@@ -1,0 +1,23 @@
+{
+  "name": "app-0.2-camarize",
+  "version": "1.0.0",
+  "description": "CAMARIZE",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joaovitor101/APP-0.2-CAMARIZE.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joaovitor101/APP-0.2-CAMARIZE/issues"
+  },
+  "homepage": "https://github.com/joaovitor101/APP-0.2-CAMARIZE#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
