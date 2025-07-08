@@ -1,0 +1,34 @@
+.loginContent {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Você pode manter os estilos do .loginCard como estão */
+
+.loginContent .loginCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 28rem;
+  height: 22rem;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  border-radius: 1rem;
+  box-shadow: 0 8px 32px 0 var(--primary-alpha);
+  border: solid 1px var(--primary-color);
+  font-family: "Poppins";
+  color: var(--secondary-color);
+}
+
+.loginContent .loginCard .loginCardHeader {
+  font-size: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.loginContent .loginCard .loginCardBody {
+  width: 70%;
+}
