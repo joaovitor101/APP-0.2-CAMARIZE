@@ -21,7 +21,14 @@ app.use('/', gameRoutes)
 app.use('/', userRoutes)
 
 // Iniciando a conexão com o banco de dados do MongoDB
-mongoose.connect("mongodb://127.0.0.1:27017/camarize")
+mongoose.connect("mongodb://mongo-api:27017/camarize")
+//mongoose.connect("mongodb://localhost:27017/camarize")
+.then(() => {
+  console.log("MongoDB conectado com sucesso!");
+})
+.catch(err => {
+  console.error("Erro na conexão:", err);
+});
 
 // Iniciando o servidor
 const port = 4000;
