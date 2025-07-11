@@ -1,0 +1,195 @@
+.homeContent {
+  background: linear-gradient(135deg, #232526 0%, #414345 100%);
+  min-height: 100vh;
+  padding: 40px 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.listGamesCard {
+  background: #2c2f34;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  padding: 32px 40px;
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.title {
+  color: #ececec;
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 32px;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+.games {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.listGames {
+  background: #232526;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+  display: flex;
+  align-items: center;
+  padding: 18px 24px;
+  transition: box-shadow 0.2s, transform 0.2s;
+  border: 1px solid #35373b;
+}
+
+.listGames:hover {
+  box-shadow: 0 6px 24px rgba(60,60,60,0.22);
+  transform: translateY(-2px) scale(1.02);
+}
+
+.gameImg {
+  margin-right: 28px;
+  flex-shrink: 0;
+}
+
+.gameImg img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  background: #444;
+}
+
+.gameInfo {
+  color: #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.gameInfo h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #fafafa;
+  margin-bottom: 2px;
+}
+
+.gameInfo li {
+  font-size: 1rem;
+  color: #b0b0b0;
+  list-style: none;
+}
+
+.deleteBtn {
+  margin-top: 10px;
+  background: #ff4d4f;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 16px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.deleteBtn:hover {
+  background: #d9363e;
+}
+
+.editForm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.editInput {
+  background: #232526;
+  border: 1px solid #35373b;
+  border-radius: 6px;
+  color: #fafafa;
+  padding: 6px 10px;
+  font-size: 1rem;
+  margin-bottom: 2px;
+  outline: none;
+  transition: border 0.2s;
+}
+.editInput:focus {
+  border: 1.5px solid #888;
+}
+
+.editActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.saveBtn {
+  background: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 16px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.saveBtn:hover {
+  background: #388e3c;
+}
+
+.cancelBtn {
+  background: #888;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 16px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.cancelBtn:hover {
+  background: #555;
+}
+
+.editBtn {
+  margin-top: 10px;
+  background: #2196f3;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 16px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-right: 8px;
+}
+.editBtn:hover {
+  background: #1769aa;
+}
+
+.descriptions {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: #b0b0b0;
+  font-size: 0.98rem;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 10px 14px;
+  margin-bottom: 24px;
+  border-radius: 8px;
+  border: 1px solid #35373b;
+  background: #232526;
+  color: #fafafa;
+  font-size: 1.1rem;
+  outline: none;
+  transition: border 0.2s;
+}
+.searchInput:focus {
+  border: 1.5px solid #888;
+}

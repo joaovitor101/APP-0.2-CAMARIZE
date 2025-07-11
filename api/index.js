@@ -32,7 +32,7 @@ mongoose.connect("mongodb://mongo-api:27017/camarize")
 
 // Iniciando o servidor
 const port = 4000;
-app.listen(port, (error) => {
+app.listen(port, '0.0.0.0', (error) => {
   if (error) {
     console.log(error);
   } else {
