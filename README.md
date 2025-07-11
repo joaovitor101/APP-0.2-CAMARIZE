@@ -70,7 +70,8 @@
 
 ### Cadastrar um novo jogo
 
-
+**Resposta:**
+```json
 POST /games
 Content-Type: application/json
 {
@@ -83,10 +84,13 @@ Content-Type: application/json
 "rating": "12+"
 }
 }
-
+```
 
 ### Editar um jogo
 
+**Resposta:**
+
+```json
 PUT /games/:id
 Content-Type: application/json
 {
@@ -99,11 +103,15 @@ Content-Type: application/json
 "rating": "16+"
 }]
 }
-
+```
 
 ### Excluir um jogo
-DELETE /games/:id
 
+**Resposta:**
+
+```json
+DELETE /games/:id
+```
 
 ---
 
