@@ -32,7 +32,8 @@ const CreateContent = () => {
       //Fazendo post na api para cadastro
 
       try {
-        const response = await axios.post("http://localhost:4000/games", game);
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+        const response = await axios.post(`${apiUrl}/games`, game);
         if (response.status === 201) {
           alert("Jogo cadastrado com sucesso !");
           router.push("/home");

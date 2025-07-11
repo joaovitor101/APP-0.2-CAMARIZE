@@ -12,18 +12,27 @@ const HomeContent = () => {
   useEffect(() => {
     const fetchGames = async () => {
       try {
-        const response = await axios.get("http://localhost:4000/games");
-        // console.log(response);
-        setGames(response.data.games);
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+        const response = await axios.get(`${apiUrl}/games`);
+        // Garante que games sempre será um array
+        if (Array.isArray(response.data)) {
+          setGames(response.data);
+        } else if (response.data && Array.isArray(response.data.games)) {
+          setGames(response.data.games);
+        } else {
+          setGames([]);
+        }
       } catch (error) {
         console.error("Error fetching games:", error);
-      } finally{
+        setGames([]);
+      } finally {
         setLoading(false);
       }
     };
-    //invocando a função
     fetchGames();
   }, []);
+
+  console.log("games:", games);
 
   return (
     <>
@@ -37,7 +46,7 @@ const HomeContent = () => {
           <Loading loading={loading}/>
           <div className={styles.games} id={styles.games}>
             {/* Lista de jogos irá aqui */}
-            {games.map((game) => (
+            {Array.isArray(games) && games.map((game) => (
               <ul key={game._id} className={styles.listGames}>
                 <div className={styles.gameImg}>
                   <img src="images/game_cd_cover.png" alt="jogo em estoque" />
