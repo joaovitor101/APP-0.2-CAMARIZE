@@ -1,12 +1,25 @@
 import styles from "@/components/LoginContent/LoginContent.module.css";
 import { useRouter } from "next/router";
+import { useState } from "react";
+import axios from "axios";
 
 const LoginContent = () => {
   const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    router.push("/home");
+    setError("");
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      const response = await axios.post(`${apiUrl}/auth`, { email, password });
+      localStorage.setItem("token", response.data.token);
+      router.push("/home");
+    } catch (err) {
+      setError("Usuário ou senha inválidos!");
+    }
   };
 
   return (
@@ -26,6 +39,9 @@ const LoginContent = () => {
               id="email"
               placeholder="Digite seu e-mail"
               className={`${styles.input} inputPrimary`}
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
             />
             <input
               type="password"
@@ -33,10 +49,14 @@ const LoginContent = () => {
               id="password"
               placeholder="Digite sua senha"
               className={`${styles.input} inputPrimary`}
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
             />
             <button type="submit" className={`${styles.input} btnPrimary`}>
               Entrar
             </button>
+            {error && <div style={{ color: "#ff4d4f", marginTop: 8 }}>{error}</div>}
           </form>
         </div>
       </div>

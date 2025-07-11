@@ -20,10 +20,14 @@ const createUser = async (req, res) => {
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
+    // Log dos dados recebidos
+    console.log("Tentando login com:", email, password);
     // Se o e-mail não está vazio
     if (email != undefined) {
       // Busca o usuário no banco
       const user = await userService.getOne(email);
+      // Log do usuário encontrado
+      console.log("Usuário encontrado:", user);
       // Usuário encontrado
       if (user != undefined) {
         // Senha correta
