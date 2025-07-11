@@ -1,26 +1,5 @@
 # APP-0.2-CAMARIZE
 
-
-APP-0.2-CAMARIZE/
-├── api/ # Back-end Node.js/Express
-│ ├── controllers/
-│ ├── models/
-│ ├── routes/
-│ ├── services/
-│ └── index.js
-├── front-react/ # Front-end React/Next.js
-│ ├── src/
-│ │ ├── components/
-│ │ │ └── HomeContent/
-│ │ └── pages/
-│ └── Dockerfile
-├── docker-compose.yml # Orquestração dos containers
-└── ...
-
-
-
----
-
 ## ⚙️ Como Rodar o Projeto (Docker)
 
 1. **Clone o repositório e acesse a pasta do projeto:**
