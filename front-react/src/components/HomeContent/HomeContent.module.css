@@ -1,195 +1,103 @@
-.homeContent {
-  background: linear-gradient(135deg, #232526 0%, #414345 100%);
+.container {
   min-height: 100vh;
-  padding: 40px 0;
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+
+  padding-top: 24px;
+  width: 100%;
 }
 
-.listGamesCard {
-  background: #2c2f34;
-  border-radius: 18px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
-  padding: 32px 40px;
+.mobileCard {
   width: 100%;
-  max-width: 700px;
+  max-width: 400px;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 2px 16px #0002;
+  padding: 0 0 24px 0;
+  margin: 0 auto;
+  min-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 32px 8px 32px;
+  max-width: 600px;
+  width: 100%;
   margin: 0 auto;
 }
 
 .title {
-  color: #ececec;
-  font-size: 2.2rem;
-  font-weight: 700;
-  margin-bottom: 32px;
-  text-align: center;
-  letter-spacing: 1px;
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin: 0;
 }
 
-.games {
+.iconGroup {
   display: flex;
-  flex-direction: column;
-  gap: 28px;
+  gap: 16px;
 }
 
-.listGames {
-  background: #232526;
-  border-radius: 14px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+.iconBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-size: 1.7rem;
+  color: #222;
   display: flex;
   align-items: center;
-  padding: 18px 24px;
-  transition: box-shadow 0.2s, transform 0.2s;
-  border: 1px solid #35373b;
 }
 
-.listGames:hover {
-  box-shadow: 0 6px 24px rgba(60,60,60,0.22);
-  transform: translateY(-2px) scale(1.02);
+.iconBtn svg {
+  width: 28px;
+  height: 28px;
 }
 
-.gameImg {
-  margin-right: 28px;
-  flex-shrink: 0;
-}
-
-.gameImg img {
-  width: 70px;
-  height: 70px;
-  object-fit: cover;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
-  background: #444;
-}
-
-.gameInfo {
-  color: #e0e0e0;
+.tanqueList {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-}
-
-.gameInfo h3 {
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: #fafafa;
-  margin-bottom: 2px;
-}
-
-.gameInfo li {
-  font-size: 1rem;
-  color: #b0b0b0;
-  list-style: none;
-}
-
-.deleteBtn {
-  margin-top: 10px;
-  background: #ff4d4f;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 16px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.deleteBtn:hover {
-  background: #d9363e;
-}
-
-.editForm {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.editInput {
-  background: #232526;
-  border: 1px solid #35373b;
-  border-radius: 6px;
-  color: #fafafa;
-  padding: 6px 10px;
-  font-size: 1rem;
-  margin-bottom: 2px;
-  outline: none;
-  transition: border 0.2s;
-}
-.editInput:focus {
-  border: 1.5px solid #888;
-}
-
-.editActions {
-  display: flex;
-  gap: 10px;
-  margin-top: 4px;
-}
-
-.saveBtn {
-  background: #4caf50;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 16px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.saveBtn:hover {
-  background: #388e3c;
-}
-
-.cancelBtn {
-  background: #888;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 16px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.cancelBtn:hover {
-  background: #555;
-}
-
-.editBtn {
-  margin-top: 10px;
-  background: #2196f3;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 16px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.2s;
-  margin-right: 8px;
-}
-.editBtn:hover {
-  background: #1769aa;
-}
-
-.descriptions {
-  margin-top: 6px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  color: #b0b0b0;
-  font-size: 0.98rem;
-}
-
-.searchInput {
+  gap: 0;
+  margin-top: 8px;
+  max-width: 600px;
   width: 100%;
-  padding: 10px 14px;
-  margin-bottom: 24px;
-  border-radius: 8px;
-  border: 1px solid #35373b;
-  background: #232526;
-  color: #fafafa;
-  font-size: 1.1rem;
-  outline: none;
-  transition: border 0.2s;
+  margin-left: auto;
+  margin-right: auto;
 }
-.searchInput:focus {
-  border: 1.5px solid #888;
+
+.tanqueItem {
+  display: flex;
+  align-items: center;
+  padding: 24px 32px;
+  border-bottom: 1px solid #f0f0f0;
+  background: #fff;
+}
+
+.tanqueImg {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 24px;
+  border: 2px solid #eee;
+}
+
+.tanqueInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.tanqueNome {
+  font-weight: bold;
+  font-size: 1.12rem;
+}
+
+.tanqueCultivo {
+  font-size: 1rem;
+  color: #888;
 }

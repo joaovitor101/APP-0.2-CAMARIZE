@@ -1,27 +1,47 @@
 import userService from "../services/userService.js";
 import jwt from "jsonwebtoken";
+import fazendaController from "./fazendaController.js";
+import Sitios from "../models/Sitios.js";
 // JWTSecret
 const JWTSecret = "apigamessecret";
 
 // Cadastrando um usuário
 const createUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
-    // AQUI SERIA FEITO O PROCESSO DE HASH DE SENHA
-    await userService.Create(name, email, password);
+    console.log("Dados recebidos para cadastro:", req.body); // Log dos dados recebidos
+    const { email, senha, foto_perfil, sitio } = req.body;
+    const user = await userService.Create(nome, email, senha, foto_perfil, sitio);
     res.sendStatus(201); // Cod. 201 (CREATED)
   } catch (error) {
-    console.log(error);
+    console.log("Erro ao salvar usuário:", error); // Log do erro
     res.sendStatus(500); // Erro interno do servidor
   }
 };
 
+// Cadastro completo (usuário + sitio)
+const register = async (req, res) => {
+  try {
+    const { nome, email, senha, foto_perfil, sitio } = req.body;
+    let sitioDoc = null;
+    if (sitio) {
+      sitioDoc = new Sitios(sitio);
+      await sitioDoc.save();
+    }
+    const user = await userService.Create(nome, email, senha, foto_perfil, sitioDoc ? sitioDoc._id : undefined);
+    res.status(201).json(user);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Removido o método registerUser, pois não será mais usado
+
 // Autenticando um usuário
 const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, senha } = req.body;
     // Log dos dados recebidos
-    console.log("Tentando login com:", email, password);
+    console.log("Tentando login com:", email, senha);
     // Se o e-mail não está vazio
     if (email != undefined) {
       // Busca o usuário no banco
@@ -31,7 +51,7 @@ const loginUser = async (req, res) => {
       // Usuário encontrado
       if (user != undefined) {
         // Senha correta
-        if (user.password == password) {
+        if (user.senha == senha) {
           // Gerando o token
           jwt.sign(
             { id: user._id, email: user.email },
@@ -62,4 +82,4 @@ const loginUser = async (req, res) => {
   }
 };
 
-export default { createUser, loginUser, JWTSecret };
+export default { createUser, loginUser, JWTSecret, register };

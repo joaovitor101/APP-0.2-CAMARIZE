@@ -1,128 +1,108 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/router";
 import styles from "@/components/CreateContent/CreateContent.module.css";
 import axios from "axios";
 
-const CreateContent = () => {
-  // Criando os estados para as informações do jogo
-  const [title, setTitle] = useState("");
-  const [platform, setPlatform] = useState("");
-  const [genre, setGenre] = useState("");
-  const [rating, setRating] = useState("");
-  const [year, setYear] = useState("");
-  const [price, setPrice] = useState("");
+const sensoresDisponiveis = [
+  "Sensor de temperatura",
+  "Sensor de PH",
+  "Sensor de amônia"
+];
 
-  //carregando o router
+export default function CreateContent() {
   const router = useRouter();
+  const [sitios, setSitios] = useState([]);
+  const [sitioSelecionado, setSitioSelecionado] = useState("");
+  const [dataInstalacao, setDataInstalacao] = useState("");
+  const [arquivo, setArquivo] = useState(null);
+  const [sensores, setSensores] = useState(["", "", ""]);
+  const fileInputRef = useRef();
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (title && platform && genre && rating && year && price !== "") {
-      const game = {
-        title: title,
-        year: year,
-        price: price,
-        descriptions: {
-          platform: platform,
-          genre: genre,
-          rating: rating,
-        },
-      };
-
-      //Fazendo post na api para cadastro
-
+  useEffect(() => {
+    async function fetchSitios() {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-        const response = await axios.post(`${apiUrl}/games`, game);
-        if (response.status === 201) {
-          alert("Jogo cadastrado com sucesso !");
-          router.push("/home");
-        }
-      } catch {
-        console.log("Erro ao cadastrar o jogo");
+        const res = await axios.get(`${apiUrl}/sitios`);
+        setSitios(res.data);
+      } catch (err) {
+        setSitios([]);
       }
-      // console.log(game);
-    } else {
-      alert("Preencha todos os campos!");
     }
+    fetchSitios();
+  }, []);
+
+  const handleSensorChange = (idx, value) => {
+    const novos = [...sensores];
+    novos[idx] = value;
+    setSensores(novos);
   };
+
   return (
-    <div className={styles.createContent}>
-      <div className="title">
-        <h2>Cadastrar novo jogo</h2>
-      </div>
-      <form id="createForm" className="formPrimary" onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="title"
-          id="title"
-          placeholder="Insira o título do jogo"
-          className="inputPrimary"
-          onChange={(e) => setTitle(e.target.value)}
-          value={title}
-        />
-        <input
-          type="text"
-          name="platform"
-          id="platform"
-          placeholder="Insira a plataforma do jogo"
-          className="inputPrimary"
-          onChange={(e) => setPlatform(e.target.value)}
-          value={platform}
-        />
-        <input
-          type="text"
-          name="genre"
-          id="genre"
-          placeholder="Insira o gênero do jogo"
-          className="inputPrimary"
-          onChange={(e) => setGenre(e.target.value)}
-          value={genre}
-        />
-        <input
-          type="text"
-          name="rating"
-          id="rating"
-          placeholder="Insira a classificação do jogo"
-          className="inputPrimary"
-          onChange={(e) => setRating(e.target.value)}
-          value={rating}
-        />
-        <input
-          type="number"
-          name="year"
-          id="year"
-          placeholder="Insira o ano do jogo"
-          className="inputPrimary"
-          onChange={(e) => setYear(e.target.value)}
-          value={year}
-        />
-        <input
-          type="number"
-          name="price"
-          id="price"
-          placeholder="Insira o preço do jogo"
-          className="inputPrimary"
-          onChange={(e) => setPrice(e.target.value)}
-          value={price}
-        />
-        <input
-          type="submit"
-          value="Cadastrar"
-          id="createBtn"
-          className="btnPrimary"
-        />
+    <div className={styles.createWrapper}>
+      <button className={styles.backBtn} onClick={() => router.back()}>
+        <span style={{fontSize: 24, lineHeight: 1}}>&larr;</span>
+      </button>
+      <form className={styles.formBox}>
+        <h2 className={styles.title}>Cadastre seu tanque</h2>
+        <select
+          className={styles.input}
+          value={sitioSelecionado}
+          onChange={e => setSitioSelecionado(e.target.value)}
+        >
+          <option value="">Selecione o sítio</option>
+          {sitios.map(s => (
+            <option key={s._id} value={s._id}>
+              {s.nome} - {s.cidade} - {s.bairro}
+            </option>
+          ))}
+        </select>
+        <div className={styles.inputIconBox}>
+          <input
+            className={styles.input}
+            placeholder="Data da instalação"
+            type="date"
+            value={dataInstalacao}
+            onChange={e => setDataInstalacao(e.target.value)}
+            style={{paddingRight: 36}}
+          />
+          <span className={styles.inputIcon}>
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M7 2v2M17 2v2M3 7h18M5 11v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6M9 15h6" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </span>
+        </div>
+        <div className={styles.uploadBox}>
+          <button type="button" className={styles.uploadBtn} onClick={() => fileInputRef.current.click()}>
+            &#128206; Selecionar foto
+          </button>
+          <input
+            type="file"
+            ref={fileInputRef}
+            style={{ display: "none" }}
+            onChange={e => setArquivo(e.target.files[0])}
+          />
+          <span className={styles.uploadFileName}>{arquivo ? arquivo.name : "Nenhum arquivo inserido"}</span>
+        </div>
+        <hr className={styles.hr} />
+        <h3 className={styles.subtitle}>Relacione os sensores</h3>
+        {sensores.map((sensor, idx) => (
+          <select
+            key={idx}
+            className={styles.input}
+            value={sensor}
+            onChange={e => handleSensorChange(idx, e.target.value)}
+          >
+            <option value="">Selecione</option>
+            {sensoresDisponiveis.map(s => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        ))}
+        <button type="submit" className={styles.cadastrarBtn}>
+          Cadastrar
+        </button>
       </form>
-      {/* <div style={{color: "white"}}>
-        {title}<br />
-        {platform}<br />
-        {genre}<br />
-        {rating}<br />
-        {year}<br />
-        {price}<br />
-      </div> */}
+      <div className={styles.logoBox}>
+        <img src="/images/camarizeLogo4.png" alt="Camarize Logo" />
+      </div>
     </div>
   );
-};
-
-export default CreateContent;
+}

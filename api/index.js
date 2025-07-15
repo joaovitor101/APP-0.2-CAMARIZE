@@ -1,28 +1,38 @@
 import express from "express";
+import cors from "cors";
 import mongoose from "mongoose";
-import Games from "./models/Games.js"
-import User from "./models/Users.js"
-import cors from "cors"
+
+import userRoutes from './routes/userRoutes.js';
+import gameRoutes from './routes/gameRoutes.js';
+import fazendaRoutes from './routes/fazendaRoutes.js';
+
 const app = express();
 
-// Importando as rotas (endpoints) de Games
-import gameRoutes from './routes/gameRoutes.js'
-// Importando as rotas (endpoints) de Usuários
-import userRoutes from './routes/userRoutes.js'
+// 🧠 Habilita CORS ANTES de tudo
+app.use(cors({
+  origin: ["http://localhost:3000", "http://localhost:3001"],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
 
-// Configurações do Express
-app.use(express.urlencoded({ extended: false }));
+// 🧠 Esses dois devem vir ANTES das rotas
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
-//
-app.use(cors())
+// 🧪 Log básico para cada requisição
+app.use((req, res, next) => {
+  console.log('Rota acessada:', req.method, req.url);
+  next();
+});
 
-app.use('/', gameRoutes)
-app.use('/', userRoutes)
+// ✅ Registra as rotas
+app.use('/', userRoutes);
+app.use('/', gameRoutes);
+app.use('/', fazendaRoutes);
 
-// Iniciando a conexão com o banco de dados do MongoDB
-mongoose.connect("mongodb://mongo-api:27017/camarize")
-//mongoose.connect("mongodb://localhost:27017/camarize")
+// ✅ Conecta ao Mongo
+const mongoUrl = process.env.MONGO_URL || "mongodb://localhost:27017/camarize";
+mongoose.connect(mongoUrl)
 .then(() => {
   console.log("MongoDB conectado com sucesso!");
 })
@@ -30,12 +40,7 @@ mongoose.connect("mongodb://mongo-api:27017/camarize")
   console.error("Erro na conexão:", err);
 });
 
-// Iniciando o servidor
 const port = 4000;
-app.listen(port, '0.0.0.0', (error) => {
-  if (error) {
-    console.log(error);
-  } else {
-    console.log(`API rodando em http://localhost:${port}.`);
-  }
+app.listen(port, '0.0.0.0', () => {
+  console.log(`API rodando em http://localhost:${port}.`);
 });

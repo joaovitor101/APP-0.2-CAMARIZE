@@ -2,17 +2,16 @@ import User from "../models/Users.js";
 
 class userService {
   // Método para cadastrar um usuário
-  async Create(name, email, password) {
-    try {
-      const newUser = new User({
-        name,
-        email,
-        password,
-      });
-      await newUser.save();
-    } catch (error) {
-      console.log(error);
-    }
+  async Create(nome, email, senha, foto_perfil, sitio) {
+    const newUser = new User({
+      nome,
+      email,
+      senha,
+      foto_perfil,
+      sitio,
+    });
+    await newUser.save();
+    return newUser;
   }
   // Método para listar um usuário
   async getOne(email) {

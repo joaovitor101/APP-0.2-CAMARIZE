@@ -2,35 +2,49 @@ import styles from "@/components/LoginContent/LoginContent.module.css";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import axios from "axios";
+import { useRegister } from "@/context/RegisterContext";
 
-const LoginContent = () => {
+const RegisterContent = () => {
   const router = useRouter();
+  const { setUserData } = useRegister();
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState("");
-  const isFormValid = email && senha;
+  const isFormValid = name && email && password;
 
-  const handleLogin = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     setError("");
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-      console.log(email, senha)
-      const response = await axios.post(`${apiUrl}/auth`, { email, senha });
-      localStorage.setItem("token", response.data.token);
-      router.push("/home");
-    } catch (err) {
-      setError("Usuário ou senha inválidos!");
-    }
+    setUserData({ name, email, password, remember });
+    // Salva os dados do usuário no localStorage para a próxima etapa
+    localStorage.setItem("usuarioCamarize", JSON.stringify({
+      nome: name,
+      email,
+      senha: password,
+      foto_perfil: null // ajuste se houver upload de foto
+    }));
+    router.push("/register/fazenda");
   };
 
   return (
     <div className={styles.loginMobileWrapper}>
-      <form className={styles.loginForm} onSubmit={handleLogin}>
-        <h2 className={styles.loginTitle}>Conecte-se para continuar</h2>
+      <form className={styles.loginForm} onSubmit={handleRegister}>
+        <h2 className={styles.loginTitle}>Cadastre-se para continuar</h2>
+        <div className={styles.inputGroup}>
+          <input
+            type="text"
+            name="name"
+            placeholder="Nome"
+            className={styles.input}
+            value={name}
+            onChange={e => setName(e.target.value)}
+            autoComplete="name"
+            required
+          />
+        </div>
         <div className={styles.inputGroup}>
           <input
             type="email"
@@ -49,9 +63,9 @@ const LoginContent = () => {
             name="password"
             placeholder="Senha"
             className={styles.input}
-            value={senha}
-            onChange={e => setSenha(e.target.value)}
-            autoComplete="current-password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            autoComplete="new-password"
             required
           />
           <span
@@ -82,13 +96,14 @@ const LoginContent = () => {
           type="submit"
           className={styles.loginButton}
           disabled={!isFormValid}
+          style={{ background: "linear-gradient(90deg, #f7b0b7 0%, #a3c7f7 100%)", color: "#fff" }}
         >
-          Conectar
+          Prosseguir
         </button>
         {error && <div className={styles.errorMsg}>{error}</div>}
         <div className={styles.registerRow}>
-          <span>Não tem uma conta?</span>
-          <a href="/register" className={styles.registerLink}>Cadastre-se agora</a>
+          <span>Já tem uma conta?</span>
+          <a href="/login" className={styles.registerLink}>Conecte-se agora</a>
         </div>
       </form>
       <div className={styles.logoWrapper}>
@@ -98,4 +113,4 @@ const LoginContent = () => {
   );
 };
 
-export default LoginContent;
+export default RegisterContent; 

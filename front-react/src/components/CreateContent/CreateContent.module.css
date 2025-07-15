@@ -1,0 +1,139 @@
+.createWrapper {
+  min-height: 100vh;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 12px 0 12px;
+  position: relative;
+}
+.backBtn {
+  background: none;
+  border: none;
+  position: absolute;
+  top: 18px;
+  left: 30px;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 2;
+}
+.formBox {
+  width: 100%;
+  max-width: 340px;
+  background: #fff;
+  margin: 56px auto 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-radius: 12px;
+  box-shadow: none;
+  padding: 0;
+}
+.title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin-bottom: 8px;
+  margin-top: 0;
+}
+.input {
+  width: 100%;
+  border: none;
+  background: #f5f5f5;
+  border-radius: 6px;
+  padding: 13px 14px;
+  font-size: 1rem;
+  margin-bottom: 0;
+  outline: none;
+  color: #222;
+  box-sizing: border-box;
+}
+.input:focus {
+  border: 1.5px solid #a3c7f7;
+  background: #f0f6ff;
+}
+.inputIconBox {
+  position: relative;
+  width: 100%;
+}
+.inputIcon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.uploadBox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f5f5f5;
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin-bottom: 0;
+}
+.uploadBtn {
+  background: #222;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-size: 1rem;
+  cursor: pointer;
+  font-weight: 500;
+  margin-right: 8px;
+}
+.uploadFileName {
+  color: #888;
+  font-size: 0.98rem;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hr {
+  border: none;
+  border-top: 1.5px solid #eaeaea;
+  margin: 16px 0 8px 0;
+}
+.subtitle {
+  font-size: 1.08rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+  margin-top: 0;
+}
+.cadastrarBtn {
+  width: 100%;
+  margin-top: 16px;
+  background: linear-gradient(90deg, #f7b0b7 0%, #a3c7f7 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 13px 0;
+  font-size: 1.08rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+.cadastrarBtn:active {
+  filter: brightness(0.95);
+}
+.logoBox {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
+  margin-bottom: 18px;
+}
+.logoBox img {
+  width: 140px;
+  height: auto;
+}
+@media (max-width: 400px) {
+  .formBox {
+    max-width: 98vw;
+  }
+  .logoBox img {
+    width: 110px;
+  }
+}

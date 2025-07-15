@@ -1,218 +1,85 @@
-import styles from "@/components/HomeContent/HomeContent.module.css";
-import Loading from "../Loading";
-import axios from "axios";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import styles from "./HomeContent.module.css";
 
-const HomeContent = () => {
-  //Criando um estado para games
+const tanquesMock = [
+  {
+    id: 1,
+    nome: "Tanque 1",
+    cultivo: "Cultivo de: Caridea",
+    imagem: "/images/tanque1.jpg"
+  },
+  {
+    id: 2,
+    nome: "Tanque 2",
+    cultivo: "Cultivo de: Caridea",
+    imagem: "/images/tanque2.jpg"
+  },
+  {
+    id: 3,
+    nome: "Tanque 3",
+    cultivo: "Cultivo de: Caridea",
+    imagem: "/images/tanque3.jpg"
+  },
+  {
+    id: 4,
+    nome: "Tanque 4",
+    cultivo: "Cultivo de: Caridea",
+    imagem: "/images/tanque4.jpg"
+  },
+  {
+    id: 5,
+    nome: "Tanque 5",
+    cultivo: "Cultivo de: Caridea",
+    imagem: "/images/tanque5.jpg"
+  },
+  {
+    id: 6,
+    nome: "Tanque 6",
+    cultivo: "Ilha Cultivo de: Caridea - SP",
+    imagem: "/images/tanque6.jpg"
+  },
+];
 
-  const [games, setGames] = useState([]);
-  const [loading, setLoading] = useState([true]);
-  const [editingId, setEditingId] = useState(null);
-  const [editForm, setEditForm] = useState({ title: '', year: '', price: '', genre: '', platform: '', rating: '' });
-  const [search, setSearch] = useState("");
+export default function HomeContent() {
+  const router = useRouter();
 
-  useEffect(() => {
-    const fetchGames = async () => {
-      try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-        const response = await axios.get(`${apiUrl}/games`);
-        // Garante que games sempre será um array
-        if (Array.isArray(response.data)) {
-          setGames(response.data);
-        } else if (response.data && Array.isArray(response.data.games)) {
-          setGames(response.data.games);
-        } else {
-          setGames([]);
-        }
-      } catch (error) {
-        console.error("Error fetching games:", error);
-        setGames([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchGames();
-  }, []);
-
-  console.log("games:", games);
-
-  const handleDelete = async (id) => {
-    if (!window.confirm("Tem certeza que deseja excluir este jogo?")) return;
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-      await axios.delete(`${apiUrl}/games/${id}`);
-      setGames((prev) => prev.filter((game) => game._id !== id));
-    } catch (error) {
-      alert("Erro ao excluir o jogo.");
-      console.error(error);
-    }
+  const handleTanqueClick = (id) => {
+    router.push(`/dashboard?id=${id}`);
   };
-
-  const startEdit = (game) => {
-    setEditingId(game._id);
-    setEditForm({
-      title: game.title,
-      year: game.year,
-      price: game.price,
-      genre: game.descriptions[0]?.genre || '',
-      platform: game.descriptions[0]?.platform || '',
-      rating: game.descriptions[0]?.rating || '',
-    });
-  };
-
-  const cancelEdit = () => {
-    setEditingId(null);
-    setEditForm({ title: '', year: '', price: '', genre: '', platform: '', rating: '' });
-  };
-
-  const handleEditChange = (e) => {
-    setEditForm({ ...editForm, [e.target.name]: e.target.value });
-  };
-
-  const handleEditSave = async (id) => {
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-      const updatedGame = {
-        title: editForm.title,
-        year: editForm.year,
-        price: editForm.price,
-        descriptions: [{
-          genre: editForm.genre,
-          platform: editForm.platform,
-          rating: editForm.rating,
-        }],
-      };
-      await axios.put(`${apiUrl}/games/${id}`, updatedGame);
-      setGames((prev) => prev.map((game) => game._id === id ? { ...game, ...updatedGame } : game));
-      cancelEdit();
-    } catch (error) {
-      alert("Erro ao editar o jogo.");
-      console.error(error);
-    }
-  };
-
-  const filteredGames = games.filter(game =>
-    game.title.toLowerCase().includes(search.toLowerCase())
-  );
 
   return (
-    <>
-      <div className={styles.homeContent}>
-        <div className={styles.listGamesCard}>
-          <div className={styles.title}>
-            <h2>Lista de jogos</h2>
-          </div>
-          <input
-            type="text"
-            className={styles.searchInput}
-            placeholder="Pesquisar por nome do jogo..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
-          <Loading loading={loading}/>
-          <div className={styles.games} id={styles.games}>
-            {Array.isArray(filteredGames) && filteredGames.map((game) => (
-              <ul key={game._id} className={styles.listGames}>
-                <li className={styles.gameImg}>
-                  <img src="images/game_cd_cover.png" alt="jogo em estoque" />
-                </li>
-                <li className={styles.gameInfo}>
-                  {editingId === game._id ? (
-                    <form className={styles.editForm} onSubmit={e => { e.preventDefault(); handleEditSave(game._id); }}>
-                      <input
-                        type="text"
-                        name="title"
-                        value={editForm.title}
-                        onChange={handleEditChange}
-                        placeholder="Título"
-                        className={styles.editInput}
-                        required
-                      />
-                      <input
-                        type="number"
-                        name="year"
-                        value={editForm.year}
-                        onChange={handleEditChange}
-                        placeholder="Ano"
-                        className={styles.editInput}
-                        required
-                      />
-                      <input
-                        type="number"
-                        name="price"
-                        value={editForm.price}
-                        onChange={handleEditChange}
-                        placeholder="Preço"
-                        className={styles.editInput}
-                        required
-                      />
-                      <input
-                        type="text"
-                        name="genre"
-                        value={editForm.genre}
-                        onChange={handleEditChange}
-                        placeholder="Gênero"
-                        className={styles.editInput}
-                        required
-                      />
-                      <input
-                        type="text"
-                        name="platform"
-                        value={editForm.platform}
-                        onChange={handleEditChange}
-                        placeholder="Plataforma"
-                        className={styles.editInput}
-                        required
-                      />
-                      <input
-                        type="text"
-                        name="rating"
-                        value={editForm.rating}
-                        onChange={handleEditChange}
-                        placeholder="Classificação"
-                        className={styles.editInput}
-                        required
-                      />
-                      <div className={styles.editActions}>
-                        <button type="submit" className={styles.saveBtn}>Salvar</button>
-                        <button type="button" className={styles.cancelBtn} onClick={cancelEdit}>Cancelar</button>
-                      </div>
-                    </form>
-                  ) : (
-                    <>
-                      <h3>{game.title}</h3>
-                      <span>Ano: {game.year}</span>
-                      <span>Preço: {game.price.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</span>
-                      {Array.isArray(game.descriptions) && game.descriptions.length > 0 && (
-                        <div className={styles.descriptions}>
-                          <span>Gênero: {game.descriptions[0].genre}</span>
-                          <span>Plataforma: {game.descriptions[0].platform}</span>
-                          <span>Classificação: {game.descriptions[0].rating}</span>
-                        </div>
-                      )}
-                      <button
-                        className={styles.editBtn}
-                        onClick={() => startEdit(game)}
-                      >
-                        Editar
-                      </button>
-                      <button
-                        className={styles.deleteBtn}
-                        onClick={() => handleDelete(game._id)}
-                      >
-                        Excluir
-                      </button>
-                    </>
-                  )}
-                </li>
-              </ul>
-            ))}
-          </div>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <img src="/images/camarizeLogo4.png" alt="Logo" style={{ height: 24 }} />
+
+        <div className={styles.iconGroup}>
+          <button className={styles.iconBtn} aria-label="Info">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#222" strokeWidth="2"/><text x="12" y="16" textAnchor="middle" fontSize="12" fill="#222">i</text></svg>
+          </button>
+          <button className={styles.iconBtn} aria-label="Adicionar">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3" stroke="#222" strokeWidth="2"/><path d="M12 8v8M8 12h8" stroke="#222" strokeWidth="2"/></svg>
+          </button>
+          <button className={styles.iconBtn} aria-label="Download">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M12 4v12m0 0l-4-4m4 4l4-4" stroke="#222" strokeWidth="2"/><rect x="4" y="18" width="16" height="2" rx="1" fill="#222"/></svg>
+          </button>
         </div>
       </div>
-    </>
+      <div className={styles.tanqueList}>
+        {tanquesMock.map(tanque => (
+          <div
+            key={tanque.id}
+            className={styles.tanqueItem}
+            style={{ cursor: "pointer" }}
+            onClick={() => handleTanqueClick(tanque.id)}
+          >
+            <img src={tanque.imagem} alt={tanque.nome} className={styles.tanqueImg} />
+            <div className={styles.tanqueInfo}>
+              <div className={styles.tanqueNome}>{tanque.nome}</div>
+              <div className={styles.tanqueCultivo}>{tanque.cultivo}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
-};
-
-export default HomeContent;
+}
