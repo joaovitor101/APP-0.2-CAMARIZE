@@ -34,7 +34,7 @@ const Menu = () => {
             <Link href="/home">Home</Link>
           </li>
           <li>
-            <Link href="/create">Cadastrar jogos</Link>
+            <Link href="/create-cativeiros">Cadastrar cativeiros</Link>
           </li>
           <li>
             <Link href="/">Logout</Link>

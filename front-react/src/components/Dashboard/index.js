@@ -27,7 +27,7 @@ export default function Dashboard() {
           </div>
         ))}
       </div>
-      <h3 className={styles.sectionTitle}>Últimos Dias - Tanque 1</h3>
+      <h3 className={styles.sectionTitle}>Últimos Dias - Cativeiro 1</h3>
       <div className={styles.graficoBox}>
         <span className={styles.graficoTitle}>Dados Semanais</span>
         <svg width="100%" height="120" viewBox="0 0 300 120">
@@ -54,7 +54,7 @@ export default function Dashboard() {
       <button className={styles.relatorioBtn}>Relatório Individual Detalhado</button>
       <button
         className={styles.addDesktopBtn}
-        onClick={() => router.push('/create')}
+        onClick={() => router.push('/create-cativeiros')}
       >
         <img src="/images/plus.svg" alt="Adicionar" />
       </button>
@@ -62,9 +62,8 @@ export default function Dashboard() {
         <button onClick={() => router.push('/home')}><img src="/images/home.svg" alt="Home" /></button>
         <button onClick={() => router.push('/settings')}><img src="/images/settings.svg" alt="Settings" /></button>
         <button
-          onClick={() => router.push('/create')}
+          onClick={() => router.push('/create-cativeiros')}
           style={{
-           
             background: 'linear-gradient(180deg, #a3c7f7 0%, #f7b0b7 100%)',
             borderRadius: '50%',
             width: 64,

@@ -1,49 +1,50 @@
 import { useRouter } from "next/router";
 import styles from "./HomeContent.module.css";
+import NavBottom from "../NavBottom";
 
-const tanquesMock = [
+const cativeirosMock = [
   {
     id: 1,
-    nome: "Tanque 1",
+    nome: "Cativeiro 1",
     cultivo: "Cultivo de: Caridea",
-    imagem: "/images/tanque1.jpg"
+    imagem: "/images/cativeiro1.jpg"
   },
   {
     id: 2,
-    nome: "Tanque 2",
+    nome: "Cativeiro 2",
     cultivo: "Cultivo de: Caridea",
-    imagem: "/images/tanque2.jpg"
+    imagem: "/images/cativeiro2.jpg"
   },
   {
     id: 3,
-    nome: "Tanque 3",
+    nome: "Cativeiro 3",
     cultivo: "Cultivo de: Caridea",
-    imagem: "/images/tanque3.jpg"
+    imagem: "/images/cativeiro3.jpg"
   },
   {
     id: 4,
-    nome: "Tanque 4",
+    nome: "Cativeiro 4",
     cultivo: "Cultivo de: Caridea",
-    imagem: "/images/tanque4.jpg"
+    imagem: "/images/cativeiro4.jpg"
   },
   {
     id: 5,
-    nome: "Tanque 5",
+    nome: "Cativeiro 5",
     cultivo: "Cultivo de: Caridea",
-    imagem: "/images/tanque5.jpg"
+    imagem: "/images/cativeiro5.jpg"
   },
   {
     id: 6,
-    nome: "Tanque 6",
+    nome: "Cativeiro 6",
     cultivo: "Ilha Cultivo de: Caridea - SP",
-    imagem: "/images/tanque6.jpg"
+    imagem: "/images/cativeiro6.jpg"
   },
 ];
 
 export default function HomeContent() {
   const router = useRouter();
 
-  const handleTanqueClick = (id) => {
+  const handleCativeiroClick = (id) => {
     router.push(`/dashboard?id=${id}`);
   };
 
@@ -64,22 +65,23 @@ export default function HomeContent() {
           </button>
         </div>
       </div>
-      <div className={styles.tanqueList}>
-        {tanquesMock.map(tanque => (
+      <div className={styles.cativeiroList}>
+        {cativeirosMock.map(cativeiro => (
           <div
-            key={tanque.id}
-            className={styles.tanqueItem}
+            key={cativeiro.id}
+            className={styles.cativeiroItem}
             style={{ cursor: "pointer" }}
-            onClick={() => handleTanqueClick(tanque.id)}
+            onClick={() => handleCativeiroClick(cativeiro.id)}
           >
-            <img src={tanque.imagem} alt={tanque.nome} className={styles.tanqueImg} />
-            <div className={styles.tanqueInfo}>
-              <div className={styles.tanqueNome}>{tanque.nome}</div>
-              <div className={styles.tanqueCultivo}>{tanque.cultivo}</div>
+            <img src={cativeiro.imagem} alt={cativeiro.nome} className={styles.cativeiroImg} />
+            <div className={styles.cativeiroInfo}>
+              <div className={styles.cativeiroNome}>{cativeiro.nome}</div>
+              <div className={styles.cativeiroCultivo}>{cativeiro.cultivo}</div>
             </div>
           </div>
         ))}
       </div>
+      <NavBottom />
     </div>
   );
 }

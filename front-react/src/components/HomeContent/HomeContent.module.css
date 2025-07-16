@@ -59,7 +59,7 @@
   height: 28px;
 }
 
-.tanqueList {
+.cativeiroList {
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -70,7 +70,7 @@
   margin-right: auto;
 }
 
-.tanqueItem {
+.cativeiroItem {
   display: flex;
   align-items: center;
   padding: 24px 32px;
@@ -78,7 +78,7 @@
   background: #fff;
 }
 
-.tanqueImg {
+.cativeiroImg {
   width: 56px;
   height: 56px;
   border-radius: 50%;
@@ -87,17 +87,46 @@
   border: 2px solid #eee;
 }
 
-.tanqueInfo {
+.cativeiroInfo {
   display: flex;
   flex-direction: column;
 }
 
-.tanqueNome {
+.cativeiroNome {
   font-weight: bold;
   font-size: 1.12rem;
 }
 
-.tanqueCultivo {
+.cativeiroCultivo {
   font-size: 1rem;
   color: #888;
+}
+
+.navBottom {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .navBottom {
+    position: fixed;
+    bottom: 0;
+    left: 0; right: 0;
+    width: 100vw;
+    background: #fff;
+    border-top: 1px solid #eee;
+    justify-content: space-around;
+    align-items: center;
+    height: 56px;
+    z-index: 100;
+    display: flex;
+  }
+  .navBottom button {
+    background: none;
+    border: none;
+    padding: 0;
+  }
+  .navBottom img {
+    width: 32px;
+    height: 32px;
+  }
 }
