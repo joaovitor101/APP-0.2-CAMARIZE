@@ -1,9 +1,8 @@
 import mongoose from "mongoose";
 
-console.log('Sitios model carregado');
+console.log('Fazendas model carregado');
 
-
-const SitiosSchema = new mongoose.Schema({
+const FazendasSchema = new mongoose.Schema({
   codigo: {
     type: Number,
     unique: true,
@@ -35,15 +34,15 @@ const SitiosSchema = new mongoose.Schema({
     default: null
   }
 }, {
-  collection: "Sitios",
+  collection: "Fazendas",
   timestamps: false
 });
 
 // Hook robusto para autoincrementar o campo codigo
-SitiosSchema.pre('save', async function(next) {
+FazendasSchema.pre('save', async function(next) {
   if (this.isNew && (this.codigo === undefined || this.codigo === null || this.codigo === -1)) {
     try {
-      const ultimo = await mongoose.models.sitios.findOne().sort({ codigo: -1 });
+      const ultimo = await mongoose.models.Fazendas.findOne().sort({ codigo: -1 });
       this.codigo = ultimo ? ultimo.codigo + 1 : 1;
       next();
     } catch (err) {
@@ -56,5 +55,5 @@ SitiosSchema.pre('save', async function(next) {
   }
 });
 
-const Sitios = mongoose.model("sitios", SitiosSchema);
-export default Sitios;
+const Fazendas = mongoose.model("Fazendas", FazendasSchema);
+export default Fazendas;

@@ -3,6 +3,7 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 
 const LoginContent = () => {
   const router = useRouter();
@@ -18,9 +19,18 @@ const LoginContent = () => {
     setError("");
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-      console.log(email, senha)
-      const response = await axios.post(`${apiUrl}/auth`, { email, senha });
+      const response = await axios.post(`${apiUrl}/users/auth`, { email, senha });
       localStorage.setItem("token", response.data.token);
+
+      // Decodificar o token para obter o id do usuário
+      const decoded = jwtDecode(response.data.token);
+      const userId = decoded.id;
+
+      // Buscar o usuário pelo id
+      const userRes = await axios.get(`${apiUrl}/users/${userId}`);
+      const usuario = userRes.data;
+      localStorage.setItem("usuarioCamarize", JSON.stringify(usuario));
+
       router.push("/home");
     } catch (err) {
       setError("Usuário ou senha inválidos!");

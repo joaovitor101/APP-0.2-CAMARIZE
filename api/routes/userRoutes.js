@@ -11,4 +11,8 @@ userRoutes.post("/auth", userController.loginUser);
 // Endpoint para cadastro completo (usuário + sitio)
 userRoutes.post("/register", userController.register);
 
+
+userRoutes.get('/:id', userController.getUserById);
+
+
 export default userRoutes;

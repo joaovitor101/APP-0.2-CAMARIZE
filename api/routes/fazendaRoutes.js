@@ -3,12 +3,18 @@ const fazendaRoutes = express.Router();
 import fazendaController from "../controllers/fazendaController.js";
 
 // Endpoint para cadastrar uma fazenda
-fazendaRoutes.all("/register-farm", (req, res, next) => {
-    console.log("Chegou em /register-farm via", req.method);
-    next();
-  });
-fazendaRoutes.post("/register-farm", fazendaController.createFarm);
+fazendaRoutes.post("/register-farm", fazendaController.createFazenda);
+
 // Endpoint para listar todas as fazendas
-fazendaRoutes.get("/fazendas", fazendaController.getAllFarms);
+fazendaRoutes.get("/", fazendaController.getAllFazendas);
+
+// Endpoint para buscar fazenda por ID
+fazendaRoutes.get("/:id", fazendaController.getFazendaById);
+
+// Endpoint para atualizar foto da fazenda
+fazendaRoutes.patch("/:id/foto", fazendaController.updateFotoFazenda);
+
+// Endpoint para buscar foto da fazenda
+fazendaRoutes.get("/:id/foto", fazendaController.getFotoFazenda);
 
 export default fazendaRoutes; 

@@ -6,95 +6,29 @@ import dynamic from 'next/dynamic';
 import SelectTipoCamarao from "@/components/SelectTipoCamarao";
 const CreatableSelect = dynamic(() => import('react-select/creatable'), { ssr: false });
 
-const sensoresDisponiveis = [
-  "Sensor de temperatura",
-  "Sensor de PH",
-  "Sensor de amônia"
-];
-
-const customSelectStyles = {
-  control: (provided, state) => ({
-    ...provided,
-    minHeight: 52,
-    borderRadius: 6,
-    background: '#f5f5f5',
-    border: state.isFocused ? '1.5px solid #a3c7f7' : 'none',
-    boxShadow: 'none',
-    fontSize: '1.08rem',
-    color: '#222',
-    paddingLeft: 0,
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-  }),
-  valueContainer: (provided) => ({
-    ...provided,
-    height: 52,
-    padding: '0 16px',
-  }),
-  input: (provided) => ({
-    ...provided,
-    margin: 0,
-    padding: 0,
-  }),
-  indicatorsContainer: (provided) => ({
-    ...provided,
-    height: 52,
-  }),
-  menu: (provided) => ({
-    ...provided,
-    borderRadius: 8,
-    fontSize: '1.08rem',
-    zIndex: 9999,
-    position: 'fixed',
-    background: '#fff',
-    color: '#222',
-    minWidth: '200px',
-  }),
-  menuPortal: base => ({ ...base, zIndex: 9999 }),
-  menuList: (provided) => ({
-    ...provided,
-    maxHeight: 220,
-    overflowY: 'auto',
-  }),
-  option: (provided, state) => ({
-    ...provided,
-    background: state.isFocused ? '#eaeaea' : '#fff',
-    color: '#222',
-    cursor: 'pointer',
-  }),
-  placeholder: (provided) => ({
-    ...provided,
-    color: '#888',
-  }),
-  singleValue: (provided) => ({
-    ...provided,
-    color: '#222',
-  }),
-};
-
-
 export default function CreateContent() {
   const router = useRouter();
-  const [sitios, setSitios] = useState([]);
+  const [fazendas, setFazendas] = useState([]);
   const [tiposCamarao, setTiposCamarao] = useState([]);
-  const [sitioSelecionado, setSitioSelecionado] = useState("");
+  const [fazendaSelecionada, setFazendaSelecionada] = useState("");
   const [tipoCamarao, setTipoCamarao] = useState(null);
   const [dataInstalacao, setDataInstalacao] = useState("");
   const [arquivo, setArquivo] = useState(null);
   const [sensores, setSensores] = useState(["", "", ""]);
+  const [sensoresDisponiveis, setSensoresDisponiveis] = useState([]);
   const [tempMedia, setTempMedia] = useState("");
   const [phMedio, setPhMedio] = useState("");
   const [amoniaMedia, setAmoniaMedia] = useState("");
   const fileInputRef = useRef();
 
   useEffect(() => {
-    async function fetchSitios() {
+    async function fetchFazendas() {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
         const res = await axios.get(`${apiUrl}/fazendas`);
-        setSitios(res.data);
+        setFazendas(res.data);
       } catch (err) {
-        setSitios([]);
+        setFazendas([]);
       }
     }
     async function fetchTiposCamarao() {
@@ -106,8 +40,18 @@ export default function CreateContent() {
         setTiposCamarao([]);
       }
     }
-    fetchSitios();
+    async function fetchSensores() {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+        const res = await axios.get(`${apiUrl}/sensores`);
+        setSensoresDisponiveis(res.data);
+      } catch (err) {
+        setSensoresDisponiveis([]);
+      }
+    }
+    fetchFazendas();
     fetchTiposCamarao();
+    fetchSensores();
   }, []);
 
   // LOG para depuração
@@ -125,7 +69,7 @@ export default function CreateContent() {
     e.preventDefault();
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
     const formData = new FormData();
-    formData.append("sitio", sitioSelecionado);
+    formData.append("fazenda", fazendaSelecionada);
     formData.append("id_tipo_camarao", tipoCamarao?.value || "");
     formData.append("data_instalacao", dataInstalacao);
     if (arquivo) formData.append("foto_cativeiro", arquivo);
@@ -137,7 +81,7 @@ export default function CreateContent() {
         headers: { "Content-Type": "multipart/form-data" }
       });
       alert("Cativeiro cadastrado com sucesso!");
-      router.push("/dashboard");
+      router.push("/home");
     } catch (err) {
       alert("Erro ao cadastrar cativeiro.");
     }
@@ -152,13 +96,13 @@ export default function CreateContent() {
         <h2 className={styles.title}>Cadastre seu cativeiro</h2>
         <select
           className={`${styles.input} ${styles.inputSelect}`}
-          value={sitioSelecionado}
-          onChange={e => setSitioSelecionado(e.target.value)}
+          value={fazendaSelecionada}
+          onChange={e => setFazendaSelecionada(e.target.value)}
         >
           <option value="">Selecione o sítio</option>
-          {sitios.map(s => (
-            <option key={s._id} value={s._id}>
-              {s.nome} - {s.codigo}
+          {fazendas.map(f => (
+            <option key={f._id} value={f._id}>
+              {f.nome} - {f.codigo}
             </option>
           ))}
         </select>
@@ -230,7 +174,9 @@ export default function CreateContent() {
           >
             <option value="">Selecione</option>
             {sensoresDisponiveis.map(s => (
-              <option key={s} value={s}>{s}</option>
+              <option key={s._id} value={s._id}>
+                {s.apelido ? `${s.apelido} (${s.id_tipo_sensor})` : s.id_tipo_sensor || s._id}
+              </option>
             ))}
           </select>
         ))}

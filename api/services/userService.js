@@ -1,14 +1,15 @@
 import User from "../models/Users.js";
 
 class userService {
+  
   // Método para cadastrar um usuário
-  async Create(nome, email, senha, foto_perfil, sitio) {
+  async Create(nome, email, senha, foto_perfil, fazenda) {
     const newUser = new User({
       nome,
       email,
       senha,
       foto_perfil,
-      sitio,
+      fazenda,
     });
     await newUser.save();
     return newUser;
@@ -22,5 +23,14 @@ class userService {
       console.log(error);
     }
   }
+ 
+
+
+
+
+  async getById(id) {
+    return await User.findById(id);
+  }
 }
+
 export default new userService();

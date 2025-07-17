@@ -3,8 +3,7 @@ import mongoose from "mongoose";
 
 const SensoresSchema = new mongoose.Schema({
   id_tipo_sensor: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "TiposSensor", // Nome do modelo referenciado
+    type: String, // Agora aceita 'Temperatura', 'pH' ou 'Amônia' diretamente
     required: true,
   },
   apelido: {

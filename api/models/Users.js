@@ -18,9 +18,9 @@ const userSchema = new mongoose.Schema({
     type: Buffer,
     required: false,
   },
-  sitio: {
+  fazenda: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Sitios',
+    ref: 'Fazendas',
     required: false
   },
 });

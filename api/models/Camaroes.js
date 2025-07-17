@@ -9,5 +9,5 @@ const TiposCamaraoSchema = new mongoose.Schema({
   // Não precisa de id_tipo_camarao, pois o _id do MongoDB já é único e auto-incrementado (ObjectId)
 });
 
-const TiposCamarao = mongoose.model("TiposCamarao", TiposCamaraoSchema);
+const TiposCamarao = mongoose.model("TiposCamaroes", TiposCamaraoSchema);
 export default TiposCamarao; 
