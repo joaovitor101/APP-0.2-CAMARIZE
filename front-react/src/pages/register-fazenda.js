@@ -47,6 +47,7 @@ export default function RegisterFazendaPage() {
         setSuccess("Cadastro realizado com sucesso!");
         setNome(""); setRua(""); setBairro(""); setCidade(""); setNumero("");
         localStorage.removeItem("usuarioCamarize");
+        router.push("/login")
       } else {
         const data = await response.json();
         setError(data.error || "Erro ao cadastrar.");
@@ -148,7 +149,7 @@ export default function RegisterFazendaPage() {
         </div>
       </form>
       <div className={styles.logoWrapper}>
-        <Image src="/images/camarizeLogo4.png" alt="Camarize Logo" width={180} height={40} />
+        <Image src="/images/logo_camarize1.png" alt="Camarize Logo" width={180} height={40} />
       </div>
     </div>
   );

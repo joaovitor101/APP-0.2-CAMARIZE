@@ -14,5 +14,4 @@ userRoutes.post("/register", userController.register);
 
 userRoutes.get('/:id', userController.getUserById);
 
-
 export default userRoutes;

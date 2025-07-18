@@ -107,7 +107,7 @@ const RegisterContent = () => {
         </div>
       </form>
       <div className={styles.logoWrapper}>
-        <Image src="/images/camarizeLogo4.png" alt="Camarize Logo" width={180} height={40} />
+        <Image src="/images/logo_camarize1.png" alt="Camarize Logo" width={180} height={40} />
       </div>
     </div>
   );

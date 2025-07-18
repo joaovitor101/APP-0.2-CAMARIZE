@@ -15,7 +15,7 @@ export default function SensorList({ sensores = [] }) {
     <div className={styles.container}>
       {sensores.map((sensor, idx) => {
         // Converter buffer para base64 se existir
-        let fotoUrl = '/images/camarizeLogo4.png';
+        let fotoUrl = '/images/logo_camarize1.png';
         if (sensor.foto_sensor && sensor.foto_sensor.data) {
           const base64String = arrayBufferToBase64(sensor.foto_sensor.data);
           fotoUrl = `data:image/jpeg;base64,${base64String}`;

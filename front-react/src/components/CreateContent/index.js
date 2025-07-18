@@ -19,6 +19,8 @@ export default function CreateContent() {
   const [tempMedia, setTempMedia] = useState("");
   const [phMedio, setPhMedio] = useState("");
   const [amoniaMedia, setAmoniaMedia] = useState("");
+  const [condicoesIdeais, setCondicoesIdeais] = useState([]);
+  const [condicaoIdealSelecionada, setCondicaoIdealSelecionada] = useState("");
   const fileInputRef = useRef();
 
   useEffect(() => {
@@ -49,9 +51,19 @@ export default function CreateContent() {
         setSensoresDisponiveis([]);
       }
     }
+    async function fetchCondicoesIdeais() {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+        const res = await axios.get(`${apiUrl}/condicoes-ideais`);
+        setCondicoesIdeais(res.data);
+      } catch (err) {
+        setCondicoesIdeais([]);
+      }
+    }
     fetchFazendas();
     fetchTiposCamarao();
     fetchSensores();
+    fetchCondicoesIdeais();
   }, []);
 
   // LOG para depuração
@@ -76,6 +88,7 @@ export default function CreateContent() {
     formData.append("temp_media_diaria", tempMedia);
     formData.append("ph_medio_diario", phMedio);
     formData.append("amonia_media_diaria", amoniaMedia);
+    formData.append("condicoes_ideais", condicaoIdealSelecionada);
     try {
       await axios.post(`${apiUrl}/cativeiros`, formData, {
         headers: { "Content-Type": "multipart/form-data" }
@@ -126,7 +139,7 @@ export default function CreateContent() {
           />
         </div>
         <div style={{ gridColumn: '1 / -1' }}>
-          <h4 style={{ margin: '0 0 8px 0', fontWeight: 600, fontSize: '1.08rem' }}>Temperatura Ideal</h4>
+          <h4 style={{ margin: '0 0 8px 0', fontWeight: 600, fontSize: '1.08rem' }}>Condições Ideais</h4>
         </div>
         <div className={styles.mediaInputs}>
           <input
@@ -185,7 +198,7 @@ export default function CreateContent() {
         </button>
       </form>
       <div className={styles.logoBox}>
-        <img src="/images/camarizeLogo4.png" alt="Camarize Logo" />
+        <img src="/images/logo_camarize1.png" alt="Camarize Logo" />
       </div>
     </div>
   );

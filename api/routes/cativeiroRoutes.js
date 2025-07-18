@@ -8,6 +8,7 @@ const upload = multer();
 cativeiroRoutes.post("/cativeiros", upload.single('foto_cativeiro'), cativeiroController.createCativeiro);
 // Endpoint para listar todos os cativeiros
 cativeiroRoutes.get("/cativeiros", cativeiroController.getAllCativeiros);
+cativeiroRoutes.get("/cativeiros/:id", cativeiroController.getCativeiroById);
 cativeiroRoutes.get("/tipos-camarao", cativeiroController.getAllTiposCamarao);
 
 export default cativeiroRoutes; 

@@ -1,16 +1,48 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "../components/ProfileContent/ProfileContent.module.css";
 import NavBottom from "../components/NavBottom";
+import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 
 export default function Profile() {
-  // Mock de dados do usuário (substitua por dados reais depois)
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
-  const [user, setUser] = useState({
-    nome: "Ana Silva",
-    email: "anasilva@gmail.com",
-    senha: "12345678",
-    foto_perfil: "/images/camarizeLogo4.png", // Substitua por foto real se houver
-  });
+
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return setLoading(false);
+        const decoded = jwtDecode(token);
+        const userId = decoded.id;
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+        const res = await axios.get(`${apiUrl}/users/${userId}`);
+        let foto_perfil = res.data.foto_perfil;
+        if (foto_perfil && typeof foto_perfil === "string" && foto_perfil.startsWith("data:image")) {
+          // base64 já com prefixo, usa direto
+        } else {
+          // Use o novo SVG de avatar como placeholder
+          foto_perfil = "/images/avatar-placeholder.svg";
+        }
+        setUser({
+          _id: res.data._id,
+          nome: res.data.nome,
+          email: res.data.email,
+          senha: res.data.senha,
+          foto_perfil
+        });
+      } catch {
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchUser();
+  }, []);
+
+  if (loading) return <div className={styles.profileWrapper}>Carregando...</div>;
+  if (!user) return <div className={styles.profileWrapper}>Não foi possível carregar o perfil.</div>;
 
   return (
     <>

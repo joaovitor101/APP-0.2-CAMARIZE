@@ -19,6 +19,15 @@ class cativeiroService {
       return null;
     }
   }
+
+  async getById(id) {
+    try {
+      return await Cativeiros.findById(id).populate('fazenda').populate('id_tipo_camarao');
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  }
 }
 
 export default new cativeiroService(); 

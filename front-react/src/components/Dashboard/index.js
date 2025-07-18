@@ -15,9 +15,10 @@ const amonia = [0.05, 0.05, 0.06, 0.05, 0.05, 0.05, 0.05];
 
 export default function Dashboard() {
   const router = useRouter();
+  const { id } = router.query;
   return (
     <div className={styles.container}>
-      <img src="/images/camarizeLogo4.png" alt="Logo" className={styles.logo} />
+      <img src="/images/logo_camarize1.png" alt="Logo" className={styles.logo} />
       <div className={styles.sensoresGrid}>
         {sensoresMock.map((s, i) => (
           <div key={i} className={styles.sensorCard + (i === 0 ? ' ' + styles.selected : '')}>
@@ -51,34 +52,18 @@ export default function Dashboard() {
           <span style={{ color: "#7be6c3" }}>■ Amônia</span>
         </div>
       </div>
-      <button className={styles.relatorioBtn}>Relatório Individual Detalhado</button>
-      <button
-        className={styles.addDesktopBtn}
-        onClick={() => router.push('/create-cativeiros')}
-      >
+      <button className={styles.relatorioBtn} onClick={() => router.push(`/rel-individual/${id}`)}>Relatório Individual Detalhado</button>
+      {/* Removido botão de adicionar (plus) desktop */}
+      {/* <button className={styles.addDesktopBtn} onClick={() => router.push('/create-cativeiros')}>
         <img src="/images/plus.svg" alt="Adicionar" />
-      </button>
+      </button> */}
       <nav className={styles.navBottom}>
         <button onClick={() => router.push('/home')}><img src="/images/home.svg" alt="Home" /></button>
         <button onClick={() => router.push('/settings')}><img src="/images/settings.svg" alt="Settings" /></button>
-        <button
-          onClick={() => router.push('/create-cativeiros')}
-          style={{
-            background: 'linear-gradient(180deg, #a3c7f7 0%, #f7b0b7 100%)',
-            borderRadius: '50%',
-            width: 64,
-            height: 64,
-            marginTop: -32,
-            boxShadow: '0 2px 12px #0002',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            border: '4px solid #fff',
-            zIndex: 5,
-          }}
-        >
-          <img src="/images/plus.svg" alt="Adicionar" style={{ width: 35, height: 35}} className="botao_flutuante" />
-        </button>
+        {/* Removido botão flutuante de adicionar (plus) */}
+        {/* <button ...>
+          <img src="/images/plus.svg" alt="Adicionar" ... />
+        </button> */}
         <button onClick={() => router.push('/notifications')}><img src="/images/bell.svg" alt="Notificações" /></button>
         <button onClick={() => router.push('/profile')}><img src="/images/user.svg" alt="Perfil" /></button>
       </nav>

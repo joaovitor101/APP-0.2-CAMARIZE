@@ -197,7 +197,7 @@ export default function Settings() {
       <button className={profileStyles.backBtn} onClick={() => window.history.back()}>
         <span style={{ fontSize: 24, lineHeight: 1 }}>&larr;</span>
       </button>
-      <div style={{ position: 'relative', marginBottom: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ position: 'relative', marginBottom: 10, marginTop: 24, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
         <img
           src={fotoFazenda}
           alt="Foto da fazenda"

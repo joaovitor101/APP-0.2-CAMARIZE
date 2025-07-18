@@ -1,5 +1,6 @@
 import cativeiroService from "../services/cativeiroService.js";
 import TiposCamarao from "../models/Camaroes.js";
+import CondicoesIdeais from "../models/Condicoes_ideais.js";
 
 const createCativeiro = async (req, res) => {
   try {
@@ -7,6 +8,18 @@ const createCativeiro = async (req, res) => {
     if (req.file) {
       data.foto_cativeiro = req.file.buffer;
     }
+    // Cria a condição ideal usando os campos de monitoramento diário
+    const condicao = await CondicoesIdeais.create({
+      id_tipo_camarao: data.id_tipo_camarao,
+      temp_ideal: data.temp_media_diaria,
+      ph_ideal: data.ph_medio_diario,
+      amonia_ideal: data.amonia_media_diaria
+    });
+    data.condicoes_ideais = condicao._id;
+    // Deixa os campos de monitoramento diário do cativeiro como null
+    data.temp_media_diaria = null;
+    data.ph_medio_diario = null;
+    data.amonia_media_diaria = null;
     const result = await cativeiroService.Create(data);
     if (!result) {
       return res.status(500).json({ error: "Falha ao salvar no banco." });
@@ -37,4 +50,17 @@ const getAllTiposCamarao = async (req, res) => {
   }
 };
 
-export default { createCativeiro, getAllCativeiros, getAllTiposCamarao }; 
+const getCativeiroById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const cativeiro = await cativeiroService.getById(id);
+    if (!cativeiro) {
+      return res.status(404).json({ error: 'Cativeiro não encontrado.' });
+    }
+    res.status(200).json(cativeiro);
+  } catch (error) {
+    res.status(500).json({ error: 'Erro ao buscar cativeiro.' });
+  }
+};
+
+export default { createCativeiro, getAllCativeiros, getAllTiposCamarao, getCativeiroById }; 

@@ -22,9 +22,24 @@ const CativeirosSchema = new mongoose.Schema({
     required: false,
     default: null
   },
-  temp_media_diaria: String,
-  ph_medio_diario: String,
-  amonia_media_diaria: String,
+  temp_media_diaria: {
+    type: String,
+    default: null
+  },
+  ph_medio_diario: {
+    type: String,
+    default: null
+  },
+  amonia_media_diaria: {
+    type: String,
+    default: null
+  },
+  condicoes_ideais: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "CondicoesIdeais",
+    required: false,
+    default: null
+  },
 });
 
 const Cativeiros = mongoose.model("Cativeiros", CativeirosSchema);

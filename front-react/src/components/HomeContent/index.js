@@ -46,6 +46,7 @@ import axios from "axios";
 export default function HomeContent() {
   const router = useRouter();
   const [cativeiros, setCativeiros] = useState([]);
+  const [showPeriodoModal, setShowPeriodoModal] = useState(false);
 
   useEffect(() => {
     async function fetchCativeiros() {
@@ -64,10 +65,18 @@ export default function HomeContent() {
     router.push(`/dashboard?id=${id}`);
   };
 
+  const handleDownloadClick = () => {
+    setShowPeriodoModal(true);
+  };
+  const handlePeriodoSelect = (periodo) => {
+    setShowPeriodoModal(false);
+    router.push(`/rel-geral?periodo=${periodo}`);
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <img src="/images/camarizeLogo4.png" alt="Logo" style={{ height: 24 }} />
+        <img src="/images/logo_camarize1.png" alt="Logo" style={{ height: 24 }} />
 
         <div className={styles.iconGroup}>
           <button className={styles.iconBtn} aria-label="Sensor" onClick={() => router.push('/sensores')}>
@@ -91,7 +100,7 @@ export default function HomeContent() {
           >
             <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3" stroke="#222" strokeWidth="2"/><path d="M12 8v8M8 12h8" stroke="#222" strokeWidth="2"/></svg>
           </button>
-          <button className={styles.iconBtn} aria-label="Download">
+          <button className={styles.iconBtn} aria-label="Download" onClick={handleDownloadClick}>
             <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M12 4v12m0 0l-4-4m4 4l4-4" stroke="#222" strokeWidth="2"/><rect x="4" y="18" width="16" height="2" rx="1" fill="#222"/></svg>
           </button>
         </div>
@@ -129,6 +138,17 @@ export default function HomeContent() {
         })}
       </div>
       <NavBottom />
+      {showPeriodoModal && (
+        <div style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',background:'rgba(0,0,0,0.3)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1000}}>
+          <div style={{background:'#fff',padding:24,borderRadius:8,minWidth:260,boxShadow:'0 2px 8px rgba(0,0,0,0.15)',display:'flex',flexDirection:'column',gap:16,alignItems:'center'}}>
+            <span style={{fontWeight:600,fontSize:18}}>Selecione o período do relatório</span>
+            <button onClick={()=>handlePeriodoSelect('dia')} style={{padding:'8px 18px',borderRadius:6,border:'none',background:'#1976d2',color:'#fff',fontWeight:600,cursor:'pointer',width:'100%'}}>Dia</button>
+            <button onClick={()=>handlePeriodoSelect('semana')} style={{padding:'8px 18px',borderRadius:6,border:'none',background:'#1976d2',color:'#fff',fontWeight:600,cursor:'pointer',width:'100%'}}>Semana</button>
+            <button onClick={()=>handlePeriodoSelect('mes')} style={{padding:'8px 18px',borderRadius:6,border:'none',background:'#1976d2',color:'#fff',fontWeight:600,cursor:'pointer',width:'100%'}}>Mês</button>
+            <button onClick={()=>setShowPeriodoModal(false)} style={{padding:'4px 12px',borderRadius:6,border:'none',background:'#eee',color:'#222',fontWeight:600,cursor:'pointer',width:'100%'}}>Cancelar</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
