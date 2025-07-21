@@ -3,7 +3,6 @@ import cors from "cors";
 import mongoose from "mongoose";
 
 import userRoutes from './routes/userRoutes.js';
-import gameRoutes from './routes/gameRoutes.js';
 import fazendaRoutes from './routes/fazendaRoutes.js';
 import cativeiroRoutes from './routes/cativeiroRoutes.js';
 import camaraoRoutes from './routes/camaraoRoutes.js';
@@ -32,7 +31,6 @@ app.use((req, res, next) => {
 // ✅ Registra as rotas
 app.use('/users', userRoutes);
 app.use('/fazendas', fazendaRoutes);
-app.use('/', gameRoutes);
 app.use('/', cativeiroRoutes);
 app.use('/', camaraoRoutes);
 app.use('/', sensorRoutes);

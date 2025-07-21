@@ -23,6 +23,10 @@ export default function SelectTipoCamarao({ value, onChange }) {
     fetchTipos();
   }, []);
 
+  // Garante que o value seja um dos objetos da lista ou null
+  const selected = tipos.find(t => t.value === value?.value) || null;
+  console.log('SelectTipoCamarao - tipos:', tipos, 'value:', value, 'selected:', selected);
+
   const handleCreate = async (inputValue) => {
     const nome = inputValue.trim();
     if (!nome) return;
@@ -34,22 +38,28 @@ export default function SelectTipoCamarao({ value, onChange }) {
   };
 
   return (
-    <CreatableSelect
-      isClearable
-      isLoading={loading}
-      options={tipos}
-      value={tipos.find(t => t.value === value) || null}
-      onChange={onChange}
-      onCreateOption={handleCreate}
-      placeholder="Selecione ou crie o tipo de camarão"
-      menuPortalTarget={typeof window !== "undefined" ? document.body : null}
-      menuPosition="fixed"
-      styles={{
-        menuPortal: base => ({ ...base, zIndex: 9999 }),
-        menu: base => ({ ...base, zIndex: 9999 }),
-      }}
-      formatCreateLabel={inputValue => `Criar novo tipo: "${inputValue}"`}
-      noOptionsMessage={() => "Nenhum tipo encontrado"}
-    />
+    <>
+      <CreatableSelect
+        isClearable
+        isLoading={loading}
+        options={tipos}
+        value={selected || null}
+        isDisabled={loading}
+        onChange={onChange}
+        onCreateOption={handleCreate}
+        placeholder="Selecione ou crie o tipo de camarão"
+        menuPortalTarget={typeof window !== "undefined" ? document.body : null}
+        // menuPosition="fixed"
+        styles={{
+          menuPortal: base => ({ ...base, zIndex: 9999 }),
+          menu: base => ({ ...base, zIndex: 9999 }),
+        }}
+        formatCreateLabel={inputValue => `Criar novo tipo: "${inputValue}"`}
+        noOptionsMessage={() => "Nenhum tipo encontrado"}
+      />
+      <div style={{ fontSize: 12, color: '#888', marginTop: 4 }}>
+        <strong>Debug opções:</strong> {tipos.length === 0 ? 'Nenhuma opção carregada' : tipos.map(t => t.label).join(', ')}
+      </div>
+    </>
   );
 } 
