@@ -81,7 +81,7 @@ export default function CreateContent() {
     e.preventDefault();
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
     const formData = new FormData();
-    formData.append("fazenda", fazendaSelecionada);
+    formData.append("fazendaId", fazendaSelecionada);
     formData.append("id_tipo_camarao", tipoCamarao?.value || "");
     formData.append("data_instalacao", dataInstalacao);
     if (arquivo) formData.append("foto_cativeiro", arquivo);
@@ -90,8 +90,12 @@ export default function CreateContent() {
     formData.append("amonia_media_diaria", amoniaMedia);
     formData.append("condicoes_ideais", condicaoIdealSelecionada);
     try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
       await axios.post(`${apiUrl}/cativeiros`, formData, {
-        headers: { "Content-Type": "multipart/form-data" }
+        headers: {
+          "Content-Type": "multipart/form-data",
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        }
       });
       alert("Cativeiro cadastrado com sucesso!");
       router.push("/home");

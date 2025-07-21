@@ -1,9 +1,11 @@
 import fazendaService from "../services/fazendaService.js";
+import UsuariosxFazendas from "../models/UsuariosxFazendas.js";
 
 // Função para cadastrar fazenda (padrão Express)
 const createFazenda = async (req, res) => {
   try {
     console.log("Body recebido:", req.body);
+    const usuarioId = req.loggedUser?.id;
     const result = await fazendaService.Create(
       req.body.nome,
       req.body.rua,
@@ -14,6 +16,8 @@ const createFazenda = async (req, res) => {
     if (!result) {
       return res.status(500).json({ error: "Falha ao salvar no banco." });
     }
+    // Cria o relacionamento na tabela intermediária
+    await UsuariosxFazendas.create({ usuario: usuarioId, fazenda: result._id });
     res.status(201).json({ message: "Fazenda criada com sucesso!" });
   } catch (error) {
     console.log("Erro no controller:", error);

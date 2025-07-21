@@ -19,38 +19,33 @@ export default function RegisterFazendaPage() {
     e.preventDefault();
     setError("");
     setSuccess("");
-    // Recupera os dados do usuário do localStorage
-    const usuario = JSON.parse(localStorage.getItem("usuarioCamarize"));
-    if (!usuario) {
-      setError("Dados do usuário não encontrados. Volte e preencha o cadastro de usuário.");
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setError("Você precisa estar logado para cadastrar uma fazenda.");
       return;
     }
     try {
-      const response = await fetch("http://localhost:4000/users/register", {
+      const response = await fetch("http://localhost:4000/fazendas", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
         body: JSON.stringify({
-          nome: usuario.nome,
-          email: usuario.email,
-          senha: usuario.senha,
-          foto_perfil: usuario.foto_perfil || null,
-          fazenda: {
-            nome,
-            rua,
-            bairro,
-            cidade,
-            numero
-          }
+          nome,
+          rua,
+          bairro,
+          cidade,
+          numero
         })
       });
       if (response.ok) {
-        setSuccess("Cadastro realizado com sucesso!");
+        setSuccess("Fazenda cadastrada com sucesso!");
         setNome(""); setRua(""); setBairro(""); setCidade(""); setNumero("");
-        localStorage.removeItem("usuarioCamarize");
-        router.push("/login")
+        router.push("/home");
       } else {
         const data = await response.json();
-        setError(data.error || "Erro ao cadastrar.");
+        setError(data.error || "Erro ao cadastrar fazenda.");
       }
     } catch (err) {
       setError("Erro de conexão com o servidor.");

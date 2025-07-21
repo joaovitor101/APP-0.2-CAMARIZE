@@ -52,7 +52,10 @@ export default function HomeContent() {
     async function fetchCativeiros() {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-        const res = await axios.get(`${apiUrl}/cativeiros`);
+        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+        const res = await axios.get(`${apiUrl}/cativeiros`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
         setCativeiros(res.data);
       } catch (err) {
         setCativeiros([]);

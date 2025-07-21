@@ -1,6 +1,7 @@
 import cativeiroService from "../services/cativeiroService.js";
 import TiposCamarao from "../models/Camaroes.js";
 import CondicoesIdeais from "../models/Condicoes_ideais.js";
+import FazendasxCativeiros from "../models/FazendasxCativeiros.js";
 
 const createCativeiro = async (req, res) => {
   try {
@@ -24,6 +25,8 @@ const createCativeiro = async (req, res) => {
     if (!result) {
       return res.status(500).json({ error: "Falha ao salvar no banco." });
     }
+    // Cria o relacionamento na tabela intermediária
+    await FazendasxCativeiros.create({ fazenda: req.body.fazendaId, cativeiro: result._id });
     res.status(201).json({ message: "Cativeiro criado com sucesso!" });
   } catch (error) {
     console.log("Erro no controller:", error);
@@ -33,7 +36,8 @@ const createCativeiro = async (req, res) => {
 
 const getAllCativeiros = async (req, res) => {
   try {
-    const cativeiros = await cativeiroService.getAll();
+    const usuarioId = req.loggedUser?.id;
+    const cativeiros = await cativeiroService.getAllByUsuarioViaRelacionamentos(usuarioId);
     res.status(200).json(cativeiros);
   } catch (error) {
     console.log(error);

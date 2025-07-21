@@ -129,4 +129,8 @@
     width: 32px;
     height: 32px;
   }
+  .container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
 }

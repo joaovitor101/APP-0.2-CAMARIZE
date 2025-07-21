@@ -8,6 +8,7 @@ import fazendaRoutes from './routes/fazendaRoutes.js';
 import cativeiroRoutes from './routes/cativeiroRoutes.js';
 import camaraoRoutes from './routes/camaraoRoutes.js';
 import sensorRoutes from './routes/sensorRoutes.js';
+import usuariosxFazendasRoutes from './routes/usuariosxFazendasRoutes.js';
 
 const app = express();
 
@@ -35,6 +36,7 @@ app.use('/', gameRoutes);
 app.use('/', cativeiroRoutes);
 app.use('/', camaraoRoutes);
 app.use('/', sensorRoutes);
+app.use('/usuariosxfazendas', usuariosxFazendasRoutes);
 // ✅ Conecta ao Mongo
 const mongoUrl = process.env.MONGO_URL || "mongodb://localhost:27017/camarize";
 mongoose.connect(mongoUrl)

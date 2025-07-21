@@ -18,15 +18,47 @@ const RegisterContent = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     setError("");
-    setUserData({ name, email, password, remember });
-    // Salva os dados do usuário no localStorage para a próxima etapa
-    localStorage.setItem("usuarioCamarize", JSON.stringify({
-      nome: name,
-      email,
-      senha: password,
-      foto_perfil: null // ajuste se houver upload de foto
-    }));
-    router.push("/register/fazenda");
+    if (!name || !email || !password) return;
+    try {
+      const response = await fetch("http://localhost:4000/users/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nome: name,
+          email,
+          senha: password,
+          foto_perfil: null
+        })
+      });
+      if (response.ok) {
+        const data = await response.json();
+        // Login automático após cadastro
+        const loginRes = await fetch("http://localhost:4000/users/auth", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, senha: password })
+        });
+        if (loginRes.ok) {
+          const loginData = await loginRes.json();
+          localStorage.setItem("token", loginData.token);
+          // Buscar o usuário pelo id do token
+          const decoded = JSON.parse(atob(loginData.token.split('.')[1]));
+          const userId = decoded.id;
+          const userRes = await fetch(`http://localhost:4000/users/${userId}`);
+          const usuario = await userRes.json();
+          localStorage.setItem("usuarioCamarize", JSON.stringify(usuario));
+          // Redireciona para cadastro de fazenda
+          router.push("/register/fazenda");
+        } else {
+          setError("Erro ao fazer login automático após cadastro.");
+        }
+      } else {
+        const data = await response.json();
+        setError(data.error || "Erro ao cadastrar usuário.");
+      }
+    } catch (err) {
+      setError("Erro de conexão com o servidor.");
+    }
   };
 
   return (

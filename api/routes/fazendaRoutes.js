@@ -1,9 +1,10 @@
 import express from "express";
 const fazendaRoutes = express.Router();
 import fazendaController from "../controllers/fazendaController.js";
+import Auth from '../middleware/Auth.js';
 
 // Endpoint para cadastrar uma fazenda
-fazendaRoutes.post("/register-farm", fazendaController.createFazenda);
+fazendaRoutes.post("/", Auth.Authorization, fazendaController.createFazenda);
 
 // Endpoint para listar todas as fazendas
 fazendaRoutes.get("/", fazendaController.getAllFazendas);

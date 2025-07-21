@@ -141,10 +141,10 @@ html, body {
   align-items: center;
   height: 24px;
 }
-@media (max-width: 500px) {
+@media (max-width: 600px) {
   .profileBox {
     max-width: 99vw;
-    padding: 18px 2vw 18px 2vw;
+    padding: 18px 16px 18px 16px;
   }
   .avatar {
     width: 90px;

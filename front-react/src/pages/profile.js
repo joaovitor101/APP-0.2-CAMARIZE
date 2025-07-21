@@ -51,6 +51,28 @@ export default function Profile() {
           <button className={styles.backBtn} onClick={() => window.history.back()}>
             <span style={{ fontSize: 24, lineHeight: 1 }}>&larr;</span>
           </button>
+          <button
+            title="Sair"
+            onClick={() => {
+              localStorage.removeItem("token");
+              localStorage.removeItem("usuarioCamarize");
+              window.location.href = "/login";
+            }}
+            style={{
+              position: "absolute",
+              top: 18,
+              right: 18,
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              zIndex: 2
+            }}
+          >
+            <svg width="26" height="26" fill="none" viewBox="0 0 24 24">
+              <path d="M16 17v1a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v1" stroke="#ff6b6b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M7 12h10m0 0-3-3m3 3-3 3" stroke="#ff6b6b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
           <h2 className={styles.title}>Perfil</h2>
           <div className={styles.avatarBox}>
             <img
