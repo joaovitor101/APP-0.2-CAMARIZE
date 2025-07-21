@@ -57,9 +57,6 @@ export default function SelectTipoCamarao({ value, onChange }) {
         formatCreateLabel={inputValue => `Criar novo tipo: "${inputValue}"`}
         noOptionsMessage={() => "Nenhum tipo encontrado"}
       />
-      <div style={{ fontSize: 12, color: '#888', marginTop: 4 }}>
-        <strong>Debug opções:</strong> {tipos.length === 0 ? 'Nenhuma opção carregada' : tipos.map(t => t.label).join(', ')}
-      </div>
     </>
   );
 } 

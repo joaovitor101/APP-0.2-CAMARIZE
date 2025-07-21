@@ -232,26 +232,6 @@ export default function Settings() {
         <input style={customStyles.input} value={fazenda.numero || ""} disabled />
       </form>
       <NavBottom />
-      <button
-        onClick={() => {
-          localStorage.removeItem("token");
-          localStorage.removeItem("usuarioCamarize");
-          window.location.href = "/login";
-        }}
-        style={{
-          marginTop: 32,
-          padding: "10px 28px",
-          borderRadius: 8,
-          background: "#ff6b6b",
-          color: "#fff",
-          border: "none",
-          fontWeight: 600,
-          cursor: "pointer",
-          fontSize: "1.08rem"
-        }}
-      >
-        Sair
-      </button>
     </div>
   );
 } 

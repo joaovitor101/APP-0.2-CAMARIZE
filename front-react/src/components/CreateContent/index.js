@@ -138,7 +138,7 @@ export default function CreateContent() {
         {/* Troca o select de tipo de camarão por um autocomplete com criação */}
         <div style={{ width: '100%' }}>
           <SelectTipoCamarao
-            value={tipoCamarao?.value || ""}
+            value={tipoCamarao}
             onChange={option => setTipoCamarao(option)}
           />
         </div>

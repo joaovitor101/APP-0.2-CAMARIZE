@@ -194,3 +194,20 @@
     margin: 24px 0 0 0;
   }
 }
+@media (max-width: 600px) {
+  .createWrapper {
+
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .formBox {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    padding-left: 0;
+    padding-right: 0;
+    box-sizing: border-box;
+  }
+}
