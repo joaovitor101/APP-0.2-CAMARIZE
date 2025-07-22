@@ -37,6 +37,7 @@
   margin-top: 0;
   grid-column: 1 / -1;
   text-align: left;
+  padding-left: 48px;
 }
 .input, .inputSelect {
   width: 100%;

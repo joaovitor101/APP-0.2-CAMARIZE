@@ -22,8 +22,8 @@ export default function SensoresPage() {
   }, []);
 
   return (
-    <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-      <div style={{ width: '100%', maxWidth: 600, padding: '16px 32px', margin: '0 auto' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ width: '100%', maxWidth: 600, padding: '16px 32px', margin: '0 auto', flex: 1, display: 'flex', flexDirection: 'column' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
           <button style={{ background: 'none', border: 'none', fontSize: 24, cursor: 'pointer' }} onClick={() => window.history.back()}>&larr;</button>
           <h2 style={{ flex: 1, textAlign: 'center', margin: 0, fontWeight: 600 }}>Sistema</h2>
@@ -41,7 +41,12 @@ export default function SensoresPage() {
             <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3" stroke="#222" strokeWidth="2"/><path d="M12 8v8M8 12h8" stroke="#222" strokeWidth="2"/></svg>
           </button>
         </div>
-        <SensorList sensores={sensores} />
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <SensorList sensores={sensores} />
+        </div>
+      </div>
+      <div style={{ width: '100%', display: 'flex', justifyContent: 'center', margin: '32px 0 16px 0' }}>
+        <img src="/images/logo_camarize1.png" alt="Camarize Logo" style={{ width: 180, height: 40 }} />
       </div>
     </div>
   );

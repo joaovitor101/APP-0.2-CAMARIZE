@@ -27,9 +27,11 @@ export default function NotificationsPage() {
       minHeight: '100vh',
       background: 'linear-gradient(180deg, #B8D8F8 0%, #E2C6F7 100%)',
       padding: 0,
-      margin: 0
+      margin: 0,
+      display: 'flex',
+      flexDirection: 'column'
     }}>
-      <div style={{ maxWidth: 400, margin: '0 auto', padding: 24 }}>
+      <div style={{ maxWidth: 400, margin: '0 auto', padding: 24, flex: 1, display: 'flex', flexDirection: 'column' }}>
         <button
           style={{
             background: 'none', border: 'none', fontSize: 28, cursor: 'pointer', marginBottom: 8
@@ -67,6 +69,9 @@ export default function NotificationsPage() {
             </div>
           ))}
         </div>
+      </div>
+      <div style={{ width: '100%', display: 'flex', justifyContent: 'center', margin: '32px 0 16px 0' }}>
+        <img src="/images/logo_camarize1.png" alt="Camarize Logo" style={{ width: 180, height: 40 }} />
       </div>
     </div>
   );
