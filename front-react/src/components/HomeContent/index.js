@@ -68,6 +68,32 @@ export default function HomeContent() {
     router.push(`/dashboard?id=${id}`);
   };
 
+  const handleEditCativeiro = (e, id) => {
+    e.stopPropagation();
+    router.push(`/edit-cativeiro?id=${id}`);
+  };
+
+  const handleDeleteCativeiro = async (e, id) => {
+    e.stopPropagation();
+    if (confirm('Tem certeza que deseja excluir este cativeiro?')) {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+        await axios.delete(`${apiUrl}/cativeiros/${id}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
+        // Recarregar a lista de cativeiros
+        const res = await axios.get(`${apiUrl}/cativeiros`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
+        setCativeiros(res.data);
+      } catch (err) {
+        console.error('Erro ao deletar cativeiro:', err);
+        alert('Erro ao deletar cativeiro');
+      }
+    }
+  };
+
   const handleDownloadClick = () => {
     setShowPeriodoModal(true);
   };
@@ -109,26 +135,31 @@ export default function HomeContent() {
         </div>
       </div>
       <div className={styles.cativeiroList}>
-        {cativeiros.map((cativeiro, idx) => {
-          // Converter buffer para base64 se existir
-          let fotoUrl = "/images/cativeiro1.jpg";
-          if (cativeiro.foto_cativeiro && cativeiro.foto_cativeiro.data) {
-            const base64String = Buffer.from(cativeiro.foto_cativeiro.data).toString('base64');
-            fotoUrl = `data:image/jpeg;base64,${base64String}`;
-          }
-          return (
-            <div
-              key={cativeiro._id}
-              className={styles.cativeiroItem}
-              style={{ cursor: "pointer" }}
-              onClick={() => handleCativeiroClick(cativeiro._id)}
-            >
-              <img
-                src={fotoUrl}
-                alt={`Cativeiro ${idx + 1}`}
-                className={styles.cativeiroImg}
-              />
-              <div className={styles.cativeiroInfo}>
+        {cativeiros.length === 0 ? (
+          <div className={styles.emptyState}>
+            <div className={styles.emptyMessage}>Sem cativeiros cadastrados</div>
+          </div>
+        ) : (
+          cativeiros.map((cativeiro, idx) => {
+            // Converter buffer para base64 se existir
+            let fotoUrl = "/images/cativeiro1.jpg";
+            if (cativeiro.foto_cativeiro && cativeiro.foto_cativeiro.data) {
+              const base64String = Buffer.from(cativeiro.foto_cativeiro.data).toString('base64');
+              fotoUrl = `data:image/jpeg;base64,${base64String}`;
+            }
+            return (
+              <div
+                key={cativeiro._id}
+                className={styles.cativeiroItem}
+                style={{ cursor: "pointer" }}
+                onClick={() => handleCativeiroClick(cativeiro._id)}
+              >
+                <img
+                  src={fotoUrl}
+                  alt={`Cativeiro ${idx + 1}`}
+                  className={styles.cativeiroImg}
+                />
+                              <div className={styles.cativeiroInfo}>
                 <div className={styles.cativeiroNome}>{`Cativeiro ${idx + 1}`}</div>
                 <div className={styles.cativeiroCultivo}>{
                   (typeof cativeiro.id_tipo_camarao === 'object' && cativeiro.id_tipo_camarao?.nome)
@@ -136,9 +167,30 @@ export default function HomeContent() {
                     : (cativeiro.id_tipo_camarao || 'Tipo não informado')
                 }</div>
               </div>
-            </div>
-          );
-        })}
+              <div className={styles.cativeiroActions}>
+                <button 
+                  className={styles.actionBtn} 
+                  onClick={(e) => handleEditCativeiro(e, cativeiro._id)}
+                  title="Editar"
+                >
+                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+                    <path d="M15.232 5.232a3 3 0 1 1 4.243 4.243L7.5 21H3v-4.5l12.232-12.268Z" stroke="#7ecbff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+                <button 
+                  className={styles.actionBtn} 
+                  onClick={(e) => handleDeleteCativeiro(e, cativeiro._id)}
+                  title="Excluir"
+                >
+                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+                    <path d="M3 6h18M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14Z" stroke="#ff6b6b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+              </div>
+            );
+          })
+        )}
       </div>
       <NavBottom />
       {showPeriodoModal && (

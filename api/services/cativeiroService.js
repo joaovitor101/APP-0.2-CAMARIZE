@@ -22,9 +22,38 @@ class cativeiroService {
 
   async getById(id) {
     try {
-      return await Cativeiros.findById(id)
+      const cativeiro = await Cativeiros.findById(id).populate('id_tipo_camarao');
+      if (!cativeiro) return null;
+
+      // Buscar sensores relacionados
+      const SensoresxCativeiros = (await import('../models/SensoresxCativeiros.js')).default;
+      const sensoresRelacionados = await SensoresxCativeiros.find({ id_cativeiro: id }).populate('id_sensor');
+      const sensores = sensoresRelacionados.map(rel => rel.id_sensor);
+
+      // Adicionar sensores ao objeto do cativeiro
+      cativeiro.sensores = sensores;
+      
+      return cativeiro;
     } catch (error) {
       console.log(error);
+      return null;
+    }
+  }
+
+  async update(id, data) {
+    try {
+      return await Cativeiros.findByIdAndUpdate(id, data, { new: true });
+    } catch (error) {
+      console.log("Erro ao atualizar cativeiro:", error);
+      return null;
+    }
+  }
+
+  async delete(id) {
+    try {
+      return await Cativeiros.findByIdAndDelete(id);
+    } catch (error) {
+      console.log("Erro ao deletar cativeiro:", error);
       return null;
     }
   }

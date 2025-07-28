@@ -67,4 +67,53 @@ const getCativeiroById = async (req, res) => {
   }
 };
 
-export default { createCativeiro, getAllCativeiros, getAllTiposCamarao, getCativeiroById }; 
+const updateCativeiro = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = { ...req.body };
+    
+    if (req.file) {
+      data.foto_cativeiro = req.file.buffer;
+    }
+
+    // Se houver mudança no tipo de camarão, atualizar as condições ideais
+    if (data.id_tipo_camarao) {
+      const condicao = await CondicoesIdeais.create({
+        id_tipo_camarao: data.id_tipo_camarao,
+        temp_ideal: data.temp_media_diaria,
+        ph_ideal: data.ph_medio_diario,
+        amonia_ideal: data.amonia_media_diaria
+      });
+      data.condicoes_ideais = condicao._id;
+      // Remove os campos de monitoramento diário
+      data.temp_media_diaria = null;
+      data.ph_medio_diario = null;
+      data.amonia_media_diaria = null;
+    }
+
+    const result = await cativeiroService.update(id, data);
+    if (!result) {
+      return res.status(404).json({ error: 'Cativeiro não encontrado.' });
+    }
+    res.status(200).json({ message: 'Cativeiro atualizado com sucesso!', cativeiro: result });
+  } catch (error) {
+    console.log("Erro no controller:", error);
+    res.status(500).json({ error: 'Erro interno do servidor.' });
+  }
+};
+
+const deleteCativeiro = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await cativeiroService.delete(id);
+    if (!result) {
+      return res.status(404).json({ error: 'Cativeiro não encontrado.' });
+    }
+    res.status(200).json({ message: 'Cativeiro deletado com sucesso!' });
+  } catch (error) {
+    console.log("Erro no controller:", error);
+    res.status(500).json({ error: 'Erro interno do servidor.' });
+  }
+};
+
+export default { createCativeiro, getAllCativeiros, getAllTiposCamarao, getCativeiroById, updateCativeiro, deleteCativeiro }; 
