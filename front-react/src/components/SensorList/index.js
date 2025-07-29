@@ -10,7 +10,7 @@ function arrayBufferToBase64(buffer) {
   return window.btoa(binary);
 }
 
-export default function SensorList({ sensores = [] }) {
+export default function SensorList({ sensores = [], onEdit, onDelete }) {
   return (
     <div className={styles.container}>
       {sensores.length === 0 ? (
@@ -40,11 +40,24 @@ export default function SensorList({ sensores = [] }) {
                 <div className={styles.numero}>{`#${String(idx + 1).padStart(3, '0')}`}</div>
               </div>
               <div className={styles.actions}>
-                <button className={`${styles.actionBtn} ${styles.edit}`} title="Editar">
-                  <svg width="22" height="22" fill="none" viewBox="0 0 24 24"><path d="M15.232 5.232a3 3 0 1 1 4.243 4.243L7.5 21H3v-4.5l12.232-12.268Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                <button 
+                  className={`${styles.actionBtn} ${styles.edit}`} 
+                  title="Editar sensor"
+                  onClick={() => onEdit && onEdit(sensor._id)}
+                >
+                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
                 </button>
-                <button className={`${styles.actionBtn} ${styles.delete}`} title="Deletar">
-                  <svg width="22" height="22" fill="none" viewBox="0 0 24 24"><path d="M3 6h18M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m2 0v14a2 2 0 0 1-2-2V6h14Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                <button 
+                  className={`${styles.actionBtn} ${styles.delete}`} 
+                  title="Excluir sensor"
+                  onClick={() => onDelete && onDelete(sensor._id)}
+                >
+                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+                    <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
                 </button>
               </div>
             </div>

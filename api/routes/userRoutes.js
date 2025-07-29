@@ -14,4 +14,7 @@ userRoutes.post("/register", userController.register);
 
 userRoutes.get('/:id', userController.getUserById);
 
+// Endpoint para atualizar foto do usuário
+userRoutes.patch('/:id/photo', userController.updateUserPhoto);
+
 export default userRoutes;

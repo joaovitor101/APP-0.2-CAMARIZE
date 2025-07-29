@@ -22,8 +22,26 @@ class cativeiroService {
 
   async getById(id) {
     try {
-      const cativeiro = await Cativeiros.findById(id).populate('id_tipo_camarao');
+      const cativeiro = await Cativeiros.findById(id)
+        .populate('id_tipo_camarao')
+        .populate('condicoes_ideais');
+      
       if (!cativeiro) return null;
+
+      // Buscar fazenda relacionada
+      const FazendasxCativeiros = (await import('../models/FazendasxCativeiros.js')).default;
+      console.log('Buscando relacionamento para cativeiro:', id);
+      const relacaoFazenda = await FazendasxCativeiros.findOne({ cativeiro: id }).populate('fazenda');
+      console.log('Relacionamento encontrado:', relacaoFazenda);
+      
+      if (relacaoFazenda) {
+        console.log('Fazenda do relacionamento:', relacaoFazenda.fazenda);
+        cativeiro.fazenda = relacaoFazenda.fazenda._id;
+        cativeiro.fazendaNome = relacaoFazenda.fazenda.nome;
+        console.log('Campo fazenda setado no cativeiro:', cativeiro.fazenda);
+      } else {
+        console.log('Nenhum relacionamento encontrado para o cativeiro:', id);
+      }
 
       // Buscar sensores relacionados
       const SensoresxCativeiros = (await import('../models/SensoresxCativeiros.js')).default;

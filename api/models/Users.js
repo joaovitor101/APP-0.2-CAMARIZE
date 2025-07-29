@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
   foto_perfil: {
-    type: Buffer,
+    type: String,
     required: false,
   },
   fazenda: {

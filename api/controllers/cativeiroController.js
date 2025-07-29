@@ -116,4 +116,13 @@ const deleteCativeiro = async (req, res) => {
   }
 };
 
-export default { createCativeiro, getAllCativeiros, getAllTiposCamarao, getCativeiroById, updateCativeiro, deleteCativeiro }; 
+const getAllCondicoesIdeais = async (req, res) => {
+  try {
+    const condicoes = await CondicoesIdeais.find().populate('id_tipo_camarao');
+    res.status(200).json(condicoes);
+  } catch (error) {
+    res.status(500).json({ error: "Erro ao buscar condições ideais." });
+  }
+};
+
+export default { createCativeiro, getAllCativeiros, getAllTiposCamarao, getCativeiroById, updateCativeiro, deleteCativeiro, getAllCondicoesIdeais }; 

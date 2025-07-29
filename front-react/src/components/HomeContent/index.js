@@ -1,8 +1,11 @@
 import { useRouter } from "next/router";
 import styles from "./HomeContent.module.css";
 import NavBottom from "../NavBottom";
+import AuthError from "../AuthError";
+import Loading from "../Loading";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Notification from "../Notification";
 
 // const cativeirosMock = [
 //   {
@@ -46,19 +49,50 @@ import axios from "axios";
 export default function HomeContent() {
   const router = useRouter();
   const [cativeiros, setCativeiros] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showPeriodoModal, setShowPeriodoModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [cativeiroToDelete, setCativeiroToDelete] = useState(null);
+  const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
+
+  const showNotification = (message, type = 'success') => {
+    setNotification({ show: true, message, type });
+  };
+
+  const hideNotification = () => {
+    setNotification({ show: false, message: '', type: 'success' });
+  };
 
   useEffect(() => {
     async function fetchCativeiros() {
       try {
+        setLoading(true);
+        setError(null);
+        
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
         const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+        
+        if (!token) {
+          setError('Você precisa estar logado para acessar esta página');
+          setLoading(false);
+          return;
+        }
+        
         const res = await axios.get(`${apiUrl}/cativeiros`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {}
+          headers: { Authorization: `Bearer ${token}` }
         });
         setCativeiros(res.data);
       } catch (err) {
+        console.error('Erro ao buscar cativeiros:', err);
+        if (err.response?.status === 401) {
+          setError('Sessão expirada. Faça login novamente para continuar.');
+        } else {
+          setError('Erro ao carregar os dados. Tente novamente.');
+        }
         setCativeiros([]);
+      } finally {
+        setLoading(false);
       }
     }
     fetchCativeiros();
@@ -75,22 +109,32 @@ export default function HomeContent() {
 
   const handleDeleteCativeiro = async (e, id) => {
     e.stopPropagation();
-    if (confirm('Tem certeza que deseja excluir este cativeiro?')) {
-      try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-        await axios.delete(`${apiUrl}/cativeiros/${id}`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {}
-        });
-        // Recarregar a lista de cativeiros
-        const res = await axios.get(`${apiUrl}/cativeiros`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {}
-        });
-        setCativeiros(res.data);
-      } catch (err) {
-        console.error('Erro ao deletar cativeiro:', err);
-        alert('Erro ao deletar cativeiro');
-      }
+    setCativeiroToDelete(id);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!cativeiroToDelete) return;
+
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      await axios.delete(`${apiUrl}/cativeiros/${cativeiroToDelete}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      // Recarregar a lista de cativeiros
+      const res = await axios.get(`${apiUrl}/cativeiros`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      setCativeiros(res.data);
+      setShowDeleteModal(false);
+      setCativeiroToDelete(null);
+      showNotification('Cativeiro excluído com sucesso!', 'success');
+    } catch (err) {
+      console.error('Erro ao deletar cativeiro:', err);
+      showNotification('Erro ao excluir cativeiro', 'error');
+      setShowDeleteModal(false);
+      setCativeiroToDelete(null);
     }
   };
 
@@ -101,6 +145,16 @@ export default function HomeContent() {
     setShowPeriodoModal(false);
     router.push(`/rel-geral?periodo=${periodo}`);
   };
+
+  // Se há erro, mostrar tela de erro
+  if (error) {
+    return <AuthError error={error} onRetry={() => window.location.reload()} />;
+  }
+
+  // Se está carregando, mostrar loading
+  if (loading) {
+    return <Loading message="Carregando..." />;
+  }
 
   return (
     <div className={styles.container}>
@@ -203,6 +257,145 @@ export default function HomeContent() {
             <button onClick={()=>setShowPeriodoModal(false)} style={{padding:'4px 12px',borderRadius:6,border:'none',background:'#eee',color:'#222',fontWeight:600,cursor:'pointer',width:'100%'}}>Cancelar</button>
           </div>
         </div>
+      )}
+      {showDeleteModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          backdropFilter: 'blur(4px)'
+        }}>
+          <div style={{
+            background: '#fff',
+            padding: '32px 24px',
+            borderRadius: '16px',
+            minWidth: '320px',
+            maxWidth: '90vw',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '20px',
+            alignItems: 'center',
+            textAlign: 'center',
+            border: '1px solid #e5e7eb'
+          }}>
+            {/* Ícone de aviso */}
+            <div style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              background: '#fef3c7',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '8px'
+            }}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                <path d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            
+            {/* Título */}
+            <div style={{
+              fontWeight: '700',
+              fontSize: '20px',
+              color: '#1f2937',
+              lineHeight: '1.2'
+            }}>
+              Confirmar Exclusão
+            </div>
+            
+            {/* Mensagem */}
+            <p style={{
+              margin: '0',
+              fontSize: '16px',
+              color: '#6b7280',
+              lineHeight: '1.5',
+              maxWidth: '280px'
+            }}>
+              Tem certeza que deseja excluir este cativeiro? Esta ação não pode ser desfeita.
+            </p>
+            
+            {/* Botões */}
+            <div style={{
+              display: 'flex',
+              gap: '12px',
+              width: '100%',
+              marginTop: '8px'
+            }}>
+              <button 
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setCativeiroToDelete(null);
+                }}
+                style={{
+                  flex: 1,
+                  padding: '12px 20px',
+                  borderRadius: '8px',
+                  border: '1px solid #d1d5db',
+                  background: '#fff',
+                  color: '#374151',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  transition: 'all 0.2s ease',
+                  ':hover': {
+                    background: '#f9fafb',
+                    borderColor: '#9ca3af'
+                  }
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.background = '#f9fafb';
+                  e.target.style.borderColor = '#9ca3af';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.background = '#fff';
+                  e.target.style.borderColor = '#d1d5db';
+                }}
+              >
+                Cancelar
+              </button>
+              <button 
+                onClick={confirmDelete}
+                style={{
+                  flex: 1,
+                  padding: '12px 20px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: '#dc2626',
+                  color: '#fff',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.background = '#b91c1c';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.background = '#dc2626';
+                }}
+              >
+                Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {notification.show && (
+        <Notification
+          isVisible={notification.show}
+          message={notification.message}
+          type={notification.type}
+          onClose={hideNotification}
+        />
       )}
     </div>
   );

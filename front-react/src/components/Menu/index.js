@@ -17,15 +17,20 @@ const Menu = () => {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("usuarioCamarize");
+    window.location.href = "/";
+  };
+
   return (
     <nav className={styles.navbar}>
       <div className={styles.logo}>
         <Link href="/home">
-          <img src="/images/thegames_symbol.png" alt="The Games" />
+          <img src="/images/logo_camarize1.png" alt="Camarize" />
         </Link>
       </div>
       <div className={styles.menu}>
-        {/* isActive && styles.active */}
         <ul
           className={`${styles.menuItems} ${isActive ? styles.active : ""}`}
           id={styles.menuItems}
@@ -37,12 +42,19 @@ const Menu = () => {
             <Link href="/create-cativeiros">Cadastrar cativeiros</Link>
           </li>
           <li>
-            <Link href="/">Logout</Link>
+            <Link href="/sensores">Sensores</Link>
+          </li>
+          <li>
+            <Link href="/settings">Configurações</Link>
+          </li>
+          <li>
+            <button onClick={handleLogout} className={styles.logoutBtn}>
+              Logout
+            </button>
           </li>
         </ul>
       </div>
       <div className={styles.menuBtn} id="menuBtn">
-        {/* Ícone do React Icons */}
         <i id={styles.menuIcon} onClick={activeMenu}>
           {menuIcon}
         </i>

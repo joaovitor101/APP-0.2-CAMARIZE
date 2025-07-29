@@ -31,6 +31,17 @@ class userService {
   async getById(id) {
     return await User.findById(id);
   }
+
+  // Atualizar foto do usuário
+  async updatePhoto(id, foto_perfil) {
+    try {
+      const updatedUser = await User.findByIdAndUpdate(id, { foto_perfil }, { new: true });
+      
+      return updatedUser;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
 
 export default new userService();

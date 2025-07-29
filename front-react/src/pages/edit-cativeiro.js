@@ -4,6 +4,7 @@ import styles from "@/components/CreateContent/CreateContent.module.css";
 import axios from "axios";
 import dynamic from 'next/dynamic';
 import SelectTipoCamarao from "@/components/SelectTipoCamarao";
+import Notification from "@/components/Notification";
 const CreatableSelect = dynamic(() => import('react-select/creatable'), { ssr: false });
 
 export default function EditCativeiroPage() {
@@ -21,38 +22,65 @@ export default function EditCativeiroPage() {
   const [tempMedia, setTempMedia] = useState("");
   const [phMedio, setPhMedio] = useState("");
   const [amoniaMedia, setAmoniaMedia] = useState("");
-  const [condicoesIdeais, setCondicoesIdeais] = useState([]);
-  const [condicaoIdealSelecionada, setCondicaoIdealSelecionada] = useState("");
   const [loading, setLoading] = useState(true);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [currentImageUrl, setCurrentImageUrl] = useState(null);
+  const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
   const fileInputRef = useRef();
 
+  const showNotification = (message, type = 'success') => {
+    setNotification({ show: true, message, type });
+  };
+
+  const hideNotification = () => {
+    setNotification({ show: false, message: '', type: 'success' });
+  };
+
   useEffect(() => {
-    if (id) {
+    console.log('useEffect fetchCativeiro chamado com ID:', id);
+    console.log('Router query completo:', router.query);
+    console.log('Router isReady:', router.isReady);
+    if (router.isReady && id && id !== 'undefined') {
       fetchCativeiro();
     }
-  }, [id]);
+  }, [id, router.isReady]);
 
   // Configurar tipo de camarão quando os dados estiverem disponíveis
   useEffect(() => {
-    configureTipoCamarao();
+    console.log('useEffect configureTipoCamarao chamado:', { 
+      cativeiro: !!cativeiro, 
+      tiposCamarao: tiposCamarao.length 
+    });
+    if (cativeiro && tiposCamarao.length > 0) {
+      configureTipoCamarao();
+    }
   }, [cativeiro, tiposCamarao]);
 
   // Verificar se todos os dados necessários foram carregados
   useEffect(() => {
-    if (cativeiro && tiposCamarao.length > 0 && !loading) {
+    console.log('Verificando dados carregados:', { 
+      cativeiro: !!cativeiro, 
+      tiposCamarao: tiposCamarao.length, 
+      loading,
+      fazendas: fazendas.length,
+      sensoresDisponiveis: sensoresDisponiveis.length
+    });
+    if (cativeiro && tiposCamarao.length > 0 && fazendas.length > 0 && !loading) {
+      console.log('Dados mínimos carregados, marcando como carregado');
       setDataLoaded(true);
     }
-  }, [cativeiro, tiposCamarao, loading]);
+  }, [cativeiro, tiposCamarao, fazendas, loading]);
 
   useEffect(() => {
+    console.log('Carregando dados iniciais...');
     async function fetchFazendas() {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
         const res = await axios.get(`${apiUrl}/fazendas`);
+        console.log('Fazendas carregadas:', res.data);
         setFazendas(res.data);
       } catch (err) {
+        console.error('Erro ao carregar fazendas:', err);
         setFazendas([]);
       }
     }
@@ -60,8 +88,10 @@ export default function EditCativeiroPage() {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
         const res = await axios.get(`${apiUrl}/tipos-camarao`);
+        console.log('Tipos de camarão carregados:', res.data);
         setTiposCamarao(res.data);
       } catch (err) {
+        console.error('Erro ao carregar tipos de camarão:', err);
         setTiposCamarao([]);
       }
     }
@@ -69,41 +99,53 @@ export default function EditCativeiroPage() {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
         const res = await axios.get(`${apiUrl}/sensores`);
+        console.log('Sensores carregados:', res.data);
         setSensoresDisponiveis(res.data);
       } catch (err) {
+        console.error('Erro ao carregar sensores:', err);
         setSensoresDisponiveis([]);
       }
     }
-    async function fetchCondicoesIdeais() {
-      try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-        const res = await axios.get(`${apiUrl}/condicoes-ideais`);
-        setCondicoesIdeais(res.data);
-      } catch (err) {
-        setCondicoesIdeais([]);
-      }
-    }
+    
+    // Carregar dados em paralelo
     fetchFazendas();
     fetchTiposCamarao();
     fetchSensores();
-    fetchCondicoesIdeais();
   }, []);
 
   const fetchCativeiro = async () => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      console.log('Buscando cativeiro com ID:', id);
       const res = await axios.get(`${apiUrl}/cativeiros/${id}`);
       const cativeiroData = res.data;
       console.log('Dados do cativeiro carregados:', cativeiroData);
+      console.log('Campo fazenda do cativeiro:', cativeiroData.fazenda);
       setCativeiro(cativeiroData);
       
       // Preencher os campos com os dados existentes
-      setFazendaSelecionada(cativeiroData.fazenda || "");
+      const fazendaId = (cativeiroData.fazenda?._id || cativeiroData.fazenda || "").toString();
+      setFazendaSelecionada(fazendaId);
+      console.log('Fazenda selecionada:', fazendaId);
+      console.log('Fazendas disponíveis:', fazendas.map(f => f._id));
+      
+      console.log('Configurando data de instalação:', cativeiroData.data_instalacao);
       setDataInstalacao(cativeiroData.data_instalacao ? new Date(cativeiroData.data_instalacao).toISOString().split('T')[0] : "");
-      setTempMedia(cativeiroData.temp_media_diaria || "");
-      setPhMedio(cativeiroData.ph_medio_diario || "");
-      setAmoniaMedia(cativeiroData.amonia_media_diaria || "");
-      setCondicaoIdealSelecionada(cativeiroData.condicoes_ideais || "");
+      
+      // Usar dados das condições ideais se disponíveis
+      console.log('Condições ideais:', cativeiroData.condicoes_ideais);
+      if (cativeiroData.condicoes_ideais) {
+        console.log('Usando dados das condições ideais');
+        setTempMedia(cativeiroData.condicoes_ideais.temp_ideal?.toString() || "");
+        setPhMedio(cativeiroData.condicoes_ideais.ph_ideal?.toString() || "");
+        setAmoniaMedia(cativeiroData.condicoes_ideais.amonia_ideal?.toString() || "");
+      } else {
+        console.log('Usando dados antigos do cativeiro');
+        // Fallback para dados antigos se não houver condições ideais
+        setTempMedia(cativeiroData.temp_media_diaria || "");
+        setPhMedio(cativeiroData.ph_medio_diario || "");
+        setAmoniaMedia(cativeiroData.amonia_media_diaria || "");
+      }
       
       // Carregar sensores relacionados ao cativeiro
       console.log('Sensores do cativeiro:', cativeiroData.sensores);
@@ -120,11 +162,12 @@ export default function EditCativeiroPage() {
       }
       
       // O tipo de camarão será configurado em um useEffect separado
+      console.log('Tipo de camarão do cativeiro:', cativeiroData.id_tipo_camarao);
       
       setLoading(false);
     } catch (err) {
       console.error('Erro ao buscar cativeiro:', err);
-      alert('Erro ao carregar dados do cativeiro');
+      showNotification('Erro ao carregar dados do cativeiro', 'error');
       router.push('/home');
     }
   };
@@ -144,11 +187,24 @@ export default function EditCativeiroPage() {
   const configureTipoCamarao = () => {
     console.log('Configurando tipo de camarão:', { cativeiro, tiposCamarao });
     if (cativeiro && tiposCamarao.length > 0 && cativeiro.id_tipo_camarao) {
-      const tipo = tiposCamarao.find(t => t._id === cativeiro.id_tipo_camarao);
+      console.log('Tipo de camarão do cativeiro:', cativeiro.id_tipo_camarao);
+      console.log('Tipos disponíveis:', tiposCamarao);
+      
+      // Verificar se o tipo de camarão é um objeto populado ou apenas um ID
+      const tipoId = cativeiro.id_tipo_camarao._id || cativeiro.id_tipo_camarao;
+      console.log('ID do tipo de camarão:', tipoId);
+      
+      const tipo = tiposCamarao.find(t => t._id === tipoId);
       console.log('Tipo encontrado:', tipo);
+      
       if (tipo) {
+        console.log('Configurando tipo de camarão:', { value: tipo._id, label: tipo.nome });
         setTipoCamarao({ value: tipo._id, label: tipo.nome });
+      } else {
+        console.log('Tipo de camarão não encontrado na lista');
       }
+    } else {
+      console.log('Dados insuficientes para configurar tipo de camarão');
     }
   };
 
@@ -169,7 +225,6 @@ export default function EditCativeiroPage() {
     formData.append("temp_media_diaria", tempMedia);
     formData.append("ph_medio_diario", phMedio);
     formData.append("amonia_media_diaria", amoniaMedia);
-    formData.append("condicoes_ideais", condicaoIdealSelecionada);
     
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
@@ -179,11 +234,14 @@ export default function EditCativeiroPage() {
           ...(token ? { Authorization: `Bearer ${token}` } : {})
         }
       });
-      alert("Cativeiro atualizado com sucesso!");
-      router.push("/home");
+      showNotification("Cativeiro atualizado com sucesso!");
+      // Aguardar 2 segundos antes de redirecionar para a notificação aparecer
+      setTimeout(() => {
+        router.push("/home");
+      }, 2000);
     } catch (err) {
       console.error('Erro ao atualizar cativeiro:', err);
-      alert("Erro ao atualizar cativeiro.");
+      showNotification("Erro ao atualizar cativeiro.", 'error');
     }
   };
 
@@ -211,7 +269,7 @@ export default function EditCativeiroPage() {
         >
           <option value="">Selecione o sítio</option>
           {fazendas.map(f => (
-            <option key={f._id} value={f._id}>
+            <option key={f._id} value={f._id.toString()}>
               {f.nome} - {f.codigo}
             </option>
           ))}
@@ -309,6 +367,12 @@ export default function EditCativeiroPage() {
       <div className={styles.logoBox}>
         <img src="/images/logo_camarize1.png" alt="Camarize Logo" />
       </div>
+      <Notification
+        isVisible={notification.show}
+        message={notification.message}
+        type={notification.type}
+        onClose={hideNotification}
+      />
     </div>
   );
 } 

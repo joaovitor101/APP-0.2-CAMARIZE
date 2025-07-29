@@ -15,23 +15,7 @@
     z-index: 100;
     display: flex;
   }
-  .navBottom::before,
-  .navBottom::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    height: 1px;
-    background: #eee;
-    z-index: 101;
-  }
-  .navBottom::before {
-    left: 0;
-    right: calc(50% + 52px); /* metade do botão plus + halo */
-  }
-  .navBottom::after {
-    right: 0;
-    left: calc(50% + 52px);
-  }
+
   .plusButton {
     position: fixed;
     left: 50%;
@@ -41,7 +25,7 @@
     border-radius: 50%;
     width: 64px;
     height: 64px;
-    box-shadow: 0 2px 12px #0002, 0 0 0 20px #fff;
+    box-shadow: 0 2px 12px #0002;
     display: flex;
     align-items: center;
     justify-content: center;

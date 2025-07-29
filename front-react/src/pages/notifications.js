@@ -1,4 +1,5 @@
 import React from "react";
+import NavBottom from "../components/NavBottom";
 
 const mockNotifications = [
   {
@@ -25,54 +26,124 @@ export default function NotificationsPage() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(180deg, #B8D8F8 0%, #E2C6F7 100%)',
+      background: '#fff',
       padding: 0,
       margin: 0,
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      paddingBottom: '80px' // Espaço para o NavBottom
     }}>
-      <div style={{ maxWidth: 400, margin: '0 auto', padding: 24, flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <button
-          style={{
-            background: 'none', border: 'none', fontSize: 28, cursor: 'pointer', marginBottom: 8
-          }}
-          onClick={() => window.history.back()}
-        >
-          &#8592;
-        </button>
-        <h1 style={{ textAlign: 'center', fontWeight: 600, fontSize: 32, margin: 0 }}>Notificações</h1>
+      <div style={{ 
+        maxWidth: 600, 
+        margin: '0 auto', 
+        padding: '24px 16px', 
+        flex: 1, 
+        display: 'flex', 
+        flexDirection: 'column',
+        width: '100%',
+        boxSizing: 'border-box'
+      }}>
+        <div style={{ position: 'relative', marginBottom: 16 }}>
+          <button 
+            style={{ 
+              position: 'absolute',
+              left: 0,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              background: 'none', 
+              border: 'none', 
+              fontSize: 24, 
+              cursor: 'pointer',
+              padding: '8px',
+              borderRadius: '4px',
+              transition: 'background-color 0.2s',
+              zIndex: 1
+            }} 
+            onClick={() => window.history.back()}
+            onMouseOver={(e) => {
+              e.target.style.backgroundColor = 'rgba(0,0,0,0.05)';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.backgroundColor = 'transparent';
+            }}
+            title="Voltar"
+          >
+            &larr;
+          </button>
+          <h2 style={{ textAlign: 'center', margin: 0, fontWeight: 600, fontSize: '1.35rem', padding: '8px 0' }}>Notificações</h2>
+        </div>
+        
         <div style={{ display: 'flex', justifyContent: 'center', margin: '18px 0 24px 0' }}>
           <button style={{
-            background: '#fff',
+            background: '#f5f5f5',
             border: 'none',
             borderRadius: 16,
-            padding: '4px 28px',
+            padding: '8px 24px',
             fontWeight: 600,
-            fontSize: 18,
-            color: '#888',
-            boxShadow: '0 1px 4px #0001',
+            fontSize: 16,
+            color: '#333',
             cursor: 'default'
           }}>Hoje</button>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+        
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {mockNotifications.map((n, i) => (
             <div key={i} style={{
-              display: 'flex', alignItems: 'center', background: '#fff', borderRadius: 14,
-              boxShadow: '0 1px 4px #0001', padding: 16, gap: 16
-            }}>
-              <img src={n.icon} alt="icon" style={{ width: 48, height: 48, borderRadius: 8, objectFit: 'cover' }} />
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 600, fontSize: 16 }}>{n.title}</div>
-                <div style={{ color: '#888', fontSize: 13 }}>{n.tank}</div>
+              display: 'flex', 
+              alignItems: 'center', 
+              background: '#fff', 
+              borderRadius: 12,
+              border: '1px solid #eee',
+              padding: 16, 
+              gap: 16,
+              transition: 'box-shadow 0.2s'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.boxShadow = 'none';
+            }}
+            >
+              <div style={{ 
+                width: 48, 
+                height: 48, 
+                borderRadius: 8, 
+                background: '#f5f5f5',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '24px'
+              }}>
+                {n.icon.includes('temp') ? '🌡️' : n.icon.includes('amonia') ? '⚗️' : '🧪'}
               </div>
-              <div style={{ color: '#888', fontWeight: 500, fontSize: 15 }}>{n.time}</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 600, fontSize: 16, color: '#333' }}>{n.title}</div>
+                <div style={{ color: '#888', fontSize: 14, marginTop: 2 }}>{n.tank}</div>
+              </div>
+              <div style={{ color: '#888', fontWeight: 500, fontSize: 14 }}>{n.time}</div>
             </div>
           ))}
         </div>
+        
+        {mockNotifications.length === 0 && (
+          <div style={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            padding: '48px 24px',
+            color: '#888',
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔔</div>
+            <div style={{ fontSize: '18px', fontWeight: 500, marginBottom: '8px' }}>Nenhuma notificação</div>
+            <div style={{ fontSize: '14px' }}>Você está em dia com suas notificações</div>
+          </div>
+        )}
       </div>
-      <div style={{ width: '100%', display: 'flex', justifyContent: 'center', margin: '32px 0 16px 0' }}>
-        <img src="/images/logo_camarize1.png" alt="Camarize Logo" style={{ width: 180, height: 40 }} />
-      </div>
+      
+      <NavBottom />
     </div>
   );
 } 

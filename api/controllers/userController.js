@@ -9,10 +9,16 @@ const JWTSecret = "apigamessecret";
 // No userController.js
 const getUserById = async (req, res) => {
   try {
-    const user = await userService.getById(req.params.id);
+    const { id } = req.params;
+    
+    const user = await userService.getById(id);
     if (!user) return res.status(404).json({ error: "Usuário não encontrado" });
+    
+
+    
     res.json(user);
   } catch (err) {
+    console.error('Erro ao buscar usuário:', err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -96,4 +102,19 @@ const loginUser = async (req, res) => {
   }
 };
 
-export default { createUser, loginUser, JWTSecret, register, getUserById };
+// Atualizar foto do usuário
+const updateUserPhoto = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { foto_perfil } = req.body;
+    
+    const user = await userService.updatePhoto(id, foto_perfil);
+    if (!user) return res.status(404).json({ error: "Usuário não encontrado" });
+    
+    res.json({ message: "Foto do usuário atualizada com sucesso!", user });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export default { createUser, loginUser, JWTSecret, register, getUserById, updateUserPhoto };

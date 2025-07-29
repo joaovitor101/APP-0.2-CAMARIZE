@@ -1,22 +1,48 @@
 import { useRouter } from 'next/router';
 import { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
+import AuthError from "../components/AuthError";
+import Loading from "../components/Loading";
 import profileStyles from "../components/ProfileContent/ProfileContent.module.css";
 
 export default function RelatorioGeral() {
   const router = useRouter();
   const { periodo } = router.query;
   const [cativeiros, setCativeiros] = useState([]);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
   const relatorioRef = useRef();
 
   useEffect(() => {
     async function fetchCativeiros() {
       try {
+        setLoading(true);
+        setError(null);
+        
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-        const res = await axios.get(`${apiUrl}/cativeiros`);
+        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+        
+        if (!token) {
+          setError('Você precisa estar logado para acessar esta página');
+          setLoading(false);
+          return;
+        }
+        
+        const res = await axios.get(`${apiUrl}/cativeiros`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        console.log('Cativeiros carregados:', res.data);
         setCativeiros(res.data);
       } catch (err) {
+        console.error('Erro ao buscar cativeiros:', err);
+        if (err.response?.status === 401) {
+          setError('Sessão expirada. Faça login novamente para continuar.');
+        } else {
+          setError('Erro ao carregar os dados. Tente novamente.');
+        }
         setCativeiros([]);
+      } finally {
+        setLoading(false);
       }
     }
     fetchCativeiros();
@@ -40,6 +66,16 @@ export default function RelatorioGeral() {
       html2pdf().set(opt).from(relatorioRef.current).save();
     }
   };
+
+  // Se há erro, mostrar tela de erro
+  if (error) {
+    return <AuthError error={error} onRetry={() => window.location.reload()} />;
+  }
+
+  // Se está carregando, mostrar loading
+  if (loading) {
+    return <Loading message="Carregando relatório..." />;
+  }
 
   return (
     <div style={{ maxWidth: 800, margin: '40px auto', background: '#fff', padding: 24, borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', position: 'relative' }}>

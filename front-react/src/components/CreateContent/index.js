@@ -4,6 +4,9 @@ import styles from "@/components/CreateContent/CreateContent.module.css";
 import axios from "axios";
 import dynamic from 'next/dynamic';
 import SelectTipoCamarao from "@/components/SelectTipoCamarao";
+import Notification from "@/components/Notification";
+import AuthError from "@/components/AuthError";
+import Loading from "@/components/Loading";
 const CreatableSelect = dynamic(() => import('react-select/creatable'), { ssr: false });
 
 export default function CreateContent() {
@@ -21,55 +24,80 @@ export default function CreateContent() {
   const [amoniaMedia, setAmoniaMedia] = useState("");
   const [condicoesIdeais, setCondicoesIdeais] = useState([]);
   const [condicaoIdealSelecionada, setCondicaoIdealSelecionada] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
   const fileInputRef = useRef();
 
+  const showNotification = (message, type = 'success') => {
+    setNotification({ show: true, message, type });
+  };
+
+  const hideNotification = () => {
+    setNotification({ show: false, message: '', type: 'success' });
+  };
+
   useEffect(() => {
-    async function fetchFazendas() {
+    async function fetchData() {
       try {
+        setLoading(true);
+        setError(null);
+        
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-        const res = await axios.get(`${apiUrl}/fazendas`);
-        setFazendas(res.data);
+        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+        
+        if (!token) {
+          setError('Você precisa estar logado para acessar esta página');
+          setLoading(false);
+          return;
+        }
+        
+        const headers = { Authorization: `Bearer ${token}` };
+        
+        // Buscar todos os dados necessários
+        const [fazendasRes, tiposRes, sensoresRes, condicoesRes] = await Promise.all([
+          axios.get(`${apiUrl}/fazendas`, { headers }),
+          axios.get(`${apiUrl}/tipos-camarao`, { headers }),
+          axios.get(`${apiUrl}/sensores`, { headers }),
+          axios.get(`${apiUrl}/condicoes-ideais`, { headers })
+        ]);
+        
+        setFazendas(fazendasRes.data);
+        setTiposCamarao(tiposRes.data);
+        setSensoresDisponiveis(sensoresRes.data);
+        setCondicoesIdeais(condicoesRes.data);
       } catch (err) {
+        console.error('Erro ao buscar dados:', err);
+        if (err.response?.status === 401) {
+          setError('Sessão expirada. Faça login novamente para continuar.');
+        } else {
+          setError('Erro ao carregar os dados. Tente novamente.');
+        }
         setFazendas([]);
-      }
-    }
-    async function fetchTiposCamarao() {
-      try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-        const res = await axios.get(`${apiUrl}/tipos-camarao`);
-        setTiposCamarao(res.data);
-      } catch (err) {
         setTiposCamarao([]);
-      }
-    }
-    async function fetchSensores() {
-      try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-        const res = await axios.get(`${apiUrl}/sensores`);
-        setSensoresDisponiveis(res.data);
-      } catch (err) {
         setSensoresDisponiveis([]);
-      }
-    }
-    async function fetchCondicoesIdeais() {
-      try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-        const res = await axios.get(`${apiUrl}/condicoes-ideais`);
-        setCondicoesIdeais(res.data);
-      } catch (err) {
         setCondicoesIdeais([]);
+      } finally {
+        setLoading(false);
       }
     }
-    fetchFazendas();
-    fetchTiposCamarao();
-    fetchSensores();
-    fetchCondicoesIdeais();
+    fetchData();
   }, []);
 
   // LOG para depuração
   useEffect(() => {
     console.log('tiposCamarao:', tiposCamarao);
   }, [tiposCamarao]);
+
+  // Se há erro, mostrar tela de erro
+  if (error) {
+    return <AuthError error={error} onRetry={() => window.location.reload()} />;
+  }
+
+  // Se está carregando, mostrar loading
+  if (loading) {
+    return <Loading message="Carregando formulário..." />;
+  }
 
   const handleSensorChange = (idx, value) => {
     const novos = [...sensores];
@@ -97,16 +125,24 @@ export default function CreateContent() {
           ...(token ? { Authorization: `Bearer ${token}` } : {})
         }
       });
-      alert("Cativeiro cadastrado com sucesso!");
-      router.push("/home");
+      showNotification("Cativeiro cadastrado com sucesso!");
+      // Aguardar 2 segundos antes de redirecionar para a notificação aparecer
+      setTimeout(() => {
+        router.push("/home");
+      }, 2000);
     } catch (err) {
-      alert("Erro ao cadastrar cativeiro.");
+      showNotification("Erro ao cadastrar cativeiro.", 'error');
     }
   };
 
   return (
     <div className={styles.createWrapper}>
-      <button className={styles.backBtn} onClick={() => router.back()}>
+      <button 
+        className={styles.backBtn} 
+        onClick={() => router.back()}
+        aria-label="Voltar"
+        type="button"
+      >
         <span style={{ fontSize: 24, lineHeight: 1 }}>&larr;</span>
       </button>
       <form className={styles.formBox} onSubmit={handleSubmit}>
@@ -115,6 +151,8 @@ export default function CreateContent() {
           className={`${styles.input} ${styles.inputSelect}`}
           value={fazendaSelecionada}
           onChange={e => setFazendaSelecionada(e.target.value)}
+          required
+          aria-label="Selecione o sítio"
         >
           <option value="">Selecione o sítio</option>
           {fazendas.map(f => (
@@ -130,10 +168,9 @@ export default function CreateContent() {
             type="date"
             value={dataInstalacao}
             onChange={e => setDataInstalacao(e.target.value)}
+            required
+            aria-label="Data da instalação"
           />
-          {/* <span className={styles.inputIcon}>
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M7 2v2M17 2v2M3 7h18M5 11v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6M9 15h6" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-          </span> */}
         </div>
         {/* Troca o select de tipo de camarão por um autocomplete com criação */}
         <div style={{ width: '100%' }}>
@@ -152,6 +189,7 @@ export default function CreateContent() {
             type="text"
             value={tempMedia}
             onChange={e => setTempMedia(e.target.value)}
+            aria-label="Temperatura média"
           />
           <input
             className={styles.input}
@@ -159,6 +197,7 @@ export default function CreateContent() {
             type="text"
             value={phMedio}
             onChange={e => setPhMedio(e.target.value)}
+            aria-label="pH médio"
           />
           <input
             className={styles.input}
@@ -166,10 +205,16 @@ export default function CreateContent() {
             type="text"
             value={amoniaMedia}
             onChange={e => setAmoniaMedia(e.target.value)}
+            aria-label="Amônia média"
           />
         </div>
         <div className={styles.uploadBox}>
-          <button type="button" className={styles.uploadBtn} onClick={() => fileInputRef.current.click()}>
+          <button 
+            type="button" 
+            className={styles.uploadBtn} 
+            onClick={() => fileInputRef.current.click()}
+            aria-label="Selecionar foto do cativeiro"
+          >
             &#128206; Selecionar foto
           </button>
           <input
@@ -177,6 +222,8 @@ export default function CreateContent() {
             ref={fileInputRef}
             style={{ display: "none" }}
             onChange={e => setArquivo(e.target.files[0])}
+            accept="image/*"
+            aria-label="Upload de foto"
           />
           <span className={styles.uploadFileName}>{arquivo ? arquivo.name : "Nenhum arquivo inserido"}</span>
         </div>
@@ -188,6 +235,7 @@ export default function CreateContent() {
             className={`${styles.input} ${styles.inputSelect}`}
             value={sensor}
             onChange={e => handleSensorChange(idx, e.target.value)}
+            aria-label={`Selecione o sensor ${idx + 1}`}
           >
             <option value="">Selecione</option>
             {sensoresDisponiveis.map(s => (
@@ -197,13 +245,19 @@ export default function CreateContent() {
             ))}
           </select>
         ))}
-        <button type="submit" className={styles.cadastrarBtn}>
+        <button type="submit" className={styles.cadastrarBtn} aria-label="Cadastrar cativeiro">
           Cadastrar
         </button>
       </form>
       <div className={styles.logoBox}>
         <img src="/images/logo_camarize1.png" alt="Camarize Logo" />
       </div>
+      <Notification
+        isVisible={notification.show}
+        message={notification.message}
+        type={notification.type}
+        onClose={hideNotification}
+      />
     </div>
   );
 }

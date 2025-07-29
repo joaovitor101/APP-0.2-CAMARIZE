@@ -2,6 +2,9 @@ import { useRef, useState, useEffect } from "react";
 import axios from "axios";
 import profileStyles from "../components/ProfileContent/ProfileContent.module.css";
 import NavBottom from "../components/NavBottom";
+import Notification from "../components/Notification";
+import AuthError from "../components/AuthError";
+import Loading from "../components/Loading";
 
 // Novo CSS para a foto circular perfeita e layout sem box
 const customStyles = {
@@ -58,7 +61,7 @@ const customStyles = {
     margin: '0 auto',
     display: 'flex',
     flexDirection: 'column',
-    gap: 10,
+    gap: 8,
     marginTop: 0,
     background: 'none',
     boxShadow: 'none',
@@ -69,16 +72,18 @@ const customStyles = {
     fontSize: '0.98rem',
     fontWeight: 500,
     color: '#444',
-    marginBottom: 2,
-    marginTop: 8,
+    marginBottom: 0,
+    marginTop: 0,
     alignSelf: 'flex-start',
+    width: '100%',
+    textAlign: 'left',
   },
   input: {
     width: '100%',
     border: 'none',
     background: '#f5f5f5',
     borderRadius: 8,
-    padding: '13px 16px',
+    padding: '13px 20px',
     fontSize: '1.08rem',
     color: '#222',
     boxSizing: 'border-box',
@@ -97,9 +102,17 @@ export default function Settings() {
   const [loading, setLoading] = useState(true);
   const [previewFoto, setPreviewFoto] = useState(null);
   const [salvandoFoto, setSalvandoFoto] = useState(false);
-  const [mensagemFoto, setMensagemFoto] = useState("");
+  const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
   const [fotoFazenda, setFotoFazenda] = useState(SVG_AVATAR_FAZENDA);
   const fileInputRef = useRef();
+
+  const showNotification = (message, type = 'success') => {
+    setNotification({ show: true, message, type });
+  };
+
+  const hideNotification = () => {
+    setNotification({ show: false, message: '', type: 'success' });
+  };
 
   // Buscar o usuário logado do localStorage
   const usuario = typeof window !== "undefined" ? JSON.parse(localStorage.getItem("usuarioCamarize")) : null;
@@ -157,7 +170,6 @@ export default function Settings() {
     const reader = new FileReader();
     reader.onloadend = () => {
       setPreviewFoto(reader.result); // Mostra preview imediatamente
-      setMensagemFoto("");
       setFotoFazenda(reader.result);
     };
     reader.readAsDataURL(file);
@@ -167,25 +179,32 @@ export default function Settings() {
   const handleSalvarFoto = async () => {
     if (!previewFoto || !fazenda._id) return;
     setSalvandoFoto(true);
-    setMensagemFoto("");
     try {
       await axios.patch(`${apiUrl}/fazendas/${fazenda._id}/foto`, { foto_sitio: previewFoto });
-      setMensagemFoto("Foto atualizada com sucesso!");
+      showNotification("Foto atualizada com sucesso!", 'success');
       setPreviewFoto(null);
       setFazenda({ ...fazenda, foto_sitio: true });
       setFotoFazenda(previewFoto);
     } catch (err) {
-      setMensagemFoto("Erro ao salvar foto.");
+      showNotification("Erro ao salvar foto.", 'error');
     }
     setSalvandoFoto(false);
   };
 
-  if (loading) return <div>Carregando...</div>;
-  if (!usuario) return <div>Faça login para ver as informações do seu sítio.</div>;
-  if (!fazenda) return <div>Nenhuma fazenda encontrada.</div>;
+  if (loading) {
+    return <Loading message="Carregando configurações..." />;
+  }
+  
+  if (!usuario) {
+    return <AuthError error="Faça login para ver as informações do seu sítio." />;
+  }
+  
+  if (!fazenda) {
+    return <AuthError error="Nenhuma fazenda encontrada. Verifique suas permissões de acesso." onRetry={() => window.location.reload()} />;
+  }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', paddingBottom: 80 }}>
+    <div style={{ minHeight: '100vh', background: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', paddingBottom: 80, paddingLeft: '20px', paddingRight: '20px' }}>
       <button className={profileStyles.backBtn} onClick={() => window.history.back()}>
         <span style={{ fontSize: 24, lineHeight: 1 }}>&larr;</span>
       </button>
@@ -215,9 +234,7 @@ export default function Settings() {
             {salvandoFoto ? 'Salvando...' : 'Salvar foto'}
           </button>
         )}
-        {mensagemFoto && (
-          <div style={{ marginTop: 8, color: mensagemFoto.includes('sucesso') ? 'green' : 'red', fontWeight: 500 }}>{mensagemFoto}</div>
-        )}
+
       </div>
       <div style={customStyles.userName}>{fazenda.nome || ""}</div>
       <div style={customStyles.userRole}>Sítio/Fazenda</div>
@@ -231,6 +248,12 @@ export default function Settings() {
         <label style={customStyles.label}>Número</label>
         <input style={customStyles.input} value={fazenda.numero || ""} disabled />
       </form>
+      <Notification
+        isVisible={notification.show}
+        message={notification.message}
+        type={notification.type}
+        onClose={hideNotification}
+      />
       <NavBottom />
     </div>
   );
