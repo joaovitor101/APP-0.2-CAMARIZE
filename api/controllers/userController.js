@@ -39,6 +39,11 @@ const createUser = async (req, res) => {
 
 // Cadastro completo (usuário + fazenda)
 const register = async (req, res) => {
+  // Adiciona headers CORS
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  
   try {
     const { nome, email, senha, foto_perfil, fazenda } = req.body;
     let fazendaDoc = null;
@@ -57,6 +62,11 @@ const register = async (req, res) => {
 
 // Autenticando um usuário
 const loginUser = async (req, res) => {
+  // Adiciona headers CORS
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  
   try {
     const { email, senha } = req.body;
     // Log dos dados recebidos
