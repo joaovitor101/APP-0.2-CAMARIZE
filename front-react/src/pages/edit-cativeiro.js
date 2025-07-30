@@ -2,10 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/router";
 import styles from "@/components/CreateContent/CreateContent.module.css";
 import axios from "axios";
-import dynamic from 'next/dynamic';
 import SelectTipoCamarao from "@/components/SelectTipoCamarao";
 import Notification from "@/components/Notification";
-const CreatableSelect = dynamic(() => import('react-select/creatable'), { ssr: false });
 
 export default function EditCativeiroPage() {
   const router = useRouter();
@@ -251,7 +249,7 @@ export default function EditCativeiroPage() {
     const sensoresSelecionados = sensores.filter(sensor => sensor && sensor !== "");
     if (sensoresSelecionados.length > 0) {
       // Envia como array para suportar múltiplos sensores
-      sensoresSelecionados.forEach((sensorId, index) => {
+      sensoresSelecionados.forEach((sensorId) => {
         formData.append("sensorIds", sensorId);
       });
       console.log('🔗 Sensores relacionados na edição:', sensoresSelecionados);
@@ -259,7 +257,7 @@ export default function EditCativeiroPage() {
     
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      const response = await axios.put(`${apiUrl}/cativeiros/${id}`, formData, {
+      await axios.put(`${apiUrl}/cativeiros/${id}`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           ...(token ? { Authorization: `Bearer ${token}` } : {})
@@ -277,8 +275,7 @@ export default function EditCativeiroPage() {
       setTimeout(() => {
         router.push("/home");
       }, 2000);
-    } catch (err) {
-      console.error('Erro ao atualizar cativeiro:', err);
+    } catch {
       showNotification("Erro ao atualizar cativeiro.", 'error');
     }
   };

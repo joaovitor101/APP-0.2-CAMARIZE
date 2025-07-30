@@ -2,12 +2,10 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/router";
 import styles from "@/components/CreateContent/CreateContent.module.css";
 import axios from "axios";
-import dynamic from 'next/dynamic';
 import SelectTipoCamarao from "@/components/SelectTipoCamarao";
 import Notification from "@/components/Notification";
 import AuthError from "@/components/AuthError";
 import Loading from "@/components/Loading";
-const CreatableSelect = dynamic(() => import('react-select/creatable'), { ssr: false });
 
 export default function CreateContent() {
   const router = useRouter();
@@ -22,8 +20,7 @@ export default function CreateContent() {
   const [tempMedia, setTempMedia] = useState("");
   const [phMedio, setPhMedio] = useState("");
   const [amoniaMedia, setAmoniaMedia] = useState("");
-  const [condicoesIdeais, setCondicoesIdeais] = useState([]);
-  const [condicaoIdealSelecionada, setCondicaoIdealSelecionada] = useState("");
+  const [condicoesIdeais] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
@@ -55,17 +52,15 @@ export default function CreateContent() {
         const headers = { Authorization: `Bearer ${token}` };
         
         // Buscar todos os dados necessários
-        const [fazendasRes, tiposRes, sensoresRes, condicoesRes] = await Promise.all([
+        const [fazendasRes, tiposRes, sensoresRes] = await Promise.all([
           axios.get(`${apiUrl}/fazendas`, { headers }),
           axios.get(`${apiUrl}/tipos-camarao`, { headers }),
-          axios.get(`${apiUrl}/sensores`, { headers }),
-          axios.get(`${apiUrl}/condicoes-ideais`, { headers })
+          axios.get(`${apiUrl}/sensores`, { headers })
         ]);
         
         setFazendas(fazendasRes.data);
         setTiposCamarao(tiposRes.data);
         setSensoresDisponiveis(sensoresRes.data);
-        setCondicoesIdeais(condicoesRes.data);
       } catch (err) {
         console.error('Erro ao buscar dados:', err);
         if (err.response?.status === 401) {
@@ -76,7 +71,6 @@ export default function CreateContent() {
         setFazendas([]);
         setTiposCamarao([]);
         setSensoresDisponiveis([]);
-        setCondicoesIdeais([]);
       } finally {
         setLoading(false);
       }
@@ -129,20 +123,20 @@ export default function CreateContent() {
     formData.append("temp_media_diaria", tempMedia);
     formData.append("ph_medio_diario", phMedio);
     formData.append("amonia_media_diaria", amoniaMedia);
-    formData.append("condicoes_ideais", condicaoIdealSelecionada);
+
     
     // Adiciona todos os sensores selecionados (máximo 3)
     const sensoresSelecionados = sensores.filter(sensor => sensor && sensor !== "");
     if (sensoresSelecionados.length > 0) {
       // Envia como array para suportar múltiplos sensores
-      sensoresSelecionados.forEach((sensorId, index) => {
+      sensoresSelecionados.forEach((sensorId) => {
         formData.append("sensorIds", sensorId);
       });
       console.log('🔗 Sensores relacionados:', sensoresSelecionados);
     }
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      const response = await axios.post(`${apiUrl}/cativeiros`, formData, {
+      await axios.post(`${apiUrl}/cativeiros`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           ...(token ? { Authorization: `Bearer ${token}` } : {})
@@ -160,7 +154,7 @@ export default function CreateContent() {
       setTimeout(() => {
         router.push("/home");
       }, 2000);
-    } catch (err) {
+    } catch {
       showNotification("Erro ao cadastrar cativeiro.", 'error');
     }
   };

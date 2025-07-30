@@ -1,12 +1,13 @@
 import styles from "@/components/LoginContent/LoginContent.module.css";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useRegister } from "@/context/RegisterContext";
 
 const RegisterContent = () => {
   const router = useRouter();
-  const { setUserData } = useRegister();
+  const { } = useRegister();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -31,7 +32,6 @@ const RegisterContent = () => {
         })
       });
       if (response.ok) {
-        const data = await response.json();
         // Login automático após cadastro
         const loginRes = await fetch("http://localhost:4000/users/auth", {
           method: "POST",
@@ -53,10 +53,9 @@ const RegisterContent = () => {
           setError("Erro ao fazer login automático após cadastro.");
         }
       } else {
-        const data = await response.json();
-        setError(data.error || "Erro ao cadastrar usuário.");
+        setError("Erro ao cadastrar usuário.");
       }
-    } catch (err) {
+    } catch {
       setError("Erro de conexão com o servidor.");
     }
   };
@@ -135,7 +134,7 @@ const RegisterContent = () => {
         {error && <div className={styles.errorMsg}>{error}</div>}
         <div className={styles.registerRow}>
           <span>Já tem uma conta?</span>
-          <a href="/login" className={styles.registerLink}>Conecte-se agora</a>
+          <Link href="/login" className={styles.registerLink}>Conecte-se agora</Link>
         </div>
       </form>
       <div className={styles.logoWrapper}>

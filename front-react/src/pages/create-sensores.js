@@ -52,7 +52,7 @@ export default function CreateSensoresPage() {
       setTimeout(() => {
         router.push('/sensores');
       }, 2000);
-    } catch (err) {
+    } catch {
       showNotification('Erro ao cadastrar sensor.', 'error');
     } finally {
       setLoading(false);

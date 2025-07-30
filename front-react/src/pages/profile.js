@@ -59,7 +59,7 @@ export default function Profile() {
       const decoded = jwtDecode(token);
       const userId = decoded.id;
 
-      const response = await axios.patch(`${apiUrl}/users/${userId}/photo`, { foto_perfil: previewFoto }, {
+      await axios.patch(`${apiUrl}/users/${userId}/photo`, { foto_perfil: previewFoto }, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`

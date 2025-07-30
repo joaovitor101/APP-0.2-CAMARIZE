@@ -1,5 +1,6 @@
 import styles from "@/components/LoginContent/LoginContent.module.css";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import axios from "axios";
@@ -32,7 +33,7 @@ const LoginContent = () => {
       localStorage.setItem("usuarioCamarize", JSON.stringify(usuario));
 
       router.push("/home");
-    } catch (err) {
+    } catch {
       setError("Usuário ou senha inválidos!");
     }
   };
@@ -98,7 +99,7 @@ const LoginContent = () => {
         {error && <div className={styles.errorMsg}>{error}</div>}
         <div className={styles.registerRow}>
           <span>Não tem uma conta?</span>
-          <a href="/register" className={styles.registerLink}>Cadastre-se agora</a>
+          <Link href="/register" className={styles.registerLink}>Cadastre-se agora</Link>
         </div>
       </form>
       <div className={styles.logoWrapper}>

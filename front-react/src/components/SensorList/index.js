@@ -29,7 +29,7 @@ export default function SensorList({ sensores = [], onEdit, onDelete }) {
             <div className={styles.sensorCard} key={sensor._id || idx}>
               <div className={styles.gradientBar} />
               <div className={styles.icon}>
-                <img src={fotoUrl} alt={sensor.id_tipo_sensor} style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }} />
+                <img src={fotoUrl} alt={sensor.id_tipo_sensor} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
               </div>
               <div className={styles.info}>
                 <div style={{ display: 'flex', flexDirection: 'row', gap: 12, alignItems: 'center' }}>

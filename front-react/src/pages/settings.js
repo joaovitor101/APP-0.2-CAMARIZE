@@ -136,7 +136,7 @@ export default function Settings() {
         } else {
           setFazenda(null);
         }
-      } catch (err) {
+      } catch {
         setFazenda(null);
       }
       setLoading(false);
@@ -185,7 +185,7 @@ export default function Settings() {
       setPreviewFoto(null);
       setFazenda({ ...fazenda, foto_sitio: true });
       setFotoFazenda(previewFoto);
-    } catch (err) {
+    } catch {
       showNotification("Erro ao salvar foto.", 'error');
     }
     setSalvandoFoto(false);

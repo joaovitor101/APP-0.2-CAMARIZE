@@ -1,5 +1,6 @@
 import styles from "@/components/LoginContent/LoginContent.module.css";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
@@ -47,7 +48,7 @@ export default function RegisterFazendaPage() {
         const data = await response.json();
         setError(data.error || "Erro ao cadastrar fazenda.");
       }
-    } catch (err) {
+    } catch {
       setError("Erro de conexão com o servidor.");
     }
   };
@@ -140,7 +141,7 @@ export default function RegisterFazendaPage() {
         {error && <div className={styles.errorMsg}>{error}</div>}
         <div className={styles.registerRow}>
           <span>Já tem uma conta?</span>
-          <a href="/login" className={styles.registerLink}>Conecte-se agora</a>
+          <Link href="/login" className={styles.registerLink}>Conecte-se agora</Link>
         </div>
       </form>
       <div className={styles.logoWrapper}>
