@@ -10,6 +10,7 @@ cativeiroRoutes.post("/cativeiros", Auth.Authorization, upload.single('foto_cati
 // Endpoint para listar todos os cativeiros
 cativeiroRoutes.get("/cativeiros", Auth.Authorization, cativeiroController.getAllCativeiros);
 cativeiroRoutes.get("/cativeiros/:id", cativeiroController.getCativeiroById);
+cativeiroRoutes.get("/cativeiros/:cativeiroId/sensores", cativeiroController.getSensoresCativeiro);
 cativeiroRoutes.get("/tipos-camarao", cativeiroController.getAllTiposCamarao);
 cativeiroRoutes.get("/condicoes-ideais", cativeiroController.getAllCondicoesIdeais);
 // Endpoint para atualizar cativeiro

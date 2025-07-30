@@ -105,6 +105,19 @@ export default function CreateContent() {
     setSensores(novos);
   };
 
+  const adicionarCampoSensor = () => {
+    if (sensores.length < 3) {
+      setSensores([...sensores, ""]);
+    }
+  };
+
+  const removerCampoSensor = (idx) => {
+    if (sensores.length > 1) {
+      const novos = sensores.filter((_, index) => index !== idx);
+      setSensores(novos);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
@@ -117,15 +130,32 @@ export default function CreateContent() {
     formData.append("ph_medio_diario", phMedio);
     formData.append("amonia_media_diaria", amoniaMedia);
     formData.append("condicoes_ideais", condicaoIdealSelecionada);
+    
+    // Adiciona todos os sensores selecionados (máximo 3)
+    const sensoresSelecionados = sensores.filter(sensor => sensor && sensor !== "");
+    if (sensoresSelecionados.length > 0) {
+      // Envia como array para suportar múltiplos sensores
+      sensoresSelecionados.forEach((sensorId, index) => {
+        formData.append("sensorIds", sensorId);
+      });
+      console.log('🔗 Sensores relacionados:', sensoresSelecionados);
+    }
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      await axios.post(`${apiUrl}/cativeiros`, formData, {
+      const response = await axios.post(`${apiUrl}/cativeiros`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           ...(token ? { Authorization: `Bearer ${token}` } : {})
         }
       });
-      showNotification("Cativeiro cadastrado com sucesso!");
+      
+      // Verifica se sensores foram relacionados
+      const sensoresSelecionados = sensores.filter(sensor => sensor && sensor !== "");
+      const message = sensoresSelecionados.length > 0 
+        ? `Cativeiro cadastrado com sucesso! ${sensoresSelecionados.length} sensor(es) relacionado(s) automaticamente.`
+        : "Cativeiro cadastrado com sucesso!";
+      
+      showNotification(message);
       // Aguardar 2 segundos antes de redirecionar para a notificação aparecer
       setTimeout(() => {
         router.push("/home");
@@ -229,22 +259,68 @@ export default function CreateContent() {
         </div>
         <hr className={styles.hr} />
         <h3 className={styles.subtitle}>Relacione os sensores</h3>
+        <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '15px', gridColumn: '1 / -1' }}>
+          Todos os sensores selecionados serão relacionados ao cativeiro automaticamente (máximo 3 sensores).
+        </p>
         {sensores.map((sensor, idx) => (
-          <select
-            key={idx}
-            className={`${styles.input} ${styles.inputSelect}`}
-            value={sensor}
-            onChange={e => handleSensorChange(idx, e.target.value)}
-            aria-label={`Selecione o sensor ${idx + 1}`}
-          >
-            <option value="">Selecione</option>
-            {sensoresDisponiveis.map(s => (
-              <option key={s._id} value={s._id}>
-                {s.apelido ? `${s.apelido} (${s.id_tipo_sensor})` : s.id_tipo_sensor || s._id}
-              </option>
-            ))}
-          </select>
+          <div key={idx} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <select
+              className={`${styles.input} ${styles.inputSelect}`}
+              value={sensor}
+              onChange={e => handleSensorChange(idx, e.target.value)}
+              aria-label={`Selecione o sensor ${idx + 1}`}
+              style={{ flex: 1 }}
+            >
+              <option value="">Selecione</option>
+              {sensoresDisponiveis
+                .filter(s => {
+                  // Mostra o sensor se ele está selecionado neste campo OU se não está selecionado em nenhum outro campo
+                  return sensor === s._id || !sensores.includes(s._id);
+                })
+                .map(s => (
+                  <option key={s._id} value={s._id}>
+                    {s.apelido ? `${s.apelido} (${s.id_tipo_sensor})` : s.id_tipo_sensor || s._id}
+                  </option>
+                ))}
+            </select>
+            {sensores.length > 1 && (
+              <button
+                type="button"
+                onClick={() => removerCampoSensor(idx)}
+                style={{
+                  background: '#ff4444',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  padding: '8px 12px',
+                  cursor: 'pointer',
+                  fontSize: '14px'
+                }}
+                aria-label={`Remover sensor ${idx + 1}`}
+              >
+                ✕
+              </button>
+            )}
+          </div>
         ))}
+        {sensores.length < 3 && (
+          <button
+            type="button"
+            onClick={adicionarCampoSensor}
+            style={{
+              background: '#4CAF50',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              padding: '10px 16px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              marginTop: '8px'
+            }}
+          >
+            + Adicionar Sensor
+          </button>
+        )}
         <button type="submit" className={styles.cadastrarBtn} aria-label="Cadastrar cativeiro">
           Cadastrar
         </button>

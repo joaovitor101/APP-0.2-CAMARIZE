@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 const EspecifCamaraoSchema = new mongoose.Schema({
   id_tipo_camarao: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "TiposCamarao",
+    ref: "TiposCamaroes",
     required: true,
   },
   id_dieta: {

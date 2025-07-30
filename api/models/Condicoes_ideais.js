@@ -5,7 +5,7 @@ const CondicoesIdeaisSchema = new mongoose.Schema({
   // id_condicao: Number, // pode usar o _id do MongoDB
   id_tipo_camarao: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "TiposCamarao",
+    ref: "TiposCamaroes",
     required: true,
   },
   temp_ideal: {

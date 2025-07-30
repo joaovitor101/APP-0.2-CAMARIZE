@@ -51,7 +51,19 @@ class cativeiroService {
       // Adicionar sensores ao objeto do cativeiro
       cativeiro.sensores = sensores;
       
-      return cativeiro;
+      // Converter para objeto simples para garantir serialização correta
+      const cativeiroObj = cativeiro.toObject();
+      cativeiroObj.sensores = sensores;
+      
+      // Garantir que a fazenda seja incluída no objeto
+      if (cativeiro.fazenda) {
+        cativeiroObj.fazenda = cativeiro.fazenda;
+      }
+      if (cativeiro.fazendaNome) {
+        cativeiroObj.fazendaNome = cativeiro.fazendaNome;
+      }
+      
+      return cativeiroObj;
     } catch (error) {
       console.log(error);
       return null;

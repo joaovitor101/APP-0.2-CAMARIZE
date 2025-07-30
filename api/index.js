@@ -1,6 +1,10 @@
 import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
+import dotenv from "dotenv";
+
+// Carrega as variáveis de ambiente
+dotenv.config();
 
 import userRoutes from './routes/userRoutes.js';
 import fazendaRoutes from './routes/fazendaRoutes.js';
@@ -8,12 +12,25 @@ import cativeiroRoutes from './routes/cativeiroRoutes.js';
 import camaraoRoutes from './routes/camaraoRoutes.js';
 import sensorRoutes from './routes/sensorRoutes.js';
 import usuariosxFazendasRoutes from './routes/usuariosxFazendasRoutes.js';
+import sensoresxCativeirosRoutes from './routes/sensoresxCativeirosRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
+import testRoutes from './routes/testRoutes.js';
+
+// Carrega todos os modelos para garantir que as coleções sejam criadas
+import './models/SensoresxCativeiros.js';
+import './models/FazendasxCativeiros.js';
+import './models/UsuariosxFazendas.js';
 
 const app = express();
 
 // 🧠 Habilita CORS ANTES de tudo
 app.use(cors({
-  origin: ["http://localhost:3000", "http://localhost:3001"],
+  origin: [
+    "http://localhost:3000", 
+    "http://localhost:3001",
+    "https://*.vercel.app",
+    "https://*.vercel.app/*"
+  ],
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   credentials: true
 }));
@@ -35,14 +52,43 @@ app.use('/', cativeiroRoutes);
 app.use('/', camaraoRoutes);
 app.use('/', sensorRoutes);
 app.use('/usuariosxfazendas', usuariosxFazendasRoutes);
-// ✅ Conecta ao Mongo
+app.use('/sensoresxcativeiros', sensoresxCativeirosRoutes);
+app.use('/notifications', notificationRoutes);
+app.use('/test', testRoutes);
+// ✅ Conecta ao MongoDB Atlas
 const mongoUrl = process.env.MONGO_URL || "mongodb://localhost:27017/camarize";
-mongoose.connect(mongoUrl)
+
+// Configurações do Mongoose para MongoDB Atlas
+const mongooseOptions = {
+  maxPoolSize: 10, // Máximo de conexões no pool
+  serverSelectionTimeoutMS: 5000, // Timeout para seleção do servidor
+  socketTimeoutMS: 45000, // Timeout para operações de socket
+  bufferCommands: false, // Desabilita o buffer de comandos
+};
+
+mongoose.connect(mongoUrl, mongooseOptions)
 .then(() => {
-  console.log("MongoDB conectado com sucesso!");
+  console.log("✅ MongoDB Atlas conectado com sucesso!");
+  console.log(`📊 Database: ${mongoose.connection.name}`);
+  console.log(`🌐 Host: ${mongoose.connection.host}`);
 })
 .catch(err => {
-  console.error("Erro na conexão:", err);
+  console.error("❌ Erro na conexão com MongoDB Atlas:", err.message);
+  console.error("🔧 Verifique se a string de conexão está correta no arquivo .env");
+  process.exit(1); // Encerra a aplicação se não conseguir conectar
+});
+
+// Event listeners para monitorar a conexão
+mongoose.connection.on('error', (err) => {
+  console.error('❌ Erro na conexão MongoDB:', err);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.log('⚠️  MongoDB desconectado');
+});
+
+mongoose.connection.on('reconnected', () => {
+  console.log('🔄 MongoDB reconectado');
 });
 
 const port = 4000;
