@@ -134,7 +134,13 @@ export default function SensoresPage() {
         flexDirection: 'column',
         boxSizing: 'border-box'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          position: 'relative',
+          marginBottom: 16,
+          minHeight: '48px'
+        }}>
           <button 
             style={{ 
               background: 'none', 
@@ -143,7 +149,10 @@ export default function SensoresPage() {
               cursor: 'pointer',
               padding: '8px',
               borderRadius: '4px',
-              transition: 'background-color 0.2s'
+              transition: 'background-color 0.2s',
+              position: 'absolute',
+              left: 0,
+              zIndex: 2
             }} 
             onClick={() => {
               if (window.history.length > 1) {
@@ -162,7 +171,15 @@ export default function SensoresPage() {
           >
             &larr;
           </button>
-          <h2 style={{ flex: 1, textAlign: 'center', margin: 0, fontWeight: 600 }}>Sistema</h2>
+          <h2 style={{ 
+            width: '100%', 
+            textAlign: 'center', 
+            margin: 0, 
+            fontWeight: 600,
+            fontSize: '1.25rem'
+          }}>
+            Sistema
+          </h2>
         </div>
         <div className={styles.headerContainer}>
           <span className={styles.headerTitle}>Sensores</span>

@@ -1,9 +1,4 @@
-html, body {
-  height: 100%;
-
-}
-
-
+/* Estilos globais movidos para globals.css */
 
 .profileWrapper {
   min-height: 100vh;
