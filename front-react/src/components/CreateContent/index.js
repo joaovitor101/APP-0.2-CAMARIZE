@@ -12,6 +12,7 @@ export default function CreateContent() {
   const [fazendas, setFazendas] = useState([]);
   const [tiposCamarao, setTiposCamarao] = useState([]);
   const [fazendaSelecionada, setFazendaSelecionada] = useState("");
+  const [nomeCativeiro, setNomeCativeiro] = useState("");
   const [tipoCamarao, setTipoCamarao] = useState(null);
   const [dataInstalacao, setDataInstalacao] = useState("");
   const [arquivo, setArquivo] = useState(null);
@@ -117,6 +118,7 @@ export default function CreateContent() {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
     const formData = new FormData();
     formData.append("fazendaId", fazendaSelecionada);
+    formData.append("nome", nomeCativeiro);
     formData.append("id_tipo_camarao", tipoCamarao?.value || "");
     formData.append("data_instalacao", dataInstalacao);
     if (arquivo) formData.append("foto_cativeiro", arquivo);
@@ -185,6 +187,15 @@ export default function CreateContent() {
             </option>
           ))}
         </select>
+        <input
+          className={styles.input}
+          placeholder="Nome do cativeiro"
+          type="text"
+          value={nomeCativeiro}
+          onChange={e => setNomeCativeiro(e.target.value)}
+          required
+          aria-label="Nome do cativeiro"
+        />
         <div className={styles.inputIconBox}>
           <input
             className={styles.input}

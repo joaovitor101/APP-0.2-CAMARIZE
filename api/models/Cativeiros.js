@@ -3,6 +3,13 @@ import mongoose from "mongoose";
 
 const CativeirosSchema = new mongoose.Schema({
   id_cativeiro: Number, // ou ObjectId, se preferir
+  nome: {
+    type: String,
+    required: true,
+    default: function() {
+      return `Cativeiro ${this.id_cativeiro || 'N/A'}`;
+    }
+  },
   // campo fazenda removido para normalização
   id_tipo_camarao: {
     type: mongoose.Schema.Types.ObjectId, // Referência ao _id do TiposCamarao

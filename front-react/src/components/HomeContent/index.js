@@ -229,7 +229,7 @@ export default function HomeContent() {
                   className={styles.cativeiroImg}
                 />
                               <div className={styles.cativeiroInfo}>
-                <div className={styles.cativeiroNome}>{`Cativeiro ${idx + 1}`}</div>
+                <div className={styles.cativeiroNome}>{cativeiro.nome || `Cativeiro ${idx + 1}`}</div>
                 <div className={styles.cativeiroCultivo}>{
                   (typeof cativeiro.id_tipo_camarao === 'object' && cativeiro.id_tipo_camarao?.nome)
                     ? cativeiro.id_tipo_camarao.nome
