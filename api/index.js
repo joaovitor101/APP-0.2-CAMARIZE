@@ -29,10 +29,13 @@ app.use(cors({
     "http://localhost:3000", 
     "http://localhost:3001",
     "https://*.vercel.app",
-    "https://*.vercel.app/*"
+    "https://*.vercel.app/*",
+    "https://frontend-kappa-liard-17.vercel.app",
+    "https://camarize.vercel.app"
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-  credentials: true
+  credentials: true,
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
 }));
 
 // 🧠 Esses dois devem vir ANTES das rotas
