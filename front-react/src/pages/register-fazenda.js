@@ -26,7 +26,8 @@ export default function RegisterFazendaPage() {
       return;
     }
     try {
-      const response = await fetch("http://localhost:4000/fazendas", {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      const response = await fetch(`${apiUrl}/fazendas`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

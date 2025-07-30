@@ -21,7 +21,8 @@ const RegisterContent = () => {
     setError("");
     if (!name || !email || !password) return;
     try {
-      const response = await fetch("http://localhost:4000/users/register", {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      const response = await fetch(`${apiUrl}/users/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -33,7 +34,7 @@ const RegisterContent = () => {
       });
       if (response.ok) {
         // Login automático após cadastro
-        const loginRes = await fetch("http://localhost:4000/users/auth", {
+        const loginRes = await fetch(`${apiUrl}/users/auth`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, senha: password })
@@ -44,7 +45,7 @@ const RegisterContent = () => {
           // Buscar o usuário pelo id do token
           const decoded = JSON.parse(atob(loginData.token.split('.')[1]));
           const userId = decoded.id;
-          const userRes = await fetch(`http://localhost:4000/users/${userId}`);
+          const userRes = await fetch(`${apiUrl}/users/${userId}`);
           const usuario = await userRes.json();
           localStorage.setItem("usuarioCamarize", JSON.stringify(usuario));
           // Redireciona para cadastro de fazenda
