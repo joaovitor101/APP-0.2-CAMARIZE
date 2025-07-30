@@ -21,6 +21,6 @@
     }
   ],
   "env": {
-    "MONGO_URL": "@mongo_url"
+    "MONGO_URL": "mongodb+srv://joaokusaka27:Oi2cWcwnYEzBXL7X@joaocluster.t5exvmz.mongodb.net/camarize?retryWrites=true&w=majority"
   }
 } 
