@@ -3,6 +3,8 @@ import TiposCamarao from "../models/Camaroes.js";
 import CondicoesIdeais from "../models/Condicoes_ideais.js";
 import FazendasxCativeiros from "../models/FazendasxCativeiros.js";
 import SensoresxCativeiros from "../models/SensoresxCativeiros.js";
+import Cativeiros from "../models/Cativeiros.js";
+import ParametrosAtuais from "../models/Parametros_atuais.js";
 
 const createCativeiro = async (req, res) => {
   try {
@@ -11,12 +13,24 @@ const createCativeiro = async (req, res) => {
       data.foto_cativeiro = req.file.buffer;
     }
     
-    // Cria a condição ideal usando os campos de monitoramento diário
+    // Valida e converte os valores das condições ideais
+    const validarEConverter = (valor, padrao) => {
+      if (!valor || valor === '') return padrao;
+      const num = parseFloat(valor);
+      if (isNaN(num)) return padrao;
+      return num;
+    };
+
+    const tempIdeal = validarEConverter(data.temp_media_diaria, 26);
+    const phIdeal = validarEConverter(data.ph_medio_diario, 7.5);
+    const amoniaIdeal = validarEConverter(data.amonia_media_diaria, 0.05);
+
+    // Cria a condição ideal usando os valores validados
     const condicao = await CondicoesIdeais.create({
       id_tipo_camarao: data.id_tipo_camarao,
-      temp_ideal: data.temp_media_diaria,
-      ph_ideal: data.ph_medio_diario,
-      amonia_ideal: data.amonia_media_diaria
+      temp_ideal: tempIdeal,
+      ph_ideal: phIdeal,
+      amonia_ideal: amoniaIdeal
     });
     data.condicoes_ideais = condicao._id;
     
@@ -166,11 +180,23 @@ const updateCativeiro = async (req, res) => {
 
     // Se houver mudança no tipo de camarão, atualizar as condições ideais
     if (data.id_tipo_camarao) {
+      // Valida e converte os valores das condições ideais
+      const validarEConverter = (valor, padrao) => {
+        if (!valor || valor === '') return padrao;
+        const num = parseFloat(valor);
+        if (isNaN(num)) return padrao;
+        return num;
+      };
+
+      const tempIdeal = validarEConverter(data.temp_media_diaria, 26);
+      const phIdeal = validarEConverter(data.ph_medio_diario, 7.5);
+      const amoniaIdeal = validarEConverter(data.amonia_media_diaria, 0.05);
+
       const condicao = await CondicoesIdeais.create({
         id_tipo_camarao: data.id_tipo_camarao,
-        temp_ideal: data.temp_media_diaria,
-        ph_ideal: data.ph_medio_diario,
-        amonia_ideal: data.amonia_media_diaria
+        temp_ideal: tempIdeal,
+        ph_ideal: phIdeal,
+        amonia_ideal: amoniaIdeal
       });
       data.condicoes_ideais = condicao._id;
       // Remove os campos de monitoramento diário
@@ -296,4 +322,202 @@ const getSensoresCativeiro = async (req, res) => {
   }
 };
 
-export default { createCativeiro, getAllCativeiros, getAllTiposCamarao, getCativeiroById, updateCativeiro, deleteCativeiro, getAllCondicoesIdeais, getSensoresCativeiro }; 
+// Buscar status geral de todos os cativeiros do usuário
+const getCativeirosStatus = async (req, res) => {
+  try {
+    const usuarioId = req.loggedUser?.id;
+    
+    // Busca todos os cativeiros do usuário usando o service
+    const cativeiros = await cativeiroService.getAllByUsuarioViaRelacionamentos(usuarioId);
+    
+    const cativeirosComStatus = [];
+    let totalCativeiros = 0;
+    let cativeirosOk = 0;
+    let cativeirosAlerta = 0;
+    let cativeirosCritico = 0;
+    let cativeirosSemDados = 0;
+
+    for (const cativeiro of cativeiros) {
+      totalCativeiros++;
+      
+      // Busca o parâmetro atual mais recente para este cativeiro
+      const parametroAtual = await ParametrosAtuais.findOne({ 
+        id_cativeiro: cativeiro._id 
+      }).sort({ datahora: -1 });
+      
+      if (!parametroAtual || !cativeiro.condicoes_ideais) {
+        cativeirosComStatus.push({
+          id: cativeiro._id,
+          nome: cativeiro.nome || `Cativeiro ${cativeiro._id}`,
+          tipo_camarao: cativeiro.id_tipo_camarao?.nome || 'Tipo não informado',
+          status: 'sem_dados',
+          statusText: 'Sem dados',
+          statusColor: '#9ca3af',
+          alertas: [],
+          alertasDetalhados: [],
+          totalAlertas: 0
+        });
+        cativeirosSemDados++;
+        continue;
+      }
+      
+      const condicaoIdeal = cativeiro.condicoes_ideais;
+      
+      // Tolerâncias mais realistas por parâmetro (mesmas das notificações)
+      const toleranciaTemp = 0.15; // 15% para temperatura
+      const toleranciaPh = 0.2;    // 20% para pH
+      const toleranciaAmonia = 0.25; // 25% para amônia
+      
+             let alertas = [];
+       const alertasDetalhados = [];
+      let status = 'ok';
+      let statusText = 'OK';
+      let statusColor = '#10b981';
+      
+      // Verifica temperatura (mesma lógica das notificações)
+      if (condicaoIdeal.temp_ideal) {
+        const diffTemp = Math.abs(parametroAtual.temp_atual - condicaoIdeal.temp_ideal);
+        const toleranciaTempValor = condicaoIdeal.temp_ideal * toleranciaTemp;
+        
+        if (diffTemp > toleranciaTempValor) {
+          const severidade = diffTemp > toleranciaTempValor * 2 ? 'alta' : 'media';
+          const tipo = parametroAtual.temp_atual > condicaoIdeal.temp_ideal ? 'aumento' : 'diminuição';
+          
+          alertas.push(severidade);
+          
+          alertasDetalhados.push({
+            tipo: 'temperatura',
+            severidade,
+            mensagem: `Temperatura com ${tipo}! Atual: ${parametroAtual.temp_atual}°C, Ideal: ${condicaoIdeal.temp_ideal}°C`,
+            valorAtual: parametroAtual.temp_atual,
+            valorIdeal: condicaoIdeal.temp_ideal,
+            diferenca: diffTemp,
+            datahora: parametroAtual.datahora
+          });
+          
+          if (severidade === 'alta') {
+            status = 'critico';
+            statusText = 'CRÍTICO';
+            statusColor = '#ef4444';
+          } else if (status !== 'critico') {
+            status = 'alerta';
+            statusText = 'ALERTA';
+            statusColor = '#f59e0b';
+          }
+        }
+      }
+      
+      // Verifica pH (mesma lógica das notificações)
+      if (condicaoIdeal.ph_ideal) {
+        const diffPh = Math.abs(parametroAtual.ph_atual - condicaoIdeal.ph_ideal);
+        const toleranciaPhValor = condicaoIdeal.ph_ideal * toleranciaPh;
+        
+        if (diffPh > toleranciaPhValor) {
+          const severidade = diffPh > toleranciaPhValor * 2 ? 'alta' : 'media';
+          const tipo = parametroAtual.ph_atual > condicaoIdeal.ph_ideal ? 'aumento' : 'diminuição';
+          
+          alertas.push(severidade);
+          
+          alertasDetalhados.push({
+            tipo: 'ph',
+            severidade,
+            mensagem: `pH com ${tipo}! Atual: ${parametroAtual.ph_atual}, Ideal: ${condicaoIdeal.ph_ideal}`,
+            valorAtual: parametroAtual.ph_atual,
+            valorIdeal: condicaoIdeal.ph_ideal,
+            diferenca: diffPh,
+            datahora: parametroAtual.datahora
+          });
+          
+          if (severidade === 'alta') {
+            status = 'critico';
+            statusText = 'CRÍTICO';
+            statusColor = '#ef4444';
+          } else if (status !== 'critico') {
+            status = 'alerta';
+            statusText = 'ALERTA';
+            statusColor = '#f59e0b';
+          }
+        }
+      }
+      
+      // Verifica amônia (mesma lógica das notificações)
+      if (condicaoIdeal.amonia_ideal) {
+        const diffAmonia = Math.abs(parametroAtual.amonia_atual - condicaoIdeal.amonia_ideal);
+        const toleranciaAmoniaValor = condicaoIdeal.amonia_ideal * toleranciaAmonia;
+        
+        if (diffAmonia > toleranciaAmoniaValor) {
+          const severidade = diffAmonia > toleranciaAmoniaValor * 2 ? 'alta' : 'media';
+          const tipo = parametroAtual.amonia_atual > condicaoIdeal.amonia_ideal ? 'aumento' : 'diminuição';
+          
+          alertas.push(severidade);
+          
+          alertasDetalhados.push({
+            tipo: 'amonia',
+            severidade,
+            mensagem: `Amônia com ${tipo}! Atual: ${parametroAtual.amonia_atual}mg/L, Ideal: ${condicaoIdeal.amonia_ideal}mg/L`,
+            valorAtual: parametroAtual.amonia_atual,
+            valorIdeal: condicaoIdeal.amonia_ideal,
+            diferenca: diffAmonia,
+            datahora: parametroAtual.datahora
+          });
+          
+          if (severidade === 'alta') {
+            status = 'critico';
+            statusText = 'CRÍTICO';
+            statusColor = '#ef4444';
+          } else if (status !== 'critico') {
+            status = 'alerta';
+            statusText = 'ALERTA';
+            statusColor = '#f59e0b';
+          }
+        }
+      }
+      
+      // Remove duplicatas dos alertas
+      alertas = [...new Set(alertas)];
+      
+      // Conta os status
+      if (status === 'ok') {
+        cativeirosOk++;
+      } else if (status === 'alerta') {
+        cativeirosAlerta++;
+      } else if (status === 'critico') {
+        cativeirosCritico++;
+      }
+      
+      cativeirosComStatus.push({
+        id: cativeiro._id,
+        nome: cativeiro.nome || `Cativeiro ${cativeiro._id}`,
+        tipo_camarao: cativeiro.id_tipo_camarao?.nome || 'Tipo não informado',
+        status,
+        statusText,
+        statusColor,
+        alertas,
+        alertasDetalhados,
+        totalAlertas: alertasDetalhados.length,
+        ultimaAtualizacao: parametroAtual.datahora
+      });
+    }
+    
+    res.json({
+      success: true,
+      cativeiros: cativeirosComStatus,
+      resumo: {
+        total: totalCativeiros,
+        ok: cativeirosOk,
+        alerta: cativeirosAlerta,
+        critico: cativeirosCritico,
+        semDados: cativeirosSemDados
+      }
+    });
+    
+  } catch (error) {
+    console.error('Erro ao buscar status dos cativeiros:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Erro interno do servidor' 
+    });
+  }
+};
+
+export default { createCativeiro, getAllCativeiros, getAllTiposCamarao, getCativeiroById, updateCativeiro, deleteCativeiro, getAllCondicoesIdeais, getSensoresCativeiro, getCativeirosStatus }; 

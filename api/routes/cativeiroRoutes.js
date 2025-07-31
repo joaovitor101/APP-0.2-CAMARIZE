@@ -9,6 +9,8 @@ import Auth from '../middleware/Auth.js';
 cativeiroRoutes.post("/cativeiros", Auth.Authorization, upload.single('foto_cativeiro'), cativeiroController.createCativeiro);
 // Endpoint para listar todos os cativeiros
 cativeiroRoutes.get("/cativeiros", Auth.Authorization, cativeiroController.getAllCativeiros);
+// Endpoint para buscar status geral dos cativeiros
+cativeiroRoutes.get("/cativeiros-status", Auth.Authorization, cativeiroController.getCativeirosStatus);
 cativeiroRoutes.get("/cativeiros/:id", cativeiroController.getCativeiroById);
 cativeiroRoutes.get("/cativeiros/:cativeiroId/sensores", cativeiroController.getSensoresCativeiro);
 cativeiroRoutes.get("/tipos-camarao", cativeiroController.getAllTiposCamarao);

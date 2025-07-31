@@ -59,6 +59,8 @@
   height: 28px;
 }
 
+
+
 .cativeiroList {
   display: flex;
   flex-direction: column;
@@ -90,6 +92,7 @@
 .cativeiroInfo {
   display: flex;
   flex-direction: column;
+  flex: 1;
 }
 
 .cativeiroNome {
@@ -101,6 +104,8 @@
   font-size: 1rem;
   color: #888;
 }
+
+
 
 .cativeiroActions {
   display: flex;
@@ -171,4 +176,6 @@
     padding-left: 16px;
     padding-right: 16px;
   }
+  
+
 }

@@ -15,6 +15,7 @@ import usuariosxFazendasRoutes from './routes/usuariosxFazendasRoutes.js';
 import sensoresxCativeirosRoutes from './routes/sensoresxCativeirosRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import testRoutes from './routes/testRoutes.js';
+import parametrosRoutes from './routes/parametrosRoutes.js';
 
 // Carrega todos os modelos para garantir que as coleções sejam criadas
 import './models/SensoresxCativeiros.js';
@@ -58,6 +59,7 @@ app.use('/usuariosxfazendas', usuariosxFazendasRoutes);
 app.use('/sensoresxcativeiros', sensoresxCativeirosRoutes);
 app.use('/notifications', notificationRoutes);
 app.use('/test', testRoutes);
+app.use('/parametros', parametrosRoutes);
 // ✅ Conecta ao MongoDB Atlas
 const mongoUrl = process.env.MONGO_URL || "mongodb://localhost:27017/camarize";
 
@@ -66,14 +68,27 @@ const mongooseOptions = {
   maxPoolSize: 10, // Máximo de conexões no pool
   serverSelectionTimeoutMS: 5000, // Timeout para seleção do servidor
   socketTimeoutMS: 45000, // Timeout para operações de socket
-  bufferCommands: false, // Desabilita o buffer de comandos
+  bufferCommands: true, // Habilita o buffer de comandos para evitar erros de conexão
 };
 
+// Função para iniciar o servidor após a conexão com o MongoDB
+const startServer = () => {
+  const port = 4000;
+  app.listen(port, '0.0.0.0', () => {
+    console.log(`🚀 API rodando em http://localhost:${port}.`);
+    console.log('✅ Servidor pronto para receber requisições!');
+  });
+};
+
+// Conecta ao MongoDB e inicia o servidor
 mongoose.connect(mongoUrl, mongooseOptions)
 .then(() => {
   console.log("✅ MongoDB Atlas conectado com sucesso!");
   console.log(`📊 Database: ${mongoose.connection.name}`);
   console.log(`🌐 Host: ${mongoose.connection.host}`);
+  
+  // Inicia o servidor apenas após a conexão estar estabelecida
+  startServer();
 })
 .catch(err => {
   console.error("❌ Erro na conexão com MongoDB Atlas:", err.message);
@@ -92,9 +107,4 @@ mongoose.connection.on('disconnected', () => {
 
 mongoose.connection.on('reconnected', () => {
   console.log('🔄 MongoDB reconectado');
-});
-
-const port = 4000;
-app.listen(port, '0.0.0.0', () => {
-  console.log(`API rodando em http://localhost:${port}.`);
 });

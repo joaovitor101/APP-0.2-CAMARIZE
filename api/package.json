@@ -21,7 +21,9 @@
         "add-custom-parametros": "node tests/add-custom-parametros.js",
         "view-parametros": "node tests/view-parametros.js",
         "test-notifications": "node tests/test-notifications.js",
-        "quick-test": "node tests/quick-test.js"
+        "quick-test": "node tests/quick-test.js",
+        "populate-parametros": "node tests/populate-parametros-atuais.js",
+        "test-dashboard": "node tests/test-dashboard-endpoint.js"
   },
   "keywords": [],
   "author": "",

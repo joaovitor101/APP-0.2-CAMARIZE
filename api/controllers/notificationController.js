@@ -24,15 +24,17 @@ const generateNotifications = async () => {
       
       const condicaoIdeal = cativeiro.condicoes_ideais;
       
-      // Define margens de tolerância (em porcentagem)
-      const tolerancia = 0.1; // 10%
+      // Tolerâncias mais realistas por parâmetro
+      const toleranciaTemp = 0.15; // 15% para temperatura
+      const toleranciaPh = 0.2;    // 20% para pH
+      const toleranciaAmonia = 0.25; // 25% para amônia
       
       // Compara temperatura
       if (condicaoIdeal.temp_ideal) {
         const diffTemp = Math.abs(parametroAtual.temp_atual - condicaoIdeal.temp_ideal);
-        const toleranciaTemp = condicaoIdeal.temp_ideal * tolerancia;
+        const toleranciaTempValor = condicaoIdeal.temp_ideal * toleranciaTemp;
         
-        if (diffTemp > toleranciaTemp) {
+        if (diffTemp > toleranciaTempValor) {
           const tipo = parametroAtual.temp_atual > condicaoIdeal.temp_ideal ? 'aumento' : 'diminuição';
           notifications.push({
             id: `temp_${cativeiro._id}_${parametroAtual._id}`,
@@ -44,7 +46,7 @@ const generateNotifications = async () => {
             diferenca: diffTemp,
             mensagem: `Temperatura com ${tipo}! Atual: ${parametroAtual.temp_atual}°C, Ideal: ${condicaoIdeal.temp_ideal}°C`,
             datahora: parametroAtual.datahora,
-            severidade: diffTemp > toleranciaTemp * 2 ? 'alta' : 'media'
+            severidade: diffTemp > toleranciaTempValor * 2 ? 'alta' : 'media'
           });
         }
       }
@@ -52,9 +54,9 @@ const generateNotifications = async () => {
       // Compara pH
       if (condicaoIdeal.ph_ideal) {
         const diffPh = Math.abs(parametroAtual.ph_atual - condicaoIdeal.ph_ideal);
-        const toleranciaPh = condicaoIdeal.ph_ideal * tolerancia;
+        const toleranciaPhValor = condicaoIdeal.ph_ideal * toleranciaPh;
         
-        if (diffPh > toleranciaPh) {
+        if (diffPh > toleranciaPhValor) {
           const tipo = parametroAtual.ph_atual > condicaoIdeal.ph_ideal ? 'aumento' : 'diminuição';
           notifications.push({
             id: `ph_${cativeiro._id}_${parametroAtual._id}`,
@@ -66,7 +68,7 @@ const generateNotifications = async () => {
             diferenca: diffPh,
             mensagem: `pH com ${tipo}! Atual: ${parametroAtual.ph_atual}, Ideal: ${condicaoIdeal.ph_ideal}`,
             datahora: parametroAtual.datahora,
-            severidade: diffPh > toleranciaPh * 2 ? 'alta' : 'media'
+            severidade: diffPh > toleranciaPhValor * 2 ? 'alta' : 'media'
           });
         }
       }
@@ -74,9 +76,9 @@ const generateNotifications = async () => {
       // Compara amônia
       if (condicaoIdeal.amonia_ideal) {
         const diffAmonia = Math.abs(parametroAtual.amonia_atual - condicaoIdeal.amonia_ideal);
-        const toleranciaAmonia = condicaoIdeal.amonia_ideal * tolerancia;
+        const toleranciaAmoniaValor = condicaoIdeal.amonia_ideal * toleranciaAmonia;
         
-        if (diffAmonia > toleranciaAmonia) {
+        if (diffAmonia > toleranciaAmoniaValor) {
           const tipo = parametroAtual.amonia_atual > condicaoIdeal.amonia_ideal ? 'aumento' : 'diminuição';
           notifications.push({
             id: `amonia_${cativeiro._id}_${parametroAtual._id}`,
@@ -88,7 +90,7 @@ const generateNotifications = async () => {
             diferenca: diffAmonia,
             mensagem: `Nível de amônia com ${tipo}! Atual: ${parametroAtual.amonia_atual}mg/L, Ideal: ${condicaoIdeal.amonia_ideal}mg/L`,
             datahora: parametroAtual.datahora,
-            severidade: diffAmonia > toleranciaAmonia * 2 ? 'alta' : 'media'
+            severidade: diffAmonia > toleranciaAmoniaValor * 2 ? 'alta' : 'media'
           });
         }
       }

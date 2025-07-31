@@ -4,6 +4,12 @@ Esta pasta contém todos os arquivos de teste e debug da API.
 
 ## 📁 Arquivos de Teste
 
+### 🌊 Scripts para Popular Dados
+- **`populate-specific-cativeiros.js`** - Popular dados para cativeiros específicos
+- **`populate-alert-data.js`** - Gerar dados que produzem alertas críticos
+- **`clear-mock-parametros.js`** - Limpar dados de parâmetros existentes
+- **`README-POPULAR-DADOS.md`** - Documentação completa dos scripts de dados
+
 ### 🔧 Testes de Funcionalidade
 - **`test-sensor-cativeiro.js`** - Guia para testar relacionamento sensor-cativeiro
 - **`test-multiple-sensors.js`** - Teste de múltiplos sensores
@@ -46,6 +52,11 @@ npm run quick-test
 
 ### Via Node diretamente
 ```bash
+# Scripts para popular dados
+node tests/populate-specific-cativeiros.js
+node tests/populate-alert-data.js
+node tests/clear-mock-parametros.js
+
 # Teste específico
 node tests/test-sensor-cativeiro.js
 node tests/debug-sensor-cativeiro.js
@@ -58,19 +69,25 @@ node tests/quick-test.js
 
 ## 📊 Tipos de Teste
 
-### 1. **Testes de Funcionalidade**
+### 1. **Scripts para Popular Dados**
+Geram dados realistas para testes:
+- Dados de parâmetros atuais
+- Dados históricos
+- Dados que geram alertas críticos/alerta
+
+### 2. **Testes de Funcionalidade**
 Testam se as funcionalidades principais estão funcionando:
 - Criação de relacionamentos sensor-cativeiro
 - Múltiplos sensores por cativeiro
 - Edição e remoção de relacionamentos
 
-### 2. **Testes de Debug**
+### 3. **Testes de Debug**
 Diagnosticam problemas no sistema:
 - Conexão com MongoDB
 - Status dos endpoints da API
 - Verificação de coleções e documentos
 
-### 3. **Testes Manuais**
+### 4. **Testes Manuais**
 Guias para testar via interface ou ferramentas externas:
 - Postman/Insomnia
 - Frontend da aplicação
