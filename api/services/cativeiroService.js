@@ -99,8 +99,10 @@ class cativeiroService {
       // Buscar cativeiros dessas fazendas
       const rels = await FazendasxCativeiros.find({ fazenda: { $in: fazendaIds } }, 'cativeiro');
       const cativeiroIds = rels.map(r => r.cativeiro);
-      // Buscar dados completos dos cativeiros, populando tipo de camarão
-      return await Cativeiros.find({ _id: { $in: cativeiroIds } }).populate('id_tipo_camarao');
+      // Buscar dados completos dos cativeiros, populando tipo de camarão e condições ideais
+      return await Cativeiros.find({ _id: { $in: cativeiroIds } })
+        .populate('id_tipo_camarao')
+        .populate('condicoes_ideais');
     } catch (error) {
       console.log(error);
       return [];

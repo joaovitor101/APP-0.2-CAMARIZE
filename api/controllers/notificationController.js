@@ -3,14 +3,22 @@ import CondicoesIdeais from "../models/Condicoes_ideais.js";
 import Cativeiros from "../models/Cativeiros.js";
 
 // Função para gerar notificações baseadas na comparação de dados
-const generateNotifications = async () => {
+const generateNotifications = async (usuarioId = null) => {
   try {
     const notifications = [];
     
-    // Busca todos os cativeiros com seus parâmetros atuais e condições ideais
-    const cativeiros = await Cativeiros.find()
-      .populate('condicoes_ideais')
-      .populate('id_tipo_camarao');
+    let cativeiros;
+    
+    if (usuarioId) {
+      // Se um usuário foi especificado, busca apenas os cativeiros do usuário
+      const cativeiroService = (await import('../services/cativeiroService.js')).default;
+      cativeiros = await cativeiroService.getAllByUsuarioViaRelacionamentos(usuarioId);
+    } else {
+      // Se não, busca todos os cativeiros (comportamento original)
+      cativeiros = await Cativeiros.find()
+        .populate('condicoes_ideais')
+        .populate('id_tipo_camarao');
+    }
     
     for (const cativeiro of cativeiros) {
       // Busca o parâmetro atual mais recente para este cativeiro
@@ -109,7 +117,8 @@ const generateNotifications = async () => {
 // Controller para buscar notificações
 const getNotifications = async (req, res) => {
   try {
-    const notifications = await generateNotifications();
+    const usuarioId = req.loggedUser?.id;
+    const notifications = await generateNotifications(usuarioId);
     
     res.status(200).json({
       success: true,
@@ -129,8 +138,9 @@ const getNotifications = async (req, res) => {
 const getNotificationsByCativeiro = async (req, res) => {
   try {
     const { cativeiroId } = req.params;
+    const usuarioId = req.loggedUser?.id;
     
-    const notifications = await generateNotifications();
+    const notifications = await generateNotifications(usuarioId);
     const filteredNotifications = notifications.filter(
       notification => notification.cativeiro.toString() === cativeiroId
     );

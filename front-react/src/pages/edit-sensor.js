@@ -202,7 +202,7 @@ export default function EditSensorPage() {
             fontWeight: 600,
             fontSize: '1.08rem',
             background: 'linear-gradient(90deg, #ffb6b6 0%, #7ecbff 100%)',
-            color: '#fff',
+            color: '#000',
             marginBottom: 16,
             opacity: loading ? 0.7 : 1,
             cursor: loading ? 'not-allowed' : 'pointer',

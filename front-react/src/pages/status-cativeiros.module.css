@@ -48,8 +48,12 @@
 .summary {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
   gap: 12px;
   margin-bottom: 32px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .summaryItem {
@@ -327,19 +331,21 @@
   
   .summary {
     grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
     gap: 8px;
+    max-width: 100%;
   }
   
   .summaryItem {
-    padding: 16px 12px;
+    padding: 12px 8px;
   }
   
   .summaryNumber {
-    font-size: 24px;
+    font-size: 20px;
   }
   
   .summaryLabel {
-    font-size: 12px;
+    font-size: 11px;
   }
   
   .sectionTitle {
@@ -372,7 +378,9 @@
 
 @media (max-width: 480px) {
   .summary {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 6px;
   }
   
   .header {

@@ -35,6 +35,14 @@
   background-color: rgba(0, 0, 0, 0.05);
 }
 
+.activeButton {
+  background-color: rgba(59, 130, 246, 0.1) !important;
+}
+
+.activeButton:hover {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+}
+
 .filterButton {
   position: relative;
 }

@@ -10,7 +10,7 @@ function arrayBufferToBase64(buffer) {
   return window.btoa(binary);
 }
 
-export default function SensorList({ sensores = [], onEdit, onDelete }) {
+export default function SensorList({ sensores = [], onEdit, onDelete, useOriginalIndex = false, originalSensores = [] }) {
   return (
     <div className={styles.container}>
       {sensores.length === 0 ? (
@@ -37,7 +37,11 @@ export default function SensorList({ sensores = [], onEdit, onDelete }) {
                   <span style={{ color: '#888', fontSize: '0.98rem', fontWeight: 500 }}>|</span>
                   <span className={styles.apelido}>{sensor.apelido || '-'}</span>
                 </div>
-                <div className={styles.numero}>{`#${String(idx + 1).padStart(3, '0')}`}</div>
+                <div className={styles.numero}>
+                  {`#${String(useOriginalIndex && originalSensores.length > 0 
+                    ? originalSensores.findIndex(s => s._id === sensor._id) + 1 
+                    : idx + 1).padStart(3, '0')}`}
+                </div>
               </div>
               <div className={styles.actions}>
                 <button 

@@ -221,7 +221,9 @@ export default function CreateContent() {
           <input
             className={styles.input}
             placeholder="Temperatura"
-            type="text"
+            type="number"
+            step="0.1"
+            min="0"
             value={tempMedia}
             onChange={e => setTempMedia(e.target.value)}
             aria-label="Temperatura média"
@@ -229,7 +231,10 @@ export default function CreateContent() {
           <input
             className={styles.input}
             placeholder="pH"
-            type="text"
+            type="number"
+            step="0.1"
+            min="0"
+            max="14"
             value={phMedio}
             onChange={e => setPhMedio(e.target.value)}
             aria-label="pH médio"
@@ -237,7 +242,9 @@ export default function CreateContent() {
           <input
             className={styles.input}
             placeholder="Amônia"
-            type="text"
+            type="number"
+            step="0.01"
+            min="0"
             value={amoniaMedia}
             onChange={e => setAmoniaMedia(e.target.value)}
             aria-label="Amônia média"

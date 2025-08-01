@@ -18,6 +18,7 @@ export default function SensoresPage() {
   const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
   const [filtroAtivo, setFiltroAtivo] = useState('');
   const [showFiltroModal, setShowFiltroModal] = useState(false);
+  const [ordenacaoAtiva, setOrdenacaoAtiva] = useState(false);
   const router = useRouter();
 
   const showNotification = (message, type = 'success') => {
@@ -26,6 +27,79 @@ export default function SensoresPage() {
 
   const hideNotification = () => {
     setNotification({ show: false, message: '', type: 'success' });
+  };
+
+  // Função para extrair o número do código do sensor
+  const extrairNumeroCodigo = (codigo) => {
+    const match = codigo.match(/#(\d+)/);
+    return match ? parseInt(match[1], 10) : 0;
+  };
+
+  // Função de merge sort para ordenar sensores por código decrescente
+  const mergeSort = (array) => {
+    if (array.length <= 1) {
+      return array;
+    }
+
+    const meio = Math.floor(array.length / 2);
+    const esquerda = mergeSort(array.slice(0, meio));
+    const direita = mergeSort(array.slice(meio));
+
+    return merge(esquerda, direita);
+  };
+
+  const merge = (esquerda, direita) => {
+    const resultado = [];
+    let i = 0;
+    let j = 0;
+
+    while (i < esquerda.length && j < direita.length) {
+      // Usar o índice original na lista completa para determinar o código
+      const indexEsquerda = sensores.findIndex(s => s._id === esquerda[i]._id);
+      const indexDireita = sensores.findIndex(s => s._id === direita[j]._id);
+      
+      const numEsquerda = indexEsquerda + 1; // +1 porque os códigos começam em #001
+      const numDireita = indexDireita + 1;
+      
+      // Ordenação decrescente (maior para menor)
+      if (numEsquerda >= numDireita) {
+        resultado.push(esquerda[i]);
+        i++;
+      } else {
+        resultado.push(direita[j]);
+        j++;
+      }
+    }
+
+    // Adicionar elementos restantes
+    while (i < esquerda.length) {
+      resultado.push(esquerda[i]);
+      i++;
+    }
+    while (j < direita.length) {
+      resultado.push(direita[j]);
+      j++;
+    }
+
+    return resultado;
+  };
+
+  const handleOrdenar = () => {
+    if (ordenacaoAtiva) {
+      // Se já está ordenado, voltar à ordem original
+      const sensoresOriginais = sensores.filter(sensor => 
+        filtroAtivo === '' || 
+        sensor.id_tipo_sensor?.toLowerCase().includes(filtroAtivo.toLowerCase()) ||
+        sensor.apelido?.toLowerCase().includes(filtroAtivo.toLowerCase())
+      );
+      setSensoresFiltrados(sensoresOriginais);
+      setOrdenacaoAtiva(false);
+    } else {
+      // Aplicar merge sort
+      const ordenados = mergeSort([...sensoresFiltrados]);
+      setSensoresFiltrados(ordenados);
+      setOrdenacaoAtiva(true);
+    }
   };
 
   // Aplicar filtro quando sensores ou filtroAtivo mudarem
@@ -39,6 +113,8 @@ export default function SensoresPage() {
       );
       setSensoresFiltrados(filtrados);
     }
+    // Resetar ordenação quando filtro mudar
+    setOrdenacaoAtiva(false);
   }, [sensores, filtroAtivo]);
 
   useEffect(() => {
@@ -185,8 +261,14 @@ export default function SensoresPage() {
           <span className={styles.headerTitle}>Sensores</span>
           <div style={{ flex: 1 }} />
           <div className={styles.headerActions}>
-            <button className={styles.headerButton} title="Ordenar">
-              <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M3 18h6M3 6h18M3 12h12" stroke="#222" strokeWidth="2" strokeLinecap="round"/></svg>
+            <button 
+              className={`${styles.headerButton} ${ordenacaoAtiva ? styles.activeButton : ''}`} 
+              title={ordenacaoAtiva ? "Desordenar" : "Ordenar por código decrescente"}
+              onClick={handleOrdenar}
+            >
+              <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+                <path d="M3 18h6M3 6h18M3 12h12" stroke={ordenacaoAtiva ? "#3b82f6" : "#222"} strokeWidth="2" strokeLinecap="round"/>
+              </svg>
             </button>
             <button 
               className={`${styles.headerButton} ${styles.filterButton}`}
@@ -212,6 +294,8 @@ export default function SensoresPage() {
             sensores={sensoresFiltrados} 
             onEdit={handleEditSensor}
             onDelete={handleDeleteSensor}
+            useOriginalIndex={ordenacaoAtiva}
+            originalSensores={sensores}
           />
         </div>
       </div>

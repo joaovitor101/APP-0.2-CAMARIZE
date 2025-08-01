@@ -128,7 +128,7 @@ const RegisterContent = () => {
           type="submit"
           className={styles.loginButton}
           disabled={!isFormValid}
-          style={{ background: "linear-gradient(90deg, #f7b0b7 0%, #a3c7f7 100%)", color: "#fff" }}
+          style={{ background: "linear-gradient(90deg, #f7b0b7 0%, #a3c7f7 100%)", color: "#000" }}
         >
           Prosseguir
         </button>

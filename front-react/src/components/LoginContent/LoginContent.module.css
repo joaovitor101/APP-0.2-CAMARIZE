@@ -84,9 +84,9 @@
   border: none;
   border-radius: 8px;
   background: linear-gradient(90deg, #f7b0b7 0%, #a3c7f7 100%);
-  color: #fff;
+  color: #000;
   font-size: 1.05rem;
-  font-weight: 600;
+  font-weight: 700;
   margin-bottom: 16px;
   cursor: pointer;
   transition: opacity 0.2s;
