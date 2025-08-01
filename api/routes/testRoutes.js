@@ -5,6 +5,15 @@ import Cativeiros from "../models/Cativeiros.js";
 
 const router = express.Router();
 
+// Rota de teste simples
+router.get("/", (req, res) => {
+  res.json({ 
+    message: "✅ API funcionando!",
+    timestamp: new Date().toISOString(),
+    status: "online"
+  });
+});
+
 // Teste para criar relação manualmente
 router.post("/test-relacao", async (req, res) => {
   try {
