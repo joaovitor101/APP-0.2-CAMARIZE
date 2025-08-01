@@ -7,6 +7,6 @@
     }
   ],
   "env": {
-    "NEXT_PUBLIC_API_URL": "https://camarize-api.vercel.app"
+    "NEXT_PUBLIC_API_URL": "https://api-camarize-n9yru9s7t-joao-kusakas-projects.vercel.app"
   }
 } 
