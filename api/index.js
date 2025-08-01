@@ -28,7 +28,8 @@ const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:3001",
   "https://frontend-kappa-liard-17.vercel.app",
-  "https://camarize.vercel.app"
+  "https://camarize.vercel.app",
+  "https://front-react-k935om7gr-joao-kusakas-projects.vercel.app"
 ];
 
 app.use(cors({
