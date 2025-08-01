@@ -23,10 +23,11 @@ import './models/FazendasxCativeiros.js';
 import './models/UsuariosxFazendas.js';
 
 const app = express();
-
+const allowedOrigins = ['https://front-react-sigma.vercel.app']; // Adicione seu domínio do frontend aqui
 // 🧠 Habilita CORS ANTES de tudo
 app.use(cors({
   origin: [
+    "https://front-react-sigma.vercel.app",
     "http://localhost:3000", 
     "http://localhost:3001",
     "https://*.vercel.app",
