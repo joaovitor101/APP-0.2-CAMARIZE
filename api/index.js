@@ -72,30 +72,23 @@ const mongooseOptions = {
   bufferCommands: true, // Habilita o buffer de comandos para evitar erros de conexão
 };
 
-// Função para iniciar o servidor após a conexão com o MongoDB
-const startServer = () => {
-  const port = 4000;
-  app.listen(port, '0.0.0.0', () => {
-    console.log(`🚀 API rodando em http://localhost:${port}.`);
-    console.log('✅ Servidor pronto para receber requisições!');
-  });
-};
-
-// Conecta ao MongoDB e inicia o servidor
+// Conecta ao MongoDB
 mongoose.connect(mongoUrl, mongooseOptions)
 .then(() => {
   console.log("✅ MongoDB Atlas conectado com sucesso!");
   console.log(`📊 Database: ${mongoose.connection.name}`);
   console.log(`🌐 Host: ${mongoose.connection.host}`);
-  
-  // Inicia o servidor apenas após a conexão estar estabelecida
-  startServer();
 })
 .catch(err => {
   console.error("❌ Erro na conexão com MongoDB Atlas:", err.message);
   console.error("🔧 Verifique se a string de conexão está correta no arquivo .env");
-  process.exit(1); // Encerra a aplicação se não conseguir conectar
 });
+
+// Para Vercel (serverless), não usamos app.listen()
+// O Vercel gerencia o servidor automaticamente
+
+// Exporta o app para o Vercel
+export default app;
 
 // Event listeners para monitorar a conexão
 mongoose.connection.on('error', (err) => {
