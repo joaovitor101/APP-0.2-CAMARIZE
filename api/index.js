@@ -23,22 +23,27 @@ import './models/FazendasxCativeiros.js';
 import './models/UsuariosxFazendas.js';
 
 const app = express();
-const allowedOrigins = ['https://front-react-sigma.vercel.app']; // Adicione seu domínio do frontend aqui
-// 🧠 Habilita CORS ANTES de tudo
+const allowedOrigins = [
+  "https://front-react-sigma.vercel.app",
+  "http://localhost:3000",
+  "http://localhost:3001",
+  "https://frontend-kappa-liard-17.vercel.app",
+  "https://camarize.vercel.app"
+];
+
 app.use(cors({
-  origin: [
-    "https://front-react-sigma.vercel.app",
-    "http://localhost:3000", 
-    "http://localhost:3001",
-    "https://*.vercel.app",
-    "https://*.vercel.app/*",
-    "https://frontend-kappa-liard-17.vercel.app",
-    "https://camarize.vercel.app"
-  ],
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
 }));
+
 
 // 🧠 Esses dois devem vir ANTES das rotas
 app.use(express.json({ limit: '10mb'}));
@@ -89,6 +94,15 @@ mongoose.connect(mongoUrl, mongooseOptions)
 
 // Exporta o app para o Vercel
 export default app;
+
+// Para desenvolvimento local, inicia o servidor
+if (process.env.NODE_ENV !== 'production') {
+  const port = process.env.PORT || 4000;
+  app.listen(port, '0.0.0.0', () => {
+    console.log(`🚀 API rodando em http://localhost:${port}.`);
+    console.log('✅ Servidor pronto para receber requisições!');
+  });
+}
 
 // Event listeners para monitorar a conexão
 mongoose.connection.on('error', (err) => {
