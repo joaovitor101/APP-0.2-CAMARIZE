@@ -6,6 +6,7 @@ import Loading from "../Loading";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Notification from "../Notification";
+import Modal from '../Modal';
 
 export default function HomeContent() {
   const router = useRouter();
@@ -272,137 +273,112 @@ export default function HomeContent() {
           </div>
         </div>
       )}
-      {showDeleteModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100vw',
-          height: '100vh',
-          background: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          backdropFilter: 'blur(4px)'
-        }}>
+      {/* Modal de Exclusão */}
+      <Modal 
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setCativeiroToDelete(null);
+        }}
+        title={
           <div style={{
-            background: '#fff',
-            padding: '32px 24px',
-            borderRadius: '16px',
-            minWidth: '320px',
-            maxWidth: '90vw',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
             display: 'flex',
-            flexDirection: 'column',
-            gap: '20px',
             alignItems: 'center',
-            textAlign: 'center',
-            border: '1px solid #e5e7eb'
+            gap: '12px'
           }}>
-            {/* Ícone de aviso */}
             <div style={{
-              width: '64px',
-              height: '64px',
+              width: '40px',
+              height: '40px',
               borderRadius: '50%',
               background: '#fef3c7',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '8px'
+              justifyContent: 'center'
             }}>
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                 <path d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
-            
-            {/* Título */}
-            <div style={{
-              fontWeight: '700',
-              fontSize: '20px',
-              color: '#1f2937',
-              lineHeight: '1.2'
-            }}>
-              Confirmar Exclusão
-            </div>
-            
-            {/* Mensagem */}
-            <p style={{
-              margin: '0',
-              fontSize: '16px',
-              color: '#6b7280',
-              lineHeight: '1.5',
-              maxWidth: '280px'
-            }}>
-              Tem certeza que deseja excluir este cativeiro? Esta ação não pode ser desfeita.
-            </p>
-            
-            {/* Botões */}
-            <div style={{
-              display: 'flex',
-              gap: '12px',
-              width: '100%',
-              marginTop: '8px'
-            }}>
-              <button 
-                onClick={() => {
-                  setShowDeleteModal(false);
-                  setCativeiroToDelete(null);
-                }}
-                style={{
-                  flex: 1,
-                  padding: '12px 20px',
-                  borderRadius: '8px',
-                  border: '1px solid #d1d5db',
-                  background: '#fff',
-                  color: '#374151',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  transition: 'all 0.2s ease',
-                  ':hover': {
-                    background: '#f9fafb',
-                    borderColor: '#9ca3af'
-                  }
-                }}
-                onMouseOver={(e) => {
-                  e.target.style.background = '#f9fafb';
-                  e.target.style.borderColor = '#9ca3af';
-                }}
-                onMouseOut={(e) => {
-                  e.target.style.background = '#fff';
-                  e.target.style.borderColor = '#d1d5db';
-                }}
-              >
-                Cancelar
-              </button>
-              <button 
-                onClick={confirmDelete}
-                style={{
-                  flex: 1,
-                  padding: '12px 20px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  background: '#dc2626',
-                  color: '#fff',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseOver={(e) => {
-                  e.target.style.background = '#b91c1c';
-                }}
-                onMouseOut={(e) => {
-                  e.target.style.background = '#dc2626';
-                }}
-              >
-                Excluir
-              </button>
-            </div>
+            <span>Confirmar Exclusão</span>
           </div>
+        }
+        showCloseButton={false}
+      >
+        {/* Mensagem */}
+        <div style={{
+          textAlign: 'center',
+          marginBottom: '24px'
+        }}>
+          <p style={{
+            margin: '0',
+            fontSize: '16px',
+            color: '#6b7280',
+            lineHeight: '1.5',
+            maxWidth: '280px'
+          }}>
+            Tem certeza que deseja excluir este cativeiro? Esta ação não pode ser desfeita.
+          </p>
         </div>
-      )}
+        
+        {/* Botões */}
+        <div style={{
+          display: 'flex',
+          gap: '12px',
+          width: '100%'
+        }}>
+          <button 
+            onClick={() => {
+              setShowDeleteModal(false);
+              setCativeiroToDelete(null);
+            }}
+            style={{
+              flex: 1,
+              padding: '12px 20px',
+              borderRadius: '8px',
+              border: '1px solid #d1d5db',
+              background: '#fff',
+              color: '#374151',
+              fontWeight: '600',
+              cursor: 'pointer',
+              fontSize: '14px',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.background = '#f9fafb';
+              e.target.style.borderColor = '#9ca3af';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.background = '#fff';
+              e.target.style.borderColor = '#d1d5db';
+            }}
+          >
+            Cancelar
+          </button>
+          <button 
+            onClick={confirmDelete}
+            style={{
+              flex: 1,
+              padding: '12px 20px',
+              borderRadius: '8px',
+              border: 'none',
+              background: '#dc2626',
+              color: '#fff',
+              fontWeight: '600',
+              cursor: 'pointer',
+              fontSize: '14px',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.background = '#b91c1c';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.background = '#dc2626';
+            }}
+          >
+            Excluir
+          </button>
+        </div>
+      </Modal>
       {notification.show && (
         <Notification
           isVisible={notification.show}
@@ -413,310 +389,250 @@ export default function HomeContent() {
       )}
 
       {/* Modal de Informações */}
-      {showInfoModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100vw',
-          height: '100vh',
-          background: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          backdropFilter: 'blur(4px)'
-        }}>
+      <Modal 
+        isOpen={showInfoModal}
+        onClose={() => setShowInfoModal(false)}
+        title={
           <div style={{
-            background: '#fff',
-            padding: '32px 24px',
-            borderRadius: '20px',
-            minWidth: '320px',
-            maxWidth: '90vw',
-            maxHeight: '80vh',
-            overflowY: 'auto',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
             display: 'flex',
-            flexDirection: 'column',
-            gap: '24px',
-            border: '1px solid #e5e7eb'
+            alignItems: 'center',
+            gap: '12px'
           }}>
-            {/* Header da Modal */}
+            <div style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              background: '#dbeafe',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="#3B82F6" strokeWidth="2" fill="none"/>
+                <path d="M12 16V12" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle cx="12" cy="8" r="1" fill="#3B82F6"/>
+              </svg>
+            </div>
+            <span>Sobre o Camarize</span>
+          </div>
+        }
+        showCloseButton={true}
+      >
+        {/* O que é o Camarize */}
+        <div>
+          <h3 style={{
+            margin: '0 0 12px 0',
+            fontSize: '18px',
+            fontWeight: '600',
+            color: '#1f2937'
+          }}>
+            🦐 O que é o Camarize?
+          </h3>
+          <p style={{
+            margin: 0,
+            fontSize: '15px',
+            lineHeight: '1.6',
+            color: '#4b5563'
+          }}>
+            O Camarize é um sistema inteligente de monitoramento para cativeiros de camarão. 
+            Ele ajuda você a acompanhar em tempo real as condições ideais para o cultivo, 
+            garantindo a saúde e produtividade dos seus camarões.
+          </p>
+        </div>
+
+        {/* Por que monitorar */}
+        <div>
+          <h3 style={{
+            margin: '0 0 12px 0',
+            fontSize: '18px',
+            fontWeight: '600',
+            color: '#1f2937'
+          }}>
+            📊 Por que monitorar estes parâmetros?
+          </h3>
+          <p style={{
+            margin: '0 0 16px 0',
+            fontSize: '15px',
+            lineHeight: '1.6',
+            color: '#4b5563'
+          }}>
+            O monitoramento constante destes três parâmetros é essencial para o sucesso 
+            do cultivo de camarões. Qualquer variação pode afetar diretamente a saúde 
+            e o crescimento dos animais.
+          </p>
+        </div>
+
+        {/* Parâmetros */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          
+          {/* Temperatura */}
+          <div style={{
+            padding: '16px',
+            borderRadius: '12px',
+            background: '#fef3c7',
+            border: '1px solid #fde68a'
+          }}>
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'space-between',
-              borderBottom: '1px solid #e5e7eb',
-              paddingBottom: '16px'
+              gap: '8px',
+              marginBottom: '8px'
             }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px'
+              <span style={{ fontSize: '20px' }}>🌡️</span>
+              <h4 style={{
+                margin: 0,
+                fontSize: '16px',
+                fontWeight: '600',
+                color: '#92400e'
               }}>
-                <div style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%',
-                  background: '#dbeafe',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="12" r="10" stroke="#3B82F6" strokeWidth="2" fill="none"/>
-                    <path d="M12 16V12" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <circle cx="12" cy="8" r="1" fill="#3B82F6"/>
-                  </svg>
-                </div>
-                <h2 style={{
-                  margin: 0,
-                  fontSize: '20px',
-                  fontWeight: '700',
-                  color: '#1f2937'
-                }}>
-                  Sobre o Camarize
-                </h2>
-              </div>
-              <button 
-                onClick={() => setShowInfoModal(false)}
-                style={{
-                  padding: '8px',
-                  borderRadius: '50%',
-                  border: 'none',
-                  background: '#f3f4f6',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                  <path d="M18 6L6 18M6 6l12 12" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
+                Temperatura da Água
+              </h4>
             </div>
+            <p style={{
+              margin: 0,
+              fontSize: '14px',
+              lineHeight: '1.5',
+              color: '#92400e'
+            }}>
+              <strong>Por que é importante:</strong> A temperatura afeta diretamente o metabolismo, 
+              crescimento e reprodução dos camarões. Temperaturas inadequadas podem causar 
+              estresse, doenças e até mortalidade.
+            </p>
+          </div>
 
-            {/* Conteúdo */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              
-              {/* O que é o Camarize */}
-              <div>
-                <h3 style={{
-                  margin: '0 0 12px 0',
-                  fontSize: '18px',
-                  fontWeight: '600',
-                  color: '#1f2937'
-                }}>
-                  🦐 O que é o Camarize?
-                </h3>
-                <p style={{
-                  margin: 0,
-                  fontSize: '15px',
-                  lineHeight: '1.6',
-                  color: '#4b5563'
-                }}>
-                  O Camarize é um sistema inteligente de monitoramento para cativeiros de camarão. 
-                  Ele ajuda você a acompanhar em tempo real as condições ideais para o cultivo, 
-                  garantindo a saúde e produtividade dos seus camarões.
-                </p>
-              </div>
-
-              {/* Por que monitorar */}
-              <div>
-                <h3 style={{
-                  margin: '0 0 12px 0',
-                  fontSize: '18px',
-                  fontWeight: '600',
-                  color: '#1f2937'
-                }}>
-                  📊 Por que monitorar estes parâmetros?
-                </h3>
-                <p style={{
-                  margin: '0 0 16px 0',
-                  fontSize: '15px',
-                  lineHeight: '1.6',
-                  color: '#4b5563'
-                }}>
-                  O monitoramento constante destes três parâmetros é essencial para o sucesso 
-                  do cultivo de camarões. Qualquer variação pode afetar diretamente a saúde 
-                  e o crescimento dos animais.
-                </p>
-              </div>
-
-              {/* Parâmetros */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                
-                {/* Temperatura */}
-                <div style={{
-                  padding: '16px',
-                  borderRadius: '12px',
-                  background: '#fef3c7',
-                  border: '1px solid #fde68a'
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    marginBottom: '8px'
-                  }}>
-                    <span style={{ fontSize: '20px' }}>🌡️</span>
-                    <h4 style={{
-                      margin: 0,
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      color: '#92400e'
-                    }}>
-                      Temperatura da Água
-                    </h4>
-                  </div>
-                  <p style={{
-                    margin: 0,
-                    fontSize: '14px',
-                    lineHeight: '1.5',
-                    color: '#92400e'
-                  }}>
-                    <strong>Por que é importante:</strong> A temperatura afeta diretamente o metabolismo, 
-                    crescimento e reprodução dos camarões. Temperaturas inadequadas podem causar 
-                    estresse, doenças e até mortalidade.
-                  </p>
-                </div>
-
-                {/* pH */}
-                <div style={{
-                  padding: '16px',
-                  borderRadius: '12px',
-                  background: '#dbeafe',
-                  border: '1px solid #93c5fd'
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    marginBottom: '8px'
-                  }}>
-                    <span style={{ fontSize: '20px' }}>🧪</span>
-                    <h4 style={{
-                      margin: 0,
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      color: '#1e40af'
-                    }}>
-                      pH da Água
-                    </h4>
-                  </div>
-                  <p style={{
-                    margin: 0,
-                    fontSize: '14px',
-                    lineHeight: '1.5',
-                    color: '#1e40af'
-                  }}>
-                    <strong>Por que é importante:</strong> O pH influencia a disponibilidade de 
-                    nutrientes, a toxicidade de substâncias e o bem-estar dos camarões. 
-                    Valores inadequados podem causar problemas respiratórios e de crescimento.
-                  </p>
-                </div>
-
-                {/* Amônia */}
-                <div style={{
-                  padding: '16px',
-                  borderRadius: '12px',
-                  background: '#fce7f3',
-                  border: '1px solid #f9a8d4'
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    marginBottom: '8px'
-                  }}>
-                    <span style={{ fontSize: '20px' }}>⚗️</span>
-                    <h4 style={{
-                      margin: 0,
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      color: '#be185d'
-                    }}>
-                      Nível de Amônia
-                    </h4>
-                  </div>
-                  <p style={{
-                    margin: 0,
-                    fontSize: '14px',
-                    lineHeight: '1.5',
-                    color: '#be185d'
-                  }}>
-                    <strong>Por que é importante:</strong> A amônia é tóxica para os camarões 
-                    mesmo em baixas concentrações. Níveis elevados podem causar danos nas 
-                    brânquias, estresse e mortalidade.
-                  </p>
-                </div>
-              </div>
-
-              {/* Benefícios */}
-              <div style={{
-                padding: '16px',
-                borderRadius: '12px',
-                background: '#f0fdf4',
-                border: '1px solid #86efac'
-              }}>
-                <h4 style={{
-                  margin: '0 0 12px 0',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  color: '#166534'
-                }}>
-                  ✅ Benefícios do Monitoramento
-                </h4>
-                <ul style={{
-                  margin: 0,
-                  paddingLeft: '20px',
-                  fontSize: '14px',
-                  lineHeight: '1.6',
-                  color: '#166534'
-                }}>
-                  <li>Prevenção de doenças e mortalidade</li>
-                  <li>Otimização do crescimento dos camarões</li>
-                  <li>Redução de perdas na produção</li>
-                  <li>Melhoria na qualidade da água</li>
-                  <li>Aumento da produtividade do cativeiro</li>
-                </ul>
-              </div>
-            </div>
-
-            {/* Botão de fechar */}
+          {/* pH */}
+          <div style={{
+            padding: '16px',
+            borderRadius: '12px',
+            background: '#dbeafe',
+            border: '1px solid #93c5fd'
+          }}>
             <div style={{
               display: 'flex',
-              justifyContent: 'center',
-              paddingTop: '16px',
-              borderTop: '1px solid #e5e7eb'
+              alignItems: 'center',
+              gap: '8px',
+              marginBottom: '8px'
             }}>
-              <button 
-                onClick={() => setShowInfoModal(false)}
-                style={{
-                  padding: '12px 24px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  background: '#3B82F6',
-                  color: '#fff',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseOver={(e) => {
-                  e.target.style.background = '#2563eb';
-                }}
-                onMouseOut={(e) => {
-                  e.target.style.background = '#3B82F6';
-                }}
-              >
-                Entendi!
-              </button>
+              <span style={{ fontSize: '20px' }}>🧪</span>
+              <h4 style={{
+                margin: 0,
+                fontSize: '16px',
+                fontWeight: '600',
+                color: '#1e40af'
+              }}>
+                pH da Água
+              </h4>
             </div>
+            <p style={{
+              margin: 0,
+              fontSize: '14px',
+              lineHeight: '1.5',
+              color: '#1e40af'
+            }}>
+              <strong>Por que é importante:</strong> O pH influencia a disponibilidade de 
+              nutrientes, a toxicidade de substâncias e o bem-estar dos camarões. 
+              Valores inadequados podem causar problemas respiratórios e de crescimento.
+            </p>
+          </div>
+
+          {/* Amônia */}
+          <div style={{
+            padding: '16px',
+            borderRadius: '12px',
+            background: '#fce7f3',
+            border: '1px solid #f9a8d4'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              marginBottom: '8px'
+            }}>
+              <span style={{ fontSize: '20px' }}>⚗️</span>
+              <h4 style={{
+                margin: 0,
+                fontSize: '16px',
+                fontWeight: '600',
+                color: '#be185d'
+              }}>
+                Nível de Amônia
+              </h4>
+            </div>
+            <p style={{
+              margin: 0,
+              fontSize: '14px',
+              lineHeight: '1.5',
+              color: '#be185d'
+            }}>
+              <strong>Por que é importante:</strong> A amônia é tóxica para os camarões 
+              mesmo em baixas concentrações. Níveis elevados podem causar danos nas 
+              brânquias, estresse e mortalidade.
+            </p>
           </div>
         </div>
-      )}
+
+        {/* Benefícios */}
+        <div style={{
+          padding: '16px',
+          borderRadius: '12px',
+          background: '#f0fdf4',
+          border: '1px solid #86efac'
+        }}>
+          <h4 style={{
+            margin: '0 0 12px 0',
+            fontSize: '16px',
+            fontWeight: '600',
+            color: '#166534'
+          }}>
+            ✅ Benefícios do Monitoramento
+          </h4>
+          <ul style={{
+            margin: 0,
+            paddingLeft: '20px',
+            fontSize: '14px',
+            lineHeight: '1.6',
+            color: '#166534'
+          }}>
+            <li>Prevenção de doenças e mortalidade</li>
+            <li>Otimização do crescimento dos camarões</li>
+            <li>Redução de perdas na produção</li>
+            <li>Melhoria na qualidade da água</li>
+            <li>Aumento da produtividade do cativeiro</li>
+          </ul>
+        </div>
+
+        {/* Botão de fechar */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          paddingTop: '16px',
+          borderTop: '1px solid #e5e7eb',
+          marginTop: 'auto'
+        }}>
+          <button 
+            onClick={() => setShowInfoModal(false)}
+            style={{
+              padding: '12px 24px',
+              borderRadius: '8px',
+              border: 'none',
+              background: '#3B82F6',
+              color: '#fff',
+              fontWeight: '600',
+              cursor: 'pointer',
+              fontSize: '14px',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.background = '#2563eb';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.background = '#3B82F6';
+            }}
+          >
+            Entendi!
+          </button>
+        </div>
+      </Modal>
     </>
   );
 }

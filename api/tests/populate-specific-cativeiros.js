@@ -3,260 +3,140 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import readline from 'readline';
+import Cativeiros from "../models/Cativeiros.js";
+import ParametrosAtuais from "../models/Parametros_atuais.js";
+import TiposCamarao from "../models/Camaroes.js";
 
 // Carrega as variáveis de ambiente
 dotenv.config();
 
-console.log('🌊 Populando dados de cativeiros específicos...');
-console.log('==============================================\n');
+const mongoUrl = process.env.MONGO_URL || "mongodb://localhost:27017/camarize";
 
-// Interface para leitura do terminal
+// Interface de leitura do terminal
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
 });
 
-// Função para fazer perguntas
-function askQuestion(question) {
-  return new Promise((resolve) => {
-    rl.question(question, (answer) => {
-      resolve(answer);
-    });
-  });
+// Função para fazer perguntas ao usuário
+function question(query) {
+  return new Promise(resolve => rl.question(query, resolve));
 }
 
 async function populateSpecificCativeiros() {
   try {
-    // Conecta ao MongoDB
-    const mongoUrl = process.env.MONGO_URL || "mongodb://localhost:27017/camarize";
-    console.log('📡 Conectando ao MongoDB...');
-    
+    console.log("🔍 Adicionando parâmetros manualmente...");
     await mongoose.connect(mongoUrl);
-    console.log('✅ Conectado ao MongoDB!');
+    console.log("✅ Conexão com MongoDB estabelecida!");
     
-    // Importa os modelos
-    await import('../models/Parametros_atuais.js');
-    await import('../models/Cativeiros.js');
-    await import('../models/Condicoes_ideais.js');
-    await import('../models/Camaroes.js');
-    
-    const ParametrosAtuais = mongoose.model('ParametrosAtuais');
-    const Cativeiros = mongoose.model('Cativeiros');
-    
-    // Busca cativeiros existentes
-    const cativeiros = await Cativeiros.find().populate('condicoes_ideais').populate('id_tipo_camarao');
-    console.log(`📊 Cativeiros encontrados: ${cativeiros.length}`);
+    // Buscar cativeiros existentes (sem populate para evitar erro)
+    const cativeiros = await Cativeiros.find();
+    console.log(`📋 Encontrados ${cativeiros.length} cativeiros`);
     
     if (cativeiros.length === 0) {
-      console.log('❌ Nenhum cativeiro encontrado. Crie cativeiros primeiro.');
+      console.log("❌ Nenhum cativeiro encontrado! Crie um cativeiro primeiro.");
       return;
     }
     
-    // Mostra os cativeiros disponíveis
-    console.log('\n📋 Cativeiros disponíveis:');
-    cativeiros.forEach((cativeiro, index) => {
-      console.log(`  ${index + 1}. ID: ${cativeiro._id}`);
-      console.log(`     Nome: ${cativeiro.nome || 'Sem nome'}`);
-      console.log(`     Tipo: ${cativeiro.id_tipo_camarao?.nome || 'N/A'}`);
-      if (cativeiro.condicoes_ideais) {
-        console.log(`     Condições ideais: Temp=${cativeiro.condicoes_ideais.temp_ideal}°C, pH=${cativeiro.condicoes_ideais.ph_ideal}, Amônia=${cativeiro.condicoes_ideais.amonia_ideal}mg/L`);
-      } else {
-        console.log(`     ⚠️  Sem condições ideais configuradas`);
-      }
-      console.log('');
+    // Buscar tipos de camarão para mostrar informações
+    const tiposCamarao = await TiposCamarao.find();
+    const tiposMap = {};
+    tiposCamarao.forEach(tipo => {
+      tiposMap[tipo._id.toString()] = tipo.nome;
     });
     
-    // Pergunta quais cativeiros popular
-    const resposta = await askQuestion('Digite os números dos cativeiros que deseja popular (ex: 1,2,3) ou "todos" para popular todos: ');
+    // Mostrar cativeiros disponíveis
+    console.log("\n🏠 Cativeiros disponíveis:");
+    cativeiros.forEach((cativeiro, index) => {
+      const tipoNome = tiposMap[cativeiro.id_tipo_camarao?.toString()] || 'Tipo não definido';
+      console.log(`   ${index + 1}. ${cativeiro.nome} (${tipoNome})`);
+    });
     
-    let cativeirosParaPopular = [];
+    // Escolher cativeiro
+    const escolhaCativeiro = await question("\n📝 Escolha o número do cativeiro: ");
+    const indiceCativeiro = parseInt(escolhaCativeiro) - 1;
     
-    if (resposta.toLowerCase() === 'todos') {
-      cativeirosParaPopular = cativeiros;
-      console.log('✅ Todos os cativeiros serão populados');
+    if (indiceCativeiro < 0 || indiceCativeiro >= cativeiros.length) {
+      console.log("❌ Escolha inválida!");
+      return;
+    }
+    
+    const cativeiroEscolhido = cativeiros[indiceCativeiro];
+    console.log(`\n✅ Cativeiro selecionado: ${cativeiroEscolhido.nome}`);
+    
+    // Coletar dados do usuário
+    console.log("\n📊 Insira os valores dos parâmetros:");
+    
+    const temperatura = await question("🌡️ Temperatura (°C): ");
+    const ph = await question("🧪 pH: ");
+    const amonia = await question("⚗️ Amônia (mg/L): ");
+    
+    // Validar dados
+    const temp = parseFloat(temperatura);
+    const phValue = parseFloat(ph);
+    const amoniaValue = parseFloat(amonia);
+    
+    if (isNaN(temp) || isNaN(phValue) || isNaN(amoniaValue)) {
+      console.log("❌ Valores inválidos! Use apenas números.");
+      return;
+    }
+    
+    // Confirmar dados
+    console.log("\n📋 Dados a serem inseridos:");
+    console.log(`   Cativeiro: ${cativeiroEscolhido.nome}`);
+    console.log(`   Temperatura: ${temp}°C`);
+    console.log(`   pH: ${phValue}`);
+    console.log(`   Amônia: ${amoniaValue} mg/L`);
+    console.log(`   Data/Hora: ${new Date().toLocaleString()}`);
+    
+    const confirmacao = await question("\n❓ Confirmar inserção? (s/n): ");
+    
+    if (confirmacao.toLowerCase() !== 's' && confirmacao.toLowerCase() !== 'sim') {
+      console.log("❌ Operação cancelada.");
+      return;
+    }
+    
+    // Criar registro
+    const novoParametro = new ParametrosAtuais({
+      datahora: new Date(),
+      temp_atual: temp,
+      ph_atual: phValue,
+      amonia_atual: amoniaValue,
+      id_cativeiro: cativeiroEscolhido._id
+    });
+    
+    await novoParametro.save();
+    
+    console.log("\n✅ Parâmetro inserido com sucesso!");
+    console.log(`📊 ID do registro: ${novoParametro._id}`);
+    
+    // Mostrar estatísticas
+    const totalParametros = await ParametrosAtuais.countDocuments();
+    const parametrosCativeiro = await ParametrosAtuais.countDocuments({ 
+      id_cativeiro: cativeiroEscolhido._id 
+    });
+    
+    console.log(`\n📈 Estatísticas:`);
+    console.log(`   Total de parâmetros no banco: ${totalParametros}`);
+    console.log(`   Parâmetros deste cativeiro: ${parametrosCativeiro}`);
+    
+    // Perguntar se quer adicionar mais
+    const adicionarMais = await question("\n❓ Adicionar mais um registro? (s/n): ");
+    
+    if (adicionarMais.toLowerCase() === 's' || adicionarMais.toLowerCase() === 'sim') {
+      console.log("\n" + "=".repeat(50));
+      await populateSpecificCativeiros(); // Recursão para adicionar mais
     } else {
-      const indices = resposta.split(',').map(s => s.trim()).map(s => parseInt(s) - 1);
-      cativeirosParaPopular = indices.map(i => cativeiros[i]).filter(c => c);
-      
-      if (cativeirosParaPopular.length === 0) {
-        console.log('❌ Nenhum cativeiro válido selecionado');
-        return;
-      }
-      
-      console.log(`✅ ${cativeirosParaPopular.length} cativeiro(s) selecionado(s):`);
-      cativeirosParaPopular.forEach(c => console.log(`   - ${c.nome}`));
+      console.log("\n🎉 Processo finalizado!");
     }
-    
-    // Pergunta se quer limpar dados existentes
-    const limparDados = await askQuestion('\nDeseja limpar dados existentes dos cativeiros selecionados? (s/n): ');
-    
-    if (limparDados.toLowerCase() === 's') {
-      console.log('🧹 Limpando dados existentes dos cativeiros selecionados...');
-      const idsCativeiros = cativeirosParaPopular.map(c => c._id);
-      await ParametrosAtuais.deleteMany({ id_cativeiro: { $in: idsCativeiros } });
-      console.log('✅ Dados antigos removidos');
-    }
-    
-    // Pergunta o tipo de geração de dados
-    console.log('\n🎯 Tipos de geração de dados:');
-    console.log('  1. Dados automáticos (realistas)');
-    console.log('  2. Dados manuais (você define os valores)');
-    
-    const tipoGeracao = await askQuestion('\nEscolha o tipo (1-2): ');
-    
-    if (tipoGeracao === '2') {
-      // Dados manuais
-      for (const cativeiro of cativeirosParaPopular) {
-        console.log(`\n🎯 Inserindo dados manuais para: ${cativeiro.nome || 'Cativeiro sem nome'}`);
-        
-        const tempManual = await askQuestion('   Temperatura atual (°C): ');
-        const phManual = await askQuestion('   pH atual: ');
-        const amoniaManual = await askQuestion('   Amônia atual (mg/L): ');
-        
-        const dadosManuais = {
-          temp_atual: parseFloat(tempManual),
-          ph_atual: parseFloat(phManual),
-          amonia_atual: parseFloat(amoniaManual)
-        };
-        
-        await generateParametrosManuais(cativeiro._id, dadosManuais);
-      }
-    } else {
-      // Dados automáticos
-      const diasResposta = await askQuestion('\nQuantos dias de dados históricos gerar? (padrão: 7): ');
-      const dias = parseInt(diasResposta) || 7;
-      
-      for (const cativeiro of cativeirosParaPopular) {
-        console.log(`\n🎯 Populando dados para: ${cativeiro.nome || 'Cativeiro sem nome'}`);
-        
-        if (!cativeiro.condicoes_ideais) {
-          console.log('⚠️  Cativeiro sem condições ideais, usando valores padrão');
-          const valoresPadrao = {
-            temp_ideal: 26,
-            ph_ideal: 7.5,
-            amonia_ideal: 0.05
-          };
-          await generateParametros(cativeiro._id, valoresPadrao, dias);
-        } else {
-          await generateParametros(cativeiro._id, cativeiro.condicoes_ideais, dias);
-        }
-      }
-    }
-    
-    console.log('\n🎉 População concluída com sucesso!');
-    console.log('📊 Os cativeiros selecionados agora têm dados atualizados');
-    console.log('🔗 Acesse o Dashboard para ver os dados atualizados');
     
   } catch (error) {
-    console.error('❌ Erro ao popular dados:', error.message);
+    console.error("❌ Erro durante a inserção:", error);
   } finally {
     rl.close();
-    await mongoose.connection.close();
-    console.log('\n🔚 Conexão fechada');
+    await mongoose.disconnect();
+    console.log("🔌 Conexão com MongoDB fechada.");
   }
-}
-
-async function generateParametros(cativeiroId, condicoesIdeais, dias) {
-  const ParametrosAtuais = mongoose.model('ParametrosAtuais');
-  
-  const dados = [];
-  const agora = new Date();
-  
-  // Dados atuais (última leitura)
-  const dadosAtuais = {
-    temp_atual: generateRealisticValue(condicoesIdeais.temp_ideal, 2, 20, 35),
-    ph_atual: generateRealisticValue(condicoesIdeais.ph_ideal, 0.3, 6.5, 8.5),
-    amonia_atual: generateRealisticValue(condicoesIdeais.amonia_ideal, 0.02, 0.01, 0.2),
-    datahora: agora,
-    id_cativeiro: cativeiroId
-  };
-  
-  dados.push(dadosAtuais);
-  console.log(`   📊 Dados atuais: Temp=${dadosAtuais.temp_atual.toFixed(1)}°C, pH=${dadosAtuais.ph_atual.toFixed(1)}, Amônia=${dadosAtuais.amonia_atual.toFixed(2)}mg/L`);
-  
-  // Dados históricos dos últimos N dias
-  for (let i = 1; i <= dias; i++) {
-    const data = new Date(agora.getTime() - (i * 24 * 60 * 60 * 1000));
-    
-    const dadosHistoricos = {
-      temp_atual: generateRealisticValue(condicoesIdeais.temp_ideal, 3, 20, 35),
-      ph_atual: generateRealisticValue(condicoesIdeais.ph_ideal, 0.5, 6.5, 8.5),
-      amonia_atual: generateRealisticValue(condicoesIdeais.amonia_ideal, 0.03, 0.01, 0.2),
-      datahora: data,
-      id_cativeiro: cativeiroId
-    };
-    
-    dados.push(dadosHistoricos);
-  }
-  
-  // Dados adicionais para simular leituras a cada 2 horas nos últimos 3 dias
-  for (let i = 1; i <= 3; i++) {
-    for (let j = 1; j <= 12; j++) {
-      const data = new Date(agora.getTime() - (i * 24 * 60 * 60 * 1000) + (j * 2 * 60 * 60 * 1000));
-      
-      const dadosAdicionais = {
-        temp_atual: generateRealisticValue(condicoesIdeais.temp_ideal, 2.5, 20, 35),
-        ph_atual: generateRealisticValue(condicoesIdeais.ph_ideal, 0.4, 6.5, 8.5),
-        amonia_atual: generateRealisticValue(condicoesIdeais.amonia_ideal, 0.025, 0.01, 0.2),
-        datahora: data,
-        id_cativeiro: cativeiroId
-      };
-      
-      dados.push(dadosAdicionais);
-    }
-  }
-  
-  // Salva todos os dados
-  console.log(`   💾 Salvando ${dados.length} registros...`);
-  
-  for (const dadosRegistro of dados) {
-    const parametro = new ParametrosAtuais(dadosRegistro);
-    await parametro.save();
-  }
-  
-  console.log(`   ✅ ${dados.length} registros salvos para este cativeiro`);
-}
-
-function generateRealisticValue(valorIdeal, variacao, min, max) {
-  const variacaoReal = (Math.random() - 0.5) * variacao * 2;
-  const variacaoAdicional = (Math.random() - 0.5) * variacao * 0.5;
-  const valorFinal = valorIdeal + variacaoReal + variacaoAdicional;
-  return Math.max(min, Math.min(max, valorFinal));
-}
-
-async function generateParametrosManuais(cativeiroId, dadosManuais) {
-  const ParametrosAtuais = mongoose.model('ParametrosAtuais');
-  
-  const agora = new Date();
-  
-  // Cria o parâmetro atual com os dados manuais
-  const parametroAtual = new ParametrosAtuais({
-    temp_atual: dadosManuais.temp_atual,
-    ph_atual: dadosManuais.ph_atual,
-    amonia_atual: dadosManuais.amonia_atual,
-    datahora: agora,
-    id_cativeiro: cativeiroId
-  });
-  
-  await parametroAtual.save();
-  console.log(`   ✅ Dados manuais salvos: Temp=${dadosManuais.temp_atual}°C, pH=${dadosManuais.ph_atual}, Amônia=${dadosManuais.amonia_atual}mg/L`);
-  
-  // Cria alguns dados históricos normais para contexto (últimos 3 dias)
-  for (let i = 1; i <= 3; i++) {
-    const data = new Date(agora.getTime() - (i * 24 * 60 * 60 * 1000));
-    
-    const dadosHistoricos = new ParametrosAtuais({
-      temp_atual: dadosManuais.temp_atual + (Math.random() - 0.5) * 1,
-      ph_atual: dadosManuais.ph_atual + (Math.random() - 0.5) * 0.1,
-      amonia_atual: dadosManuais.amonia_atual + (Math.random() - 0.5) * 0.005,
-      datahora: data,
-      id_cativeiro: cativeiroId
-    });
-    
-    await dadosHistoricos.save();
-  }
-  
-  console.log(`   ✅ 3 registros históricos também criados para contexto`);
 }
 
 populateSpecificCativeiros(); 

@@ -23,6 +23,25 @@ const getUserById = async (req, res) => {
   }
 };
 
+// Buscar usuário atual (baseado no token)
+const getCurrentUser = async (req, res) => {
+  try {
+    // O middleware de autenticação já adicionou req.loggedUser
+    const userId = req.loggedUser.id;
+    
+    const user = await userService.getById(userId);
+    if (!user) return res.status(404).json({ error: "Usuário não encontrado" });
+    
+    // Remove a senha do objeto retornado por segurança
+    const { senha, ...userWithoutPassword } = user.toObject();
+    
+    res.json(userWithoutPassword);
+  } catch (err) {
+    console.error('Erro ao buscar usuário atual:', err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
 
 // Cadastrando um usuário
 const createUser = async (req, res) => {
@@ -144,4 +163,4 @@ const updateUserPhoto = async (req, res) => {
   }
 };
 
-export default { createUser, loginUser, JWTSecret, register, getUserById, updateUserPhoto };
+export default { createUser, loginUser, JWTSecret, register, getUserById, updateUserPhoto, getCurrentUser };

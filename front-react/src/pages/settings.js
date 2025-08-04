@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from "react";
+import { useRouter } from "next/router";
 import axios from "axios";
 import profileStyles from "../components/ProfileContent/ProfileContent.module.css";
 import NavBottom from "../components/NavBottom";
@@ -97,6 +98,7 @@ const SVG_AVATAR_FAZENDA =
   "data:image/svg+xml;utf8,<svg width='110' height='110' viewBox='0 0 110 110' fill='none' xmlns='http://www.w3.org/2000/svg'><circle cx='55' cy='55' r='55' fill='%23a3c7f7'/><rect x='30' y='60' width='50' height='25' rx='6' fill='%23fff'/><rect x='45' y='50' width='20' height='20' rx='4' fill='%23e6d6f7'/><rect x='52' y='65' width='6' height='20' rx='2' fill='%23a3c7f7'/></svg>";
 
 export default function Settings() {
+  const router = useRouter();
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
   const [fazenda, setFazenda] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -248,6 +250,98 @@ export default function Settings() {
         <label style={customStyles.label}>Número</label>
         <input style={customStyles.input} value={fazenda.numero || ""} disabled />
       </form>
+
+      {/* Seção de Configurações Avançadas */}
+      <div style={{
+        width: '100%',
+        maxWidth: 400,
+        margin: '32px auto 0',
+        padding: '24px',
+        background: '#f8fafc',
+        borderRadius: '16px',
+        border: '1px solid #e2e8f0'
+      }}>
+        <h3 style={{
+          margin: '0 0 20px 0',
+          fontSize: '18px',
+          fontWeight: '600',
+          color: '#1f2937',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px'
+        }}>
+          ⚙️ Configurações Avançadas
+        </h3>
+        
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '16px'
+        }}>
+          <button
+            onClick={() => router.push('/notifications-settings')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '16px 20px',
+              background: '#fff',
+              border: '1px solid #e5e7eb',
+              borderRadius: '12px',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              width: '100%',
+              textAlign: 'left'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.borderColor = '#3B82F6';
+              e.target.style.boxShadow = '0 4px 6px -1px rgba(59, 130, 246, 0.1)';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.borderColor = '#e5e7eb';
+              e.target.style.boxShadow = 'none';
+            }}
+          >
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px'
+            }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                background: '#dbeafe',
+                borderRadius: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '20px'
+              }}>
+                🔔
+              </div>
+              <div>
+                <div style={{
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  color: '#1f2937',
+                  marginBottom: '4px'
+                }}>
+                  Notificações Push
+                </div>
+                <div style={{
+                  fontSize: '14px',
+                  color: '#6b7280'
+                }}>
+                  Configure alertas no celular
+                </div>
+              </div>
+            </div>
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
+              <path d="M9 18l6-6-6-6" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      </div>
       <Notification
         isVisible={notification.show}
         message={notification.message}

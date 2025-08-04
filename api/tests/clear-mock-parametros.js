@@ -2,66 +2,49 @@
 
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import ParametrosAtuais from "../models/Parametros_atuais.js";
 
 // Carrega as variáveis de ambiente
 dotenv.config();
 
-console.log('🗑️  Limpando dados mockados de parâmetros atuais...');
-console.log('==================================================\n');
+const mongoUrl = process.env.MONGO_URL || "mongodb://localhost:27017/camarize";
 
 async function clearMockParametros() {
   try {
-    // Conecta ao MongoDB
-    const mongoUrl = process.env.MONGO_URL || "mongodb://localhost:27017/camarize";
-    console.log('📡 Conectando ao MongoDB...');
-    
+    console.log("🧹 Limpando dados de parâmetros mockados...");
     await mongoose.connect(mongoUrl);
-    console.log('✅ Conectado ao MongoDB Atlas!');
+    console.log("✅ Conexão com MongoDB estabelecida!");
     
-    // Importa os modelos
-    await import('../models/Parametros_atuais.js');
+    // Contar registros antes da limpeza
+    const totalAntes = await ParametrosAtuais.countDocuments();
+    console.log(`📊 Total de registros antes da limpeza: ${totalAntes}`);
     
-    const ParametrosAtuais = mongoose.model('ParametrosAtuais');
-    
-    // Conta quantos registros existem
-    const totalRegistros = await ParametrosAtuais.countDocuments();
-    console.log(`📊 Total de registros encontrados: ${totalRegistros}`);
-    
-    if (totalRegistros === 0) {
-      console.log('✅ Nenhum registro para remover.');
+    if (totalAntes === 0) {
+      console.log("ℹ️ Nenhum registro encontrado para limpar.");
       return;
     }
     
-    // Mostra alguns registros antes de remover
-    console.log('\n📋 Últimos 3 registros (serão removidos):');
-    const ultimosRegistros = await ParametrosAtuais.find()
-      .sort({ datahora: -1 })
-      .limit(3);
-    
-    ultimosRegistros.forEach((registro, index) => {
-      console.log(`  ${index + 1}. ID: ${registro._id}`);
-      console.log(`     Temperatura: ${registro.temp_atual}°C`);
-      console.log(`     pH: ${registro.ph_atual}`);
-      console.log(`     Amônia: ${registro.amonia_atual}mg/L`);
-      console.log(`     Cativeiro: ${registro.id_cativeiro}`);
-      console.log(`     Data/Hora: ${registro.datahora.toLocaleString()}`);
-      console.log('');
-    });
-    
-    // Remove todos os registros
-    console.log('🗑️  Removendo todos os registros...');
+    // Limpar todos os dados de parâmetros
     const resultado = await ParametrosAtuais.deleteMany({});
+    console.log(`🗑️ ${resultado.deletedCount} registros removidos com sucesso!`);
     
-    console.log(`✅ Removidos ${resultado.deletedCount} registros com sucesso!`);
-    console.log('📊 Coleção "parametros_atuais" está limpa.');
-    console.log('\n💡 Agora você pode adicionar dados customizados usando:');
-    console.log('   npm run add-custom-parametros');
+    // Verificar se a limpeza foi bem-sucedida
+    const totalDepois = await ParametrosAtuais.countDocuments();
+    console.log(`📊 Total de registros após a limpeza: ${totalDepois}`);
+    
+    if (totalDepois === 0) {
+      console.log("✅ Limpeza concluída com sucesso! Todos os dados foram removidos.");
+    } else {
+      console.log("⚠️ Ainda existem registros no banco. Verifique se há dados importantes.");
+    }
+    
+    console.log("\n🎉 Processo de limpeza finalizado!");
     
   } catch (error) {
-    console.error('❌ Erro ao limpar dados mockados:', error.message);
+    console.error("❌ Erro durante a limpeza:", error);
   } finally {
-    await mongoose.connection.close();
-    console.log('\n🔚 Conexão fechada');
+    await mongoose.disconnect();
+    console.log("🔌 Conexão com MongoDB fechada.");
   }
 }
 
