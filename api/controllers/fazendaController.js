@@ -4,8 +4,16 @@ import UsuariosxFazendas from "../models/UsuariosxFazendas.js";
 // Função para cadastrar fazenda (padrão Express)
 const createFazenda = async (req, res) => {
   try {
-    console.log("Body recebido:", req.body);
+    console.log("🔍 [FAZENDA] Body recebido:", req.body);
+    console.log("🔍 [FAZENDA] Usuário logado:", req.loggedUser);
+    
     const usuarioId = req.loggedUser?.id;
+    if (!usuarioId) {
+      console.log("❌ [FAZENDA] Usuário não autenticado");
+      return res.status(401).json({ error: "Usuário não autenticado" });
+    }
+    
+    console.log("📝 [FAZENDA] Criando fazenda...");
     const result = await fazendaService.Create(
       req.body.nome,
       req.body.rua,
@@ -13,14 +21,22 @@ const createFazenda = async (req, res) => {
       req.body.cidade,
       req.body.numero
     );
+    
     if (!result) {
+      console.log("❌ [FAZENDA] Falha ao salvar fazenda no banco");
       return res.status(500).json({ error: "Falha ao salvar no banco." });
     }
+    
+    console.log("✅ [FAZENDA] Fazenda criada:", result._id);
+    
     // Cria o relacionamento na tabela intermediária
+    console.log("🔗 [FAZENDA] Criando relacionamento usuário-fazenda...");
     await UsuariosxFazendas.create({ usuario: usuarioId, fazenda: result._id });
+    console.log("✅ [FAZENDA] Relacionamento criado");
+    
     res.status(201).json({ message: "Fazenda criada com sucesso!" });
   } catch (error) {
-    console.log("Erro no controller:", error);
+    console.error("❌ [FAZENDA] Erro no controller:", error);
     res.status(500).json({ error: "Erro interno do servidor." });
   }
 };

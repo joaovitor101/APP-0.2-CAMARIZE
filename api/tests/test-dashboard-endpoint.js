@@ -2,73 +2,79 @@
 
 import axios from 'axios';
 
-console.log('🧪 Testando endpoint do Dashboard...');
-console.log('=====================================\n');
+const API_URL = 'http://localhost:4000';
+const cativeiroId = '6890ab0102816c0ffab726e2'; // ID do cativeiro que existe
 
 async function testDashboardEndpoint() {
+  console.log("🧪 Testando endpoint do dashboard...");
+  
   try {
-    const apiUrl = "http://localhost:4000";
-    const cativeiroId = "688b59068f7117f0e7577b87"; // ID do Cativeiro Junior
-    
-    console.log(`📡 Testando: GET ${apiUrl}/parametros/dashboard/${cativeiroId}`);
-    
-    // Teste sem token (deve retornar 401)
-    console.log('\n🔒 Teste 1: Sem token de autenticação');
+    // Teste 1: Sem autenticação (deve retornar 401)
+    console.log("\n📡 Teste 1: Sem autenticação");
     try {
-      const response = await axios.get(`${apiUrl}/parametros/dashboard/${cativeiroId}`);
-      console.log('❌ ERRO: Deveria ter retornado 401, mas retornou:', response.status);
+      const response = await axios.get(`${API_URL}/parametros/dashboard/${cativeiroId}`);
+      console.log("❌ ERRO: Deveria ter retornado 401, mas retornou:", response.status);
     } catch (error) {
       if (error.response?.status === 401) {
-        console.log('✅ CORRETO: Retornou 401 (não autorizado)');
+        console.log("✅ Correto: Retornou 401 (não autorizado)");
       } else {
-        console.log('❌ ERRO: Status inesperado:', error.response?.status);
+        console.log("❌ ERRO: Retornou status inesperado:", error.response?.status);
       }
     }
     
-    // Teste com token inválido (deve retornar 401)
-    console.log('\n🔒 Teste 2: Com token inválido');
+    // Teste 2: Com token válido (deve retornar 200)
+    console.log("\n📡 Teste 2: Com autenticação");
     try {
-      const response = await axios.get(`${apiUrl}/parametros/dashboard/${cativeiroId}`, {
-        headers: { Authorization: 'Bearer token_invalido' }
+      // Primeiro fazer login para obter token
+      const loginResponse = await axios.post(`${API_URL}/users/auth`, {
+        email: "j@j",
+        senha: "123"
       });
-      console.log('❌ ERRO: Deveria ter retornado 401, mas retornou:', response.status);
+      
+      const token = loginResponse.data.token;
+      console.log("✅ Login realizado, token obtido");
+      
+      // Agora testar o endpoint do dashboard
+      const dashboardResponse = await axios.get(`${API_URL}/parametros/dashboard/${cativeiroId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      console.log("✅ Dashboard funcionando!");
+      console.log("📊 Dados retornados:");
+      console.log(`  - Cativeiro: ${dashboardResponse.data.cativeiro.nome}`);
+      console.log(`  - Temperatura atual: ${dashboardResponse.data.dadosAtuais.temperatura}°C`);
+      console.log(`  - pH atual: ${dashboardResponse.data.dadosAtuais.ph}`);
+      console.log(`  - Amônia atual: ${dashboardResponse.data.dadosAtuais.amonia} mg/L`);
+      console.log(`  - Dados semanais: ${dashboardResponse.data.dadosSemanais.length} registros`);
+      
     } catch (error) {
-      if (error.response?.status === 401) {
-        console.log('✅ CORRETO: Retornou 401 (token inválido)');
-      } else {
-        console.log('❌ ERRO: Status inesperado:', error.response?.status);
-      }
+      console.log("❌ ERRO no teste 2:", error.response?.status, error.response?.data);
     }
     
-    // Teste com ID inválido (deve retornar 404)
-    console.log('\n🔍 Teste 3: Com ID de cativeiro inválido');
+    // Teste 3: ID inválido (deve retornar 404)
+    console.log("\n📡 Teste 3: ID inválido");
     try {
-      const response = await axios.get(`${apiUrl}/parametros/dashboard/123456789012345678901234`, {
-        headers: { Authorization: 'Bearer token_invalido' }
+             const loginResponse = await axios.post(`${API_URL}/users/auth`, {
+         email: "j@j",
+         senha: "123"
+       });
+      
+      const token = loginResponse.data.token;
+      
+      const response = await axios.get(`${API_URL}/parametros/dashboard/123456789012345678901234`, {
+        headers: { Authorization: `Bearer ${token}` }
       });
-      console.log('❌ ERRO: Deveria ter retornado 404, mas retornou:', response.status);
+      console.log("❌ ERRO: Deveria ter retornado 404, mas retornou:", response.status);
     } catch (error) {
       if (error.response?.status === 404) {
-        console.log('✅ CORRETO: Retornou 404 (cativeiro não encontrado)');
-      } else if (error.response?.status === 401) {
-        console.log('✅ CORRETO: Retornou 401 (token inválido) - esperado');
+        console.log("✅ Correto: Retornou 404 (cativeiro não encontrado)");
       } else {
-        console.log('❌ ERRO: Status inesperado:', error.response?.status);
+        console.log("❌ ERRO: Retornou status inesperado:", error.response?.status);
       }
     }
     
-    console.log('\n📊 Resumo dos testes:');
-    console.log('✅ Endpoint está protegido por autenticação');
-    console.log('✅ Validação de ID de cativeiro funcionando');
-    console.log('✅ Respostas de erro corretas');
-    
-    console.log('\n💡 Para testar com dados reais:');
-    console.log('1. Faça login na aplicação para obter um token válido');
-    console.log('2. Use o token no header Authorization: Bearer <seu_token>');
-    console.log('3. Acesse o endpoint com o ID correto do cativeiro');
-    
   } catch (error) {
-    console.error('❌ Erro geral:', error.message);
+    console.error("❌ Erro durante o teste:", error);
   }
 }
 

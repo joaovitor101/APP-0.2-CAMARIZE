@@ -54,10 +54,13 @@ const RegisterContent = () => {
           setError("Erro ao fazer login automático após cadastro.");
         }
       } else {
-        setError("Erro ao cadastrar usuário.");
+        const errorData = await response.text();
+        console.error("Erro no registro:", errorData);
+        setError(`Erro ao cadastrar usuário: ${errorData}`);
       }
-    } catch {
-      setError("Erro de conexão com o servidor.");
+    } catch (error) {
+      console.error("Erro de conexão:", error);
+      setError(`Erro de conexão com o servidor: ${error.message}`);
     }
   };
 

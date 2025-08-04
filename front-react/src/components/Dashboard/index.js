@@ -58,29 +58,44 @@ export default function Dashboard() {
     }
   }, [id]);
 
+  // Função auxiliar para formatar valores
+  const formatarValor = (valor, casasDecimais = 1, unidade = '') => {
+    if (valor === "#" || valor === null || valor === undefined) {
+      return "#";
+    }
+    if (typeof valor === 'number') {
+      return `${valor.toFixed(casasDecimais)}${unidade}`;
+    }
+    return valor;
+  };
+
   // Dados dos sensores baseados nos dados reais
   const sensores = dadosAtuais ? [
     { 
       label: "Temperatura", 
-      value: `${dadosAtuais.temperatura.toFixed(1)}°C`, 
+      value: formatarValor(dadosAtuais.temperatura, 1, "°C"), 
       icon: "🌡️", 
       desc: "Temperatura" 
     },
     { 
       label: "Nível de PH", 
-      value: dadosAtuais.ph.toFixed(1), 
+      value: formatarValor(dadosAtuais.ph, 1), 
       icon: "🧪", 
       desc: "Nível de PH" 
     },
     { 
       label: "Amônia total", 
-      value: `${dadosAtuais.amonia.toFixed(2)} mg/L`, 
+      value: formatarValor(dadosAtuais.amonia, 2, " mg/L"), 
       icon: "⚗️", 
       desc: "Amônia total (NH3 e NH4+)" 
     },
     { 
       label: "Amônia não ionizada", 
-      value: `${(dadosAtuais.amonia * 0.2).toFixed(2)} mg/L`, 
+      value: formatarValor(
+        typeof dadosAtuais.amonia === 'number' ? dadosAtuais.amonia * 0.2 : "#", 
+        2, 
+        " mg/L"
+      ), 
       icon: "⚗️", 
       desc: "Amônia não ionizada (NH3)" 
     },
@@ -88,9 +103,21 @@ export default function Dashboard() {
 
   // Dados para o gráfico baseados nos dados semanais
   const dias = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
-  const temp = dadosSemanais.length > 0 ? dadosSemanais.map(d => d.temperatura) : [26, 26, 27, 26, 25, 26, 26];
-  const ph = dadosSemanais.length > 0 ? dadosSemanais.map(d => d.ph) : [7.5, 7.4, 7.6, 7.5, 7.5, 7.4, 7.5];
-  const amonia = dadosSemanais.length > 0 ? dadosSemanais.map(d => d.amonia) : [0.05, 0.05, 0.06, 0.05, 0.05, 0.05, 0.05];
+  
+  // Função para processar dados do gráfico
+  const processarDadosGrafico = (dados, valorPadrao) => {
+    if (dadosSemanais.length > 0) {
+      return dadosSemanais.map(d => {
+        const valor = d[dados];
+        return valor === "#" || valor === null || valor === undefined ? valorPadrao : valor;
+      });
+    }
+    return [valorPadrao, valorPadrao, valorPadrao, valorPadrao, valorPadrao, valorPadrao, valorPadrao];
+  };
+  
+  const temp = processarDadosGrafico('temperatura', 26);
+  const ph = processarDadosGrafico('ph', 7.5);
+  const amonia = processarDadosGrafico('amonia', 0.05);
 
   // Loading state
   if (loading) {

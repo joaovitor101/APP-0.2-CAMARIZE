@@ -24,13 +24,13 @@
     "quick-test": "node tests/quick-test.js",
     "populate-parametros-atuais": "node tests/populate-parametros-atuais.js",
     "test-dashboard-endpoint": "node tests/test-dashboard-endpoint.js",
-            "populate-specific-cativeiros": "node tests/populate-specific-cativeiros.js",
-        "populate-alert-data": "node tests/populate-alert-data.js",
-        "test-amonia-decimal": "node tests/test-amonia-decimal.js",
-        "test-merge-sort": "node tests/test-merge-sort.js",
-        "test-frontend-merge-sort": "node tests/test-frontend-merge-sort.js",
-        "clear-condicoes-ideais": "node tests/clear-condicoes-ideais.js",
-        "quick-clear-condicoes": "node tests/quick-clear-condicoes.js"
+    "populate-specific-cativeiros": "node tests/populate-specific-cativeiros.js",
+    "populate-alert-data": "node tests/populate-alert-data.js",
+    "test-amonia-decimal": "node tests/test-amonia-decimal.js",
+    "test-merge-sort": "node tests/test-merge-sort.js",
+    "test-frontend-merge-sort": "node tests/test-frontend-merge-sort.js",
+    "clear-condicoes-ideais": "node tests/clear-condicoes-ideais.js",
+    "quick-clear-condicoes": "node tests/quick-clear-condicoes.js"
   },
   "keywords": [],
   "author": "",
@@ -46,6 +46,7 @@
     "mongodb": "^6.17.0",
     "mongoose": "^8.16.1",
     "multer": "^2.0.1",
+    "node-fetch": "^3.3.2",
     "nodemon": "^3.1.10"
   },
   "type": "module"

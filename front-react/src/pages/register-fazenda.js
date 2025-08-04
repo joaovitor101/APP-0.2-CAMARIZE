@@ -47,10 +47,12 @@ export default function RegisterFazendaPage() {
         router.push("/home");
       } else {
         const data = await response.json();
+        console.error("Erro ao cadastrar fazenda:", data);
         setError(data.error || "Erro ao cadastrar fazenda.");
       }
-    } catch {
-      setError("Erro de conexão com o servidor.");
+    } catch (error) {
+      console.error("Erro de conexão:", error);
+      setError(`Erro de conexão com o servidor: ${error.message}`);
     }
   };
 

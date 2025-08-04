@@ -45,15 +45,32 @@ const register = async (req, res) => {
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
   
   try {
+    console.log("🔍 [REGISTER] Dados recebidos:", req.body);
     const { nome, email, senha, foto_perfil, fazenda } = req.body;
+    
+    // Verificar se o usuário já existe
+    const existingUser = await userService.getOne(email);
+    if (existingUser) {
+      console.log("❌ [REGISTER] Usuário já existe:", email);
+      return res.status(400).json({ 
+        error: `Usuário com o email '${email}' já existe. Tente usar um email diferente ou faça login.` 
+      });
+    }
+    
     let fazendaDoc = null;
     if (fazenda) {
       fazendaDoc = new Fazendas(fazenda);
       await fazendaDoc.save();
+      console.log("✅ [REGISTER] Fazenda criada:", fazendaDoc._id);
     }
+    
+    console.log("📝 [REGISTER] Criando usuário...");
     const user = await userService.Create(nome, email, senha, foto_perfil, fazendaDoc ? fazendaDoc._id : undefined);
+    console.log("✅ [REGISTER] Usuário criado:", user._id);
+    
     res.status(201).json(user);
   } catch (err) {
+    console.error("❌ [REGISTER] Erro:", err);
     res.status(500).json({ error: err.message });
   }
 };

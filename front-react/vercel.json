@@ -6,7 +6,7 @@
       "use": "@vercel/next"
     }
   ],
-          "env": {
-          "NEXT_PUBLIC_API_URL": "https://api-camarize-9cwim2beq-joao-kusakas-projects.vercel.app"
-        }
+                    "env": {
+            "NEXT_PUBLIC_API_URL": "https://api-camarize-f1w5908e6-joao-kusakas-projects.vercel.app"
+          }
 } 

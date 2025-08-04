@@ -21,21 +21,25 @@ const getParametrosAtuais = async (req, res) => {
       id_cativeiro: cativeiroId 
     }).sort({ datahora: -1 });
 
-    if (!parametroAtual) {
-      return res.status(404).json({ error: "Nenhum parâmetro encontrado para este cativeiro" });
-    }
+    // Se não há dados, usa valores padrão
+    const parametros = parametroAtual ? {
+      temperatura: parametroAtual.temp_atual,
+      ph: parametroAtual.ph_atual,
+      amonia: parametroAtual.amonia_atual,
+      datahora: parametroAtual.datahora
+    } : {
+      temperatura: "#",
+      ph: "#",
+      amonia: "#",
+      datahora: new Date()
+    };
 
     res.json({
       cativeiro: {
         id: cativeiro._id,
         nome: cativeiro.nome
       },
-      parametros: {
-        temperatura: parametroAtual.temp_atual,
-        ph: parametroAtual.ph_atual,
-        amonia: parametroAtual.amonia_atual,
-        datahora: parametroAtual.datahora
-      }
+      parametros: parametros
     });
 
   } catch (error) {
@@ -70,8 +74,15 @@ const getParametrosHistoricos = async (req, res) => {
       datahora: { $gte: dataLimite }
     }).sort({ datahora: 1 });
 
+    // Se não há dados históricos, retorna array vazio
     if (parametros.length === 0) {
-      return res.status(404).json({ error: "Nenhum parâmetro histórico encontrado" });
+      return res.json({
+        cativeiro: {
+          id: cativeiro._id,
+          nome: cativeiro.nome
+        },
+        dados: []
+      });
     }
 
     // Agrupa os dados por dia para o gráfico
@@ -139,9 +150,18 @@ const getDadosDashboard = async (req, res) => {
       id_cativeiro: cativeiroId 
     }).sort({ datahora: -1 });
 
-    if (!parametroAtual) {
-      return res.status(404).json({ error: "Nenhum parâmetro encontrado para este cativeiro" });
-    }
+    // Se não há dados, usa valores padrão
+    const dadosAtuais = parametroAtual ? {
+      temperatura: parametroAtual.temp_atual,
+      ph: parametroAtual.ph_atual,
+      amonia: parametroAtual.amonia_atual,
+      datahora: parametroAtual.datahora
+    } : {
+      temperatura: "#",
+      ph: "#",
+      amonia: "#",
+      datahora: new Date()
+    };
 
     // Busca dados dos últimos 7 dias para o gráfico
     const dataLimite = new Date();
@@ -186,11 +206,11 @@ const getDadosDashboard = async (req, res) => {
           amonia: dados.amonia.reduce((a, b) => a + b, 0) / dados.amonia.length
         });
       } else {
-        // Se não há dados para este dia, usa o valor atual
+        // Se não há dados para este dia, usa valores padrão
         dadosSemanais.push({
-          temperatura: parametroAtual.temp_atual,
-          ph: parametroAtual.ph_atual,
-          amonia: parametroAtual.amonia_atual
+          temperatura: "#",
+          ph: "#",
+          amonia: "#"
         });
       }
     }
@@ -200,12 +220,7 @@ const getDadosDashboard = async (req, res) => {
         id: cativeiro._id,
         nome: cativeiro.nome
       },
-      dadosAtuais: {
-        temperatura: parametroAtual.temp_atual,
-        ph: parametroAtual.ph_atual,
-        amonia: parametroAtual.amonia_atual,
-        datahora: parametroAtual.datahora
-      },
+      dadosAtuais: dadosAtuais,
       dadosSemanais: dadosSemanais
     });
 

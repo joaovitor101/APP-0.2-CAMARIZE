@@ -87,6 +87,13 @@ export default function StatusCativeirosPage() {
     }
   };
 
+  const formatarDiferenca = (diferenca) => {
+    if (typeof diferenca === 'number') {
+      return diferenca.toFixed(2);
+    }
+    return '#';
+  };
+
   const getAlertasText = (alertas) => {
     if (alertas.length === 0) return 'Sem alertas';
     
@@ -222,7 +229,7 @@ export default function StatusCativeirosPage() {
                   <div className={styles.cardHeader}>
                     <div className={styles.cativeiroInfo}>
                       <h3>{cativeiro.nome}</h3>
-                      <p>{cativeiro.tipo_camarao}</p>
+                      <p>Tipo: {cativeiro.tipo_camarao}</p>
                     </div>
                     <div className={styles.statusBadge}>
                       <span style={{ color: getStatusColor(cativeiro.status) }}>
@@ -265,7 +272,7 @@ export default function StatusCativeirosPage() {
                             <div className={styles.alertaValores}>
                               <span>Atual: {alerta.valorAtual}</span>
                               <span>Ideal: {alerta.valorIdeal}</span>
-                              <span>Diferença: {alerta.diferenca.toFixed(2)}</span>
+                              <span>Diferença: {formatarDiferenca(alerta.diferenca)}</span>
                             </div>
                           </div>
                         ))}
@@ -304,7 +311,7 @@ export default function StatusCativeirosPage() {
                   <div className={styles.cardHeader}>
                     <div className={styles.cativeiroInfo}>
                       <h3>{cativeiro.nome}</h3>
-                      <p>{cativeiro.tipo_camarao}</p>
+                      <p>Tipo: {cativeiro.tipo_camarao}</p>
                     </div>
                     <div className={styles.statusBadge}>
                       <span style={{ color: getStatusColor(cativeiro.status) }}>
@@ -347,7 +354,7 @@ export default function StatusCativeirosPage() {
                             <div className={styles.alertaValores}>
                               <span>Atual: {alerta.valorAtual}</span>
                               <span>Ideal: {alerta.valorIdeal}</span>
-                              <span>Diferença: {alerta.diferenca.toFixed(2)}</span>
+                              <span>Diferença: {formatarDiferenca(alerta.diferenca)}</span>
                             </div>
                           </div>
                         ))}
@@ -386,7 +393,7 @@ export default function StatusCativeirosPage() {
                   <div className={styles.cardHeader}>
                     <div className={styles.cativeiroInfo}>
                       <h3>{cativeiro.nome}</h3>
-                      <p>{cativeiro.tipo_camarao}</p>
+                      <p>Tipo: {cativeiro.tipo_camarao}</p>
                     </div>
                     <div className={styles.statusBadge}>
                       <span style={{ color: getStatusColor(cativeiro.status) }}>

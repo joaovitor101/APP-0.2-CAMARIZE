@@ -16,35 +16,7 @@ export function useAuth() {
     setError(null);
   };
 
-  // Listener para detectar fechamento da página
-  useEffect(() => {
-    const handleBeforeUnload = () => {
-      // Limpa o token quando a página é fechada
-      clearAuthData();
-    };
-
-    const handleVisibilityChange = () => {
-      // Limpa o token quando a aba fica oculta por muito tempo
-      if (document.hidden) {
-        // Aguarda 30 minutos antes de limpar (opcional)
-        setTimeout(() => {
-          if (document.hidden) {
-            clearAuthData();
-          }
-        }, 30 * 60 * 1000); // 30 minutos
-      }
-    };
-
-    // Adiciona os event listeners
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    // Cleanup dos event listeners
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, []);
+  // Removida limpeza automática do token para não interferir no fluxo normal
 
   const checkAuth = async () => {
     try {
