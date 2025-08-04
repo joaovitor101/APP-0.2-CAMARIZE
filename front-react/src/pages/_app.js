@@ -1,6 +1,6 @@
 import "@/styles/globals.css";
 import { RegisterProvider } from "@/context/RegisterContext";
-import { useEffect } from "react";
+import Head from "next/head";
 
 // Componente de segurança (removida limpeza automática do token)
 function SecurityProvider({ children }) {
@@ -10,10 +10,15 @@ function SecurityProvider({ children }) {
 
 export default function MyApp({ Component, pageProps }) {
   return (
-    <SecurityProvider>
-      <RegisterProvider>
-        <Component {...pageProps} />
-      </RegisterProvider>
-    </SecurityProvider>
+    <>
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+      </Head>
+      <SecurityProvider>
+        <RegisterProvider>
+          <Component {...pageProps} />
+        </RegisterProvider>
+      </SecurityProvider>
+    </>
   );
 }

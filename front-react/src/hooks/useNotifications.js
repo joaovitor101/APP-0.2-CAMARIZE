@@ -1,171 +1,185 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 
 export const useNotifications = () => {
   const [isSupported, setIsSupported] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
-  const [subscription, setSubscription] = useState(null);
   const [permission, setPermission] = useState('default');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  // Verificar se o navegador suporta notificações push
   useEffect(() => {
     const checkSupport = () => {
-      const supported = 'serviceWorker' in navigator && 
-                       'PushManager' in window && 
-                       'Notification' in window;
+      const supported = 'serviceWorker' in navigator && 'PushManager' in window;
       setIsSupported(supported);
       
       if (supported) {
-        setPermission(Notification.permission);
+        checkPermission();
+        checkSubscription();
       }
     };
-    
+
     checkSupport();
   }, []);
 
-  // Registrar Service Worker
-  const registerServiceWorker = useCallback(async () => {
+  const checkPermission = () => {
+    if ('Notification' in window) {
+      setPermission(Notification.permission);
+    }
+  };
+
+  const checkSubscription = async () => {
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.getSubscription();
+      setIsSubscribed(!!subscription);
+    } catch (error) {
+      console.error('Erro ao verificar inscrição:', error);
+    }
+  };
+
+  const registerServiceWorker = async () => {
     try {
       if ('serviceWorker' in navigator) {
         const registration = await navigator.serviceWorker.register('/sw.js');
-        console.log('✅ Service Worker registrado:', registration);
+        console.log('Service Worker registrado:', registration);
         return registration;
       }
     } catch (error) {
-      console.error('❌ Erro ao registrar Service Worker:', error);
+      console.error('Erro ao registrar Service Worker:', error);
       throw error;
     }
-  }, []);
+  };
 
-  // Solicitar permissão para notificações
-  const requestPermission = useCallback(async () => {
+  const requestPermission = async () => {
     try {
       setIsLoading(true);
-      
-      if (!isSupported) {
-        throw new Error('Notificações push não são suportadas neste navegador');
+      setError(null);
+
+      if (!('Notification' in window)) {
+        throw new Error('Notificações não são suportadas neste navegador');
       }
 
       const permission = await Notification.requestPermission();
       setPermission(permission);
-      
+
       if (permission === 'granted') {
-        console.log('✅ Permissão para notificações concedida!');
+        console.log('Permissão concedida!');
         return true;
       } else {
-        console.log('❌ Permissão para notificações negada');
-        return false;
+        throw new Error('Permissão negada para notificações');
       }
     } catch (error) {
-      console.error('❌ Erro ao solicitar permissão:', error);
-      throw error;
+      console.error('Erro ao solicitar permissão:', error);
+      setError(error.message);
+      return false;
     } finally {
       setIsLoading(false);
     }
-  }, [isSupported]);
+  };
 
-  // Inscrever para notificações push
-  const subscribeToPush = useCallback(async () => {
+  const subscribeToPush = async () => {
     try {
       setIsLoading(true);
-      
-      if (!isSupported) {
-        throw new Error('Notificações push não são suportadas');
-      }
-
-      if (permission !== 'granted') {
-        const granted = await requestPermission();
-        if (!granted) {
-          throw new Error('Permissão necessária para notificações');
-        }
-      }
+      setError(null);
 
       // Registrar Service Worker
       const registration = await registerServiceWorker();
-      
-      // Verificar se já está inscrito
-      let existingSubscription = await registration.pushManager.getSubscription();
-      
-      if (existingSubscription) {
-        console.log('✅ Já inscrito para notificações push');
-        setSubscription(existingSubscription);
-        setIsSubscribed(true);
-        return existingSubscription;
+
+      // Solicitar permissão
+      const hasPermission = await requestPermission();
+      if (!hasPermission) {
+        throw new Error('Permissão necessária para notificações');
       }
 
-      // Gerar chave VAPID (Você precisará configurar isso no servidor)
-      const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || 
-                            'BEl62iUYgUivxIkv69yViEuiBIa1lQzK7WqCJfagKShFGiExuFy4XwsMMtXjQ0FEizxg3L_YmWWRSxef5jYAlz8';
-      
-      // Converter chave VAPID para Uint8Array
-      const vapidPublicKeyArray = urlBase64ToUint8Array(vapidPublicKey);
+      // Converter VAPID key
+      const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || 'BEl62iUYgUivxIkv69yViEuiBIa1l9aPvV0xXl3qzSxScyPRN-2M9ZAX4h6yJV9RqOEPf84jGrd0n3_2OlAi7Rg';
+      const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
 
       // Inscrever para push
-      const newSubscription = await registration.pushManager.subscribe({
+      const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: vapidPublicKeyArray
+        applicationServerKey: convertedVapidKey
       });
 
-      console.log('✅ Inscrito para notificações push:', newSubscription);
-      
+      console.log('Inscrito para notificações push:', subscription);
+
       // Enviar subscription para o servidor
-      await sendSubscriptionToServer(newSubscription);
-      
-      setSubscription(newSubscription);
+      await sendSubscriptionToServer(subscription);
+
       setIsSubscribed(true);
-      
-      return newSubscription;
-      
+      return true;
     } catch (error) {
-      console.error('❌ Erro ao inscrever para push:', error);
-      throw error;
+      console.error('Erro ao inscrever para notificações:', error);
+      setError(error.message);
+      return false;
     } finally {
       setIsLoading(false);
     }
-  }, [isSupported, permission, requestPermission, registerServiceWorker]);
+  };
 
-  // Cancelar inscrição
-  const unsubscribeFromPush = useCallback(async () => {
+  const unsubscribeFromPush = async () => {
     try {
       setIsLoading(true);
-      
+      setError(null);
+
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.getSubscription();
+
       if (subscription) {
         await subscription.unsubscribe();
-        console.log('✅ Inscrição cancelada');
-        
-        // Remover subscription do servidor
         await removeSubscriptionFromServer(subscription);
-        
-        setSubscription(null);
         setIsSubscribed(false);
+        console.log('Inscrição cancelada');
       }
     } catch (error) {
-      console.error('❌ Erro ao cancelar inscrição:', error);
-      throw error;
+      console.error('Erro ao cancelar inscrição:', error);
+      setError(error.message);
     } finally {
       setIsLoading(false);
     }
-  }, [subscription]);
+  };
 
-  // Enviar subscription para o servidor
+  const testNotification = async () => {
+    try {
+      if (permission !== 'granted') {
+        const granted = await requestPermission();
+        if (!granted) return;
+      }
+
+      // Enviar notificação de teste através do Service Worker
+      const registration = await navigator.serviceWorker.ready;
+      await registration.showNotification('Camarize - Teste', {
+        body: 'Esta é uma notificação de teste!',
+        icon: '/images/logo_camarize1.png',
+        badge: '/images/logo_camarize2.png',
+        vibrate: [100, 50, 100],
+        data: { type: 'test' }
+      });
+
+      console.log('Notificação de teste enviada');
+    } catch (error) {
+      console.error('Erro ao enviar notificação de teste:', error);
+      setError(error.message);
+    }
+  };
+
   const sendSubscriptionToServer = async (subscription) => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-      const token = localStorage.getItem("token");
+      const userId = localStorage.getItem("userId");
       
       const response = await fetch(`${apiUrl}/notifications/subscribe`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${localStorage.getItem("token")}`
         },
         body: JSON.stringify({
-          subscription: subscription.toJSON(),
-          userId: localStorage.getItem("userId"),
+          subscription: subscription,
+          userId: userId,
           deviceInfo: {
             userAgent: navigator.userAgent,
-            platform: navigator.platform,
-            language: navigator.language
+            platform: navigator.platform
           }
         })
       });
@@ -174,28 +188,27 @@ export const useNotifications = () => {
         throw new Error('Erro ao enviar subscription para o servidor');
       }
 
-      console.log('✅ Subscription enviada para o servidor');
+      console.log('Subscription enviada para o servidor');
     } catch (error) {
-      console.error('❌ Erro ao enviar subscription:', error);
+      console.error('Erro ao enviar subscription:', error);
       throw error;
     }
   };
 
-  // Remover subscription do servidor
   const removeSubscriptionFromServer = async (subscription) => {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
-      const token = localStorage.getItem("token");
+      const userId = localStorage.getItem("userId");
       
       const response = await fetch(`${apiUrl}/notifications/unsubscribe`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${localStorage.getItem("token")}`
         },
         body: JSON.stringify({
-          subscription: subscription.toJSON(),
-          userId: localStorage.getItem("userId")
+          subscription: subscription,
+          userId: userId
         })
       });
 
@@ -203,108 +216,39 @@ export const useNotifications = () => {
         throw new Error('Erro ao remover subscription do servidor');
       }
 
-      console.log('✅ Subscription removida do servidor');
+      console.log('Subscription removida do servidor');
     } catch (error) {
-      console.error('❌ Erro ao remover subscription:', error);
+      console.error('Erro ao remover subscription:', error);
       throw error;
     }
   };
 
-  // Verificar status da inscrição
-  const checkSubscriptionStatus = useCallback(async () => {
-    try {
-      if ('serviceWorker' in navigator) {
-        const registration = await navigator.serviceWorker.ready;
-        const subscription = await registration.pushManager.getSubscription();
-        
-        if (subscription) {
-          setSubscription(subscription);
-          setIsSubscribed(true);
-          console.log('✅ Inscrição ativa encontrada');
-        } else {
-          setIsSubscribed(false);
-          console.log('ℹ️ Nenhuma inscrição ativa');
-        }
-      }
-    } catch (error) {
-      console.error('❌ Erro ao verificar status da inscrição:', error);
+  const urlBase64ToUint8Array = (base64String) => {
+    const padding = '='.repeat((4 - base64String.length % 4) % 4);
+    const base64 = (base64String + padding)
+      .replace(/-/g, '+')
+      .replace(/_/g, '/');
+
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
     }
-  }, []);
-
-  // Verificar status na inicialização
-  useEffect(() => {
-    if (isSupported) {
-      checkSubscriptionStatus();
-    }
-  }, [isSupported, checkSubscriptionStatus]);
-
-  // Testar notificação local
-  const testNotification = useCallback(async () => {
-    try {
-      if (permission !== 'granted') {
-        throw new Error('Permissão necessária para notificações');
-      }
-
-      const notification = new Notification('Camarize - Teste', {
-        body: 'Esta é uma notificação de teste do Camarize!',
-        icon: '/images/logo_camarize1.png',
-        badge: '/images/logo_camarize1.png',
-        tag: 'test-notification',
-        requireInteraction: true,
-        actions: [
-          {
-            action: 'view',
-            title: 'Ver Detalhes'
-          },
-          {
-            action: 'dismiss',
-            title: 'Fechar'
-          }
-        ]
-      });
-
-      notification.onclick = () => {
-        window.focus();
-        notification.close();
-      };
-
-      console.log('✅ Notificação de teste enviada');
-    } catch (error) {
-      console.error('❌ Erro ao enviar notificação de teste:', error);
-      throw error;
-    }
-  }, [permission]);
+    return outputArray;
+  };
 
   return {
-    // Estados
     isSupported,
     isSubscribed,
-    subscription,
     permission,
     isLoading,
-    
-    // Funções
+    error,
     requestPermission,
     subscribeToPush,
     unsubscribeFromPush,
     testNotification,
-    checkSubscriptionStatus,
+    checkSubscriptionStatus: checkSubscription,
     registerServiceWorker
   };
-};
-
-// Função auxiliar para converter chave VAPID
-function urlBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4);
-  const base64 = (base64String + padding)
-    .replace(/-/g, '+')
-    .replace(/_/g, '/');
-
-  const rawData = window.atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
-
-  for (let i = 0; i < rawData.length; ++i) {
-    outputArray[i] = rawData.charCodeAt(i);
-  }
-  return outputArray;
-} 
+}; 
