@@ -94,7 +94,7 @@ export default function NotificationsSettings() {
       }}>
         {/* PWA Install Banner */}
         <div style={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          background: 'linear-gradient(90deg, #f7b0b7 0%, #a3c7f7 100%)',
           borderRadius: '16px',
           padding: '24px',
           marginBottom: '24px',
@@ -155,7 +155,7 @@ export default function NotificationsSettings() {
                 background: 'rgba(255, 255, 255, 0.9)',
                 border: 'none',
                 borderRadius: '8px',
-                color: '#667eea',
+                color: '#f7b0b7',
                 fontWeight: '600',
                 cursor: 'pointer',
                 fontSize: '14px',

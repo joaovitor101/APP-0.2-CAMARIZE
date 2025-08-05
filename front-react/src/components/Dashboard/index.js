@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import ErrorDisplay from "../ErrorDisplay";
+import Modal from '../Modal';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -13,6 +14,8 @@ export default function Dashboard() {
   const [nomeCativeiro, setNomeCativeiro] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showRelatorioModal, setShowRelatorioModal] = useState(false);
+  const [selectedPeriodo, setSelectedPeriodo] = useState('');
 
   // Função para buscar dados do dashboard
   const buscarDadosDashboard = async () => {
@@ -119,6 +122,22 @@ export default function Dashboard() {
   const ph = processarDadosGrafico('ph', 7.5);
   const amonia = processarDadosGrafico('amonia', 0.05);
 
+  // Funções para controlar o modal de relatório
+  const handleRelatorioClick = () => {
+    setShowRelatorioModal(true);
+  };
+
+  const handlePeriodoSelect = (periodo) => {
+    setSelectedPeriodo(periodo);
+    setShowRelatorioModal(false);
+    router.push(`/rel-individual/${id}?periodo=${periodo}`);
+  };
+
+  const handleCloseModal = () => {
+    setShowRelatorioModal(false);
+    setSelectedPeriodo('');
+  };
+
   // Loading state
   if (loading) {
     return (
@@ -218,7 +237,7 @@ export default function Dashboard() {
           <span style={{ color: "#7be6c3" }}>■ Amônia</span>
         </div>
       </div>
-      <button className={styles.relatorioBtn} onClick={() => router.push(`/rel-individual/${id}`)}>
+      <button className={styles.relatorioBtn} onClick={handleRelatorioClick}>
         Relatório Individual Detalhado
       </button>
       <nav className={styles.navBottom}>
@@ -227,6 +246,148 @@ export default function Dashboard() {
         <button onClick={() => router.push('/notifications')}><img src="/images/bell.svg" alt="Notificações" /></button>
         <button onClick={() => router.push('/profile')}><img src="/images/user.svg" alt="Perfil" /></button>
       </nav>
+
+      {/* Modal de Relatório */}
+      <Modal 
+        isOpen={showRelatorioModal}
+        onClose={handleCloseModal}
+        title={
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px'
+          }}>
+            <div style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              background: 'linear-gradient(90deg, #f7b0b7 0%, #a3c7f7 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <polyline points="14,2 14,8 20,8" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <line x1="16" y1="13" x2="8" y2="13" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <line x1="16" y1="17" x2="8" y2="17" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <polyline points="10,9 9,9 8,9" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <span>Relatório Individual</span>
+          </div>
+        }
+        showCloseButton={true}
+      >
+        {/* Descrição */}
+        <div style={{
+          textAlign: 'center',
+          marginBottom: '24px'
+        }}>
+          <p style={{
+            margin: '0',
+            fontSize: '16px',
+            color: '#6b7280',
+            lineHeight: '1.5'
+          }}>
+            Selecione o período para gerar o relatório detalhado do cativeiro <strong>{nomeCativeiro}</strong>
+          </p>
+        </div>
+
+        {/* Opções de período */}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '12px'
+        }}>
+          <button 
+            onClick={() => handlePeriodoSelect('dia')}
+            style={{
+              padding: '16px 20px',
+              borderRadius: '12px',
+              border: '2px solid #e5e7eb',
+              background: 'linear-gradient(90deg, #f7b0b7 0%, #a3c7f7 100%)',
+              color: '#1f2937',
+              fontWeight: '600',
+              cursor: 'pointer',
+              fontSize: '16px',
+              transition: 'all 0.3s ease',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.transform = 'translateY(-2px)';
+              e.target.style.boxShadow = '0 8px 25px rgba(247, 176, 183, 0.4)';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = 'none';
+            }}
+          >
+            <span>📅 Relatório Diário</span>
+            <span style={{ fontSize: '14px', opacity: 0.9 }}>Últimas 24h</span>
+          </button>
+
+          <button 
+            onClick={() => handlePeriodoSelect('semana')}
+            style={{
+              padding: '16px 20px',
+              borderRadius: '12px',
+              border: '2px solid #e5e7eb',
+              background: 'linear-gradient(90deg, #f7b0b7 0%, #a3c7f7 100%)',
+              color: '#1f2937',
+              fontWeight: '600',
+              cursor: 'pointer',
+              fontSize: '16px',
+              transition: 'all 0.3s ease',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.transform = 'translateY(-2px)';
+              e.target.style.boxShadow = '0 8px 25px rgba(247, 176, 183, 0.4)';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = 'none';
+            }}
+          >
+            <span>📊 Relatório Semanal</span>
+            <span style={{ fontSize: '14px', opacity: 0.9 }}>Últimos 7 dias</span>
+          </button>
+
+          <button 
+            onClick={() => handlePeriodoSelect('mes')}
+            style={{
+              padding: '16px 20px',
+              borderRadius: '12px',
+              border: '2px solid #e5e7eb',
+              background: 'linear-gradient(90deg, #f7b0b7 0%, #a3c7f7 100%)',
+              color: '#1f2937',
+              fontWeight: '600',
+              cursor: 'pointer',
+              fontSize: '16px',
+              transition: 'all 0.3s ease',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.transform = 'translateY(-2px)';
+              e.target.style.boxShadow = '0 8px 25px rgba(247, 176, 183, 0.4)';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = 'none';
+            }}
+          >
+            <span>📈 Relatório Mensal</span>
+            <span style={{ fontSize: '14px', opacity: 0.9 }}>Últimos 30 dias</span>
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }

@@ -78,7 +78,8 @@ export default function RelatorioGeral() {
   }
 
   return (
-    <div style={{ maxWidth: 800, margin: '40px auto', background: '#fff', padding: 24, borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', position: 'relative' }}>
+    <div style={{ minHeight: '100vh', overflowY: 'auto' }}>
+      <div style={{ maxWidth: 800, margin: '40px auto', background: '#fff', padding: 24, borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)', position: 'relative' }}>
       <button className={profileStyles.backBtn} onClick={() => window.history.back()} style={{ position: 'absolute', top: 16, left: 16 }}>
         <span style={{ fontSize: 24, lineHeight: 1 }}>&larr;</span>
       </button>
@@ -110,6 +111,7 @@ export default function RelatorioGeral() {
           Salvar como PDF
         </button>
       </div>
+    </div>
     </div>
   );
 } 

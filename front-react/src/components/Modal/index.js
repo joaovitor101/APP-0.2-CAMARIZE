@@ -18,6 +18,11 @@ export default function Modal({
       setIsVisible(false);
       setIsAnimating(false);
     }
+    
+    // Cleanup: restaura o scroll quando o componente é desmontado
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, []);
 
   useEffect(() => {
@@ -52,25 +57,43 @@ export default function Modal({
       // Aguarda a animação terminar antes de esconder
       const timer = setTimeout(() => {
         setIsVisible(false);
-        document.body.style.overflow = 'unset';
+        // Restaura o scroll do body
+        document.body.style.overflow = '';
       }, 300); // Sincronizado com o tempo da animação
       
       return () => clearTimeout(timer);
     }
   }, [isOpen]);
 
+  // Cleanup adicional para garantir que o scroll seja restaurado
+  useEffect(() => {
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+
   const handleBackdropClick = (e) => {
     if (closeOnBackdropClick && e.target === e.currentTarget) {
+      // Restaura o scroll ao clicar no backdrop
+      document.body.style.overflow = '';
       onClose();
     }
   };
 
   const handleClose = () => {
+    // Restaura o scroll imediatamente ao fechar
+    document.body.style.overflow = '';
     onClose();
   };
 
   // Não renderiza nada se não estiver visível
-  if (!isVisible) return null;
+  if (!isVisible) {
+    // Garante que o scroll seja restaurado quando o modal não estiver visível
+    if (document.body.style.overflow === 'hidden') {
+      document.body.style.overflow = '';
+    }
+    return null;
+  }
 
   return (
     <div 

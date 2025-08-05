@@ -262,17 +262,145 @@ export default function HomeContent() {
       
       <NavBottom />
       
-      {showPeriodoModal && (
-        <div style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',background:'rgba(0,0,0,0.3)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1000}}>
-          <div style={{background:'#fff',padding:24,borderRadius:8,minWidth:260,boxShadow:'0 2px 8px rgba(0,0,0,0.15)',display:'flex',flexDirection:'column',gap:16,alignItems:'center'}}>
-            <span style={{fontWeight:600,fontSize:18}}>Selecione o período do relatório</span>
-            <button onClick={()=>handlePeriodoSelect('dia')} style={{padding:'8px 18px',borderRadius:6,border:'none',background:'#1976d2',color:'#fff',fontWeight:600,cursor:'pointer',width:'100%'}}>Dia</button>
-            <button onClick={()=>handlePeriodoSelect('semana')} style={{padding:'8px 18px',borderRadius:6,border:'none',background:'#1976d2',color:'#fff',fontWeight:600,cursor:'pointer',width:'100%'}}>Semana</button>
-            <button onClick={()=>handlePeriodoSelect('mes')} style={{padding:'8px 18px',borderRadius:6,border:'none',background:'#1976d2',color:'#fff',fontWeight:600,cursor:'pointer',width:'100%'}}>Mês</button>
-            <button onClick={()=>setShowPeriodoModal(false)} style={{padding:'4px 12px',borderRadius:6,border:'none',background:'#eee',color:'#222',fontWeight:600,cursor:'pointer',width:'100%'}}>Cancelar</button>
+      {/* Modal de Relatório Geral */}
+      <Modal 
+        isOpen={showPeriodoModal}
+        onClose={() => setShowPeriodoModal(false)}
+        title={
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px'
+          }}>
+            <div style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              background: 'linear-gradient(90deg, #f7b0b7 0%, #a3c7f7 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M9 12l2 2 4-4" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle cx="12" cy="12" r="10" stroke="#fff" strokeWidth="2" fill="none"/>
+                <path d="M12 4v12m0 0l-4-4m4 4l4-4" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <span>Relatório Geral</span>
           </div>
+        }
+        showCloseButton={true}
+      >
+        {/* Descrição */}
+        <div style={{
+          textAlign: 'center',
+          marginBottom: '24px'
+        }}>
+          <p style={{
+            margin: '0',
+            fontSize: '16px',
+            color: '#6b7280',
+            lineHeight: '1.5'
+          }}>
+            Selecione o período para gerar o relatório geral de todos os cativeiros
+          </p>
         </div>
-      )}
+
+        {/* Opções de período */}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '12px'
+        }}>
+          <button 
+            onClick={() => handlePeriodoSelect('dia')}
+            style={{
+              padding: '16px 20px',
+              borderRadius: '12px',
+              border: '2px solid #e5e7eb',
+              background: 'linear-gradient(90deg, #f7b0b7 0%, #a3c7f7 100%)',
+              color: '#1f2937',
+              fontWeight: '600',
+              cursor: 'pointer',
+              fontSize: '16px',
+              transition: 'all 0.3s ease',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.transform = 'translateY(-2px)';
+              e.target.style.boxShadow = '0 8px 25px rgba(247, 176, 183, 0.4)';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = 'none';
+            }}
+          >
+            <span>📅 Relatório Diário</span>
+            <span style={{ fontSize: '14px', opacity: 0.9 }}>Últimas 24h</span>
+          </button>
+
+          <button 
+            onClick={() => handlePeriodoSelect('semana')}
+            style={{
+              padding: '16px 20px',
+              borderRadius: '12px',
+              border: '2px solid #e5e7eb',
+              background: 'linear-gradient(90deg, #f7b0b7 0%, #a3c7f7 100%)',
+              color: '#1f2937',
+              fontWeight: '600',
+              cursor: 'pointer',
+              fontSize: '16px',
+              transition: 'all 0.3s ease',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.transform = 'translateY(-2px)';
+              e.target.style.boxShadow = '0 8px 25px rgba(247, 176, 183, 0.4)';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = 'none';
+            }}
+          >
+            <span>📊 Relatório Semanal</span>
+            <span style={{ fontSize: '14px', opacity: 0.9 }}>Últimos 7 dias</span>
+          </button>
+
+          <button 
+            onClick={() => handlePeriodoSelect('mes')}
+            style={{
+              padding: '16px 20px',
+              borderRadius: '12px',
+              border: '2px solid #e5e7eb',
+              background: 'linear-gradient(90deg, #f7b0b7 0%, #a3c7f7 100%)',
+              color: '#1f2937',
+              fontWeight: '600',
+              cursor: 'pointer',
+              fontSize: '16px',
+              transition: 'all 0.3s ease',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.transform = 'translateY(-2px)';
+              e.target.style.boxShadow = '0 8px 25px rgba(247, 176, 183, 0.4)';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = 'none';
+            }}
+          >
+            <span>📈 Relatório Mensal</span>
+            <span style={{ fontSize: '14px', opacity: 0.9 }}>Últimos 30 dias</span>
+          </button>
+        </div>
+      </Modal>
       {/* Modal de Exclusão */}
       <Modal 
         isOpen={showDeleteModal}
