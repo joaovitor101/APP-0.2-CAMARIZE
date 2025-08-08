@@ -2,7 +2,7 @@
 
 ## 🌐 Base URL
 ```
-https://api-camarize.vercel.app
+https://localhost:3000
 ```
 
 ## 🔐 Autenticação
