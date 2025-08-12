@@ -1,16 +1,19 @@
 import express from "express";
-import { getParametrosAtuais, getParametrosHistoricos, getDadosDashboard } from "../controllers/parametrosController.js";
+import { cadastrarParametros, getParametrosAtuais, getParametrosHistoricos, getDadosDashboard } from "../controllers/parametrosController.js";
 import Auth from "../middleware/Auth.js";
 
 const router = express.Router();
 
-// Rota para buscar dados atuais de um cativeiro
+// POST - Cadastrar dados dos sensores do ESP32
+router.post("/cadastrar", cadastrarParametros);
+
+// GET - Buscar dados atuais de um cativeiro
 router.get("/atuais/:cativeiroId", Auth.Authorization, getParametrosAtuais);
 
-// Rota para buscar dados históricos de um cativeiro
+// GET - Buscar dados históricos de um cativeiro
 router.get("/historicos/:cativeiroId", Auth.Authorization, getParametrosHistoricos);
 
-// Rota para buscar dados completos do dashboard
+// GET - Buscar dados completos do dashboard
 router.get("/dashboard/:cativeiroId", Auth.Authorization, getDadosDashboard);
 
 export default router; 

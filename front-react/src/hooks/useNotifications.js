@@ -39,7 +39,13 @@ export const useNotifications = () => {
 
   const registerServiceWorker = async () => {
     try {
-      if ('serviceWorker' in navigator) {
+      // Somente registra em produção para evitar cache atrapalhando no desenvolvimento
+      if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
+        // aguarda a página carregar para não competir com o Next em hot reload
+        await new Promise((resolve) => {
+          if (document.readyState === 'complete') return resolve();
+          window.addEventListener('load', () => resolve(), { once: true });
+        });
         const registration = await navigator.serviceWorker.register('/sw.js');
         console.log('Service Worker registrado:', registration);
         return registration;

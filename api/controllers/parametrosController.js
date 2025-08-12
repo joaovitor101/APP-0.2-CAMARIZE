@@ -1,7 +1,62 @@
 import ParametrosAtuais from "../models/Parametros_atuais.js";
 import Cativeiros from "../models/Cativeiros.js";
 
-// Buscar dados atuais de um cativeiro específico
+// POST - Receber dados dos sensores do ESP32
+const cadastrarParametros = async (req, res) => {
+  try {
+    const { id_cativeiro, temperatura, ph, amonia } = req.body;
+
+    // Validação dos dados obrigatórios
+    if (!id_cativeiro) {
+      return res.status(400).json({ error: "ID do cativeiro é obrigatório" });
+    }
+
+    if (temperatura === undefined || ph === undefined || amonia === undefined) {
+      return res.status(400).json({ error: "Temperatura, pH e amônia são obrigatórios" });
+    }
+
+    // Validação dos tipos de dados
+    if (typeof temperatura !== 'number' || typeof ph !== 'number' || typeof amonia !== 'number') {
+      return res.status(400).json({ error: "Temperatura, pH e amônia devem ser números" });
+    }
+
+    // Verificar se o cativeiro existe
+    const cativeiro = await Cativeiros.findById(id_cativeiro);
+    if (!cativeiro) {
+      return res.status(404).json({ error: "Cativeiro não encontrado" });
+    }
+
+    // Criar novo registro de parâmetros
+    const novoParametro = new ParametrosAtuais({
+      id_cativeiro,
+      temp_atual: temperatura,
+      ph_atual: ph,
+      amonia_atual: amonia,
+      datahora: new Date()
+    });
+
+    await novoParametro.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Parâmetros cadastrados com sucesso",
+      data: {
+        id: novoParametro._id,
+        cativeiro: cativeiro.nome,
+        temperatura,
+        ph,
+        amonia,
+        datahora: novoParametro.datahora
+      }
+    });
+
+  } catch (error) {
+    console.error('Erro ao cadastrar parâmetros:', error);
+    res.status(500).json({ error: "Erro interno do servidor" });
+  }
+};
+
+// GET - Buscar dados atuais de um cativeiro específico
 const getParametrosAtuais = async (req, res) => {
   try {
     const { cativeiroId } = req.params;
@@ -28,10 +83,10 @@ const getParametrosAtuais = async (req, res) => {
       amonia: parametroAtual.amonia_atual,
       datahora: parametroAtual.datahora
     } : {
-      temperatura: "#",
-      ph: "#",
-      amonia: "#",
-      datahora: new Date()
+      temperatura: null,
+      ph: null,
+      amonia: null,
+      datahora: null
     };
 
     res.json({
@@ -48,7 +103,7 @@ const getParametrosAtuais = async (req, res) => {
   }
 };
 
-// Buscar dados históricos dos últimos 7 dias
+// GET - Buscar dados históricos dos últimos X dias
 const getParametrosHistoricos = async (req, res) => {
   try {
     const { cativeiroId } = req.params;
@@ -85,35 +140,13 @@ const getParametrosHistoricos = async (req, res) => {
       });
     }
 
-    // Agrupa os dados por dia para o gráfico
-    const dadosPorDia = {};
-    parametros.forEach(parametro => {
-      const data = new Date(parametro.datahora);
-      const dia = data.toISOString().split('T')[0]; // YYYY-MM-DD
-      
-      if (!dadosPorDia[dia]) {
-        dadosPorDia[dia] = {
-          temperatura: [],
-          ph: [],
-          amonia: []
-        };
-      }
-      
-      dadosPorDia[dia].temperatura.push(parametro.temp_atual);
-      dadosPorDia[dia].ph.push(parametro.ph_atual);
-      dadosPorDia[dia].amonia.push(parametro.amonia_atual);
-    });
-
-    // Calcula médias diárias
-    const dadosMedios = Object.keys(dadosPorDia).map(dia => {
-      const dados = dadosPorDia[dia];
-      return {
-        data: dia,
-        temperatura: dados.temperatura.reduce((a, b) => a + b, 0) / dados.temperatura.length,
-        ph: dados.ph.reduce((a, b) => a + b, 0) / dados.ph.length,
-        amonia: dados.amonia.reduce((a, b) => a + b, 0) / dados.amonia.length
-      };
-    });
+    // Formata os dados para retorno
+    const dadosFormatados = parametros.map(parametro => ({
+      datahora: parametro.datahora,
+      temperatura: parametro.temp_atual,
+      ph: parametro.ph_atual,
+      amonia: parametro.amonia_atual
+    }));
 
     res.json({
       cativeiro: {
@@ -121,7 +154,8 @@ const getParametrosHistoricos = async (req, res) => {
         nome: cativeiro.nome
       },
       periodo: `${dias} dias`,
-      dados: dadosMedios
+      total_registros: dadosFormatados.length,
+      dados: dadosFormatados
     });
 
   } catch (error) {
@@ -130,7 +164,7 @@ const getParametrosHistoricos = async (req, res) => {
   }
 };
 
-// Buscar dados para o dashboard (atual + histórico resumido)
+// GET - Buscar dados para o dashboard (atual + histórico resumido)
 const getDadosDashboard = async (req, res) => {
   try {
     const { cativeiroId } = req.params;
@@ -157,10 +191,10 @@ const getDadosDashboard = async (req, res) => {
       amonia: parametroAtual.amonia_atual,
       datahora: parametroAtual.datahora
     } : {
-      temperatura: "#",
-      ph: "#",
-      amonia: "#",
-      datahora: new Date()
+      temperatura: null,
+      ph: null,
+      amonia: null,
+      datahora: null
     };
 
     // Busca dados dos últimos 7 dias para o gráfico
@@ -201,6 +235,7 @@ const getDadosDashboard = async (req, res) => {
       if (dadosPorDia[dia]) {
         const dados = dadosPorDia[dia];
         dadosSemanais.push({
+          data: dia,
           temperatura: dados.temperatura.reduce((a, b) => a + b, 0) / dados.temperatura.length,
           ph: dados.ph.reduce((a, b) => a + b, 0) / dados.ph.length,
           amonia: dados.amonia.reduce((a, b) => a + b, 0) / dados.amonia.length
@@ -208,9 +243,10 @@ const getDadosDashboard = async (req, res) => {
       } else {
         // Se não há dados para este dia, usa valores padrão
         dadosSemanais.push({
-          temperatura: "#",
-          ph: "#",
-          amonia: "#"
+          data: dia,
+          temperatura: null,
+          ph: null,
+          amonia: null
         });
       }
     }
@@ -231,6 +267,7 @@ const getDadosDashboard = async (req, res) => {
 };
 
 export {
+  cadastrarParametros,
   getParametrosAtuais,
   getParametrosHistoricos,
   getDadosDashboard

@@ -3,10 +3,11 @@ import styles from "./HomeContent.module.css";
 import NavBottom from "../NavBottom";
 import AuthError from "../AuthError";
 import Loading from "../Loading";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 import Notification from "../Notification";
 import Modal from '../Modal';
+import GuidedTour from "../GuidedTour";
 
 export default function HomeContent() {
   const router = useRouter();
@@ -18,6 +19,15 @@ export default function HomeContent() {
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [cativeiroToDelete, setCativeiroToDelete] = useState(null);
   const [notification, setNotification] = useState({ show: false, message: '', type: 'success' });
+  const [showTour, setShowTour] = useState(false);
+
+  // Refs para o tour
+  const infoRef = useRef(null);
+  const statusRef = useRef(null);
+  const sensoresRef = useRef(null);
+  const addRef = useRef(null);
+  const downloadRef = useRef(null);
+  const firstCativeiroRef = useRef(null);
 
   const showNotification = (message, type = 'success') => {
     setNotification({ show: true, message, type });
@@ -112,7 +122,31 @@ export default function HomeContent() {
     router.push(`/rel-geral?periodo=${periodo}`);
   };
 
+  // Mostrar tour apenas na primeira vez
+  useEffect(() => {
+    try {
+      // Usa um identificador por usuário para o tour
+      const getCurrentUserId = () => {
+        try {
+          const raw = localStorage.getItem('usuarioCamarize');
+          if (!raw) return null;
+          const user = JSON.parse(raw);
+          return user?._id || user?.id || user?.userId || null;
+        } catch {
+          return null;
+        }
+      };
 
+      const userId = getCurrentUserId();
+      const tourKey = userId ? `camarize_home_tour_done_${userId}` : 'camarize_home_tour_done';
+      const done = localStorage.getItem(tourKey);
+      if (!done) {
+        // pequeno delay para garantir refs montadas
+        const t = setTimeout(() => setShowTour(true), 250);
+        return () => clearTimeout(t);
+      }
+    } catch {}
+  }, []);
 
   // Se há erro, mostrar tela de erro
   if (error) {
@@ -134,6 +168,7 @@ export default function HomeContent() {
               aria-label="Informações sobre a aplicação"
               onClick={() => setShowInfoModal(true)}
               style={{ padding: '4px', borderRadius: '50%', border: 'none', background: 'transparent', cursor: 'pointer' }}
+              ref={infoRef}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                 <circle cx="12" cy="12" r="10" stroke="#3B82F6" strokeWidth="2" fill="none"/>
@@ -149,13 +184,14 @@ export default function HomeContent() {
               aria-label="Status dos Cativeiros"
               onClick={() => router.push('/status-cativeiros')}
               style={{ position: 'relative' }}
+              ref={statusRef}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                 <path d="M9 12l2 2 4-4" stroke="#222" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 <circle cx="12" cy="12" r="10" stroke="#222" strokeWidth="2" fill="none"/>
               </svg>
             </button>
-            <button className={styles.iconBtn} aria-label="Sensor" onClick={() => router.push('/sensores')}>
+            <button className={styles.iconBtn} aria-label="Sensor" onClick={() => router.push('/sensores')} ref={sensoresRef}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                 <rect x="7" y="7" width="10" height="10" rx="2" fill="#000"/>
                 <rect x="9" y="9" width="6" height="6" rx="1" fill="#fff"/>
@@ -173,10 +209,11 @@ export default function HomeContent() {
               className={styles.iconBtn}
               aria-label="Cadastrar Cativeiro"
               onClick={() => router.push('/create-cativeiros')}
+              ref={addRef}
             >
               <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3" stroke="#222" strokeWidth="2"/><path d="M12 8v8M8 12h8" stroke="#222" strokeWidth="2"/></svg>
             </button>
-            <button className={styles.iconBtn} aria-label="Download" onClick={handleDownloadClick}>
+            <button className={styles.iconBtn} aria-label="Download" onClick={handleDownloadClick} ref={downloadRef}>
               <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M12 4v12m0 0l-4-4m4 4l4-4" stroke="#222" strokeWidth="2"/><rect x="4" y="18" width="16" height="2" rx="1" fill="#222"/></svg>
             </button>
           </div>
@@ -191,11 +228,22 @@ export default function HomeContent() {
           </div>
         ) : (
           cativeiros.map((cativeiro, idx) => {
-            // Converter buffer para base64 se existir
+            // Converter buffer para base64 se existir (sem depender de Buffer do Node)
             let fotoUrl = "/images/cativeiro1.jpg";
             if (cativeiro.foto_cativeiro && cativeiro.foto_cativeiro.data) {
-              const base64String = Buffer.from(cativeiro.foto_cativeiro.data).toString('base64');
-              fotoUrl = `data:image/jpeg;base64,${base64String}`;
+              try {
+                const bytes = new Uint8Array(cativeiro.foto_cativeiro.data);
+                let binary = "";
+                for (let i = 0; i < bytes.byteLength; i += 1) {
+                  binary += String.fromCharCode(bytes[i]);
+                }
+                const base64String = typeof window !== 'undefined' ? window.btoa(binary) : "";
+                if (base64String) {
+                  fotoUrl = `data:image/jpeg;base64,${base64String}`;
+                }
+              } catch (e) {
+                // mantém imagem padrão
+              }
             }
             return (
               <div
@@ -203,6 +251,7 @@ export default function HomeContent() {
                 className={styles.cativeiroItem}
                 style={{ cursor: "pointer" }}
                 onClick={() => handleCativeiroClick(cativeiro._id)}
+                ref={idx === 0 ? firstCativeiroRef : null}
               >
                 <img
                   src={fotoUrl}
@@ -261,6 +310,37 @@ export default function HomeContent() {
       </div>
       
       <NavBottom />
+
+      {/* Tour guiado - somente na primeira visita */}
+      {showTour && (
+        <GuidedTour
+          steps={
+            [
+              { ref: infoRef, title: 'Informações', content: 'Saiba o que é o Camarize e por que monitoramos temperatura, pH e amônia.' },
+              { ref: statusRef, title: 'Status dos cativeiros', content: 'Veja rapidamente se algum cativeiro precisa de atenção agora.' },
+              ...(cativeiros.length > 0 ? [{ ref: firstCativeiroRef, title: 'Cativeiro', content: 'Toque no cativeiro para abrir o dashboard com dados em tempo real.' }] : []),
+              { ref: sensoresRef, title: 'Sensores', content: 'Gerencie sensores instalados e verifique o funcionamento.' },
+              { ref: addRef, title: 'Adicionar cativeiro', content: 'Cadastre um novo cativeiro para começar a monitorar.' },
+              { ref: downloadRef, title: 'Relatórios', content: 'Baixe relatórios com os principais indicadores por período.' },
+            ].filter(s => s.ref && s.ref.current)
+          }
+          onFinish={() => {
+            try {
+              const raw = localStorage.getItem('usuarioCamarize');
+              let tourKey = 'camarize_home_tour_done';
+              if (raw) {
+                try {
+                  const user = JSON.parse(raw);
+                  const userId = user?._id || user?.id || user?.userId;
+                  if (userId) tourKey = `camarize_home_tour_done_${userId}`;
+                } catch {}
+              }
+              localStorage.setItem(tourKey, '1');
+            } catch {}
+            setShowTour(false);
+          }}
+        />
+      )}
       
       {/* Modal de Relatório Geral */}
       <Modal 

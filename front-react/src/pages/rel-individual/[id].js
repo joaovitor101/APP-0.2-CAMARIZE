@@ -2,19 +2,15 @@ import { useRouter } from 'next/router';
 import { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import profileStyles from "../../components/ProfileContent/ProfileContent.module.css";
-import Modal from '../../components/Modal'; // Added import for Modal
+import Modal from '../../components/Modal';
 
 const mockResumo = `Durante o período de monitoramento do tanque de camarão, foram observadas variações significativas nos parâmetros ambientais essenciais para a saúde e o bem-estar dos crustáceos. A equipe de monitoramento conduziu análises rigorosas e implementou medidas corretivas para garantir um ambiente aquático estável e propício ao crescimento saudável dos camarões.\n\nTemperatura:\nA temperatura média registrada no tanque durante o período de monitoramento foi de 29,75°C. Observou-se uma leve variação diurna, com picos máximos de até 29,5°C durante as horas mais quentes do dia e mínimos de 26°C durante a noite. Essas variações foram mantidas dentro dos limites aceitáveis para as espécies de camarão cultivada, garantindo um ambiente termicamente estável.\n\nNíveis de Amônia:\nOs níveis de amônia foram monitorados de perto, com uma média de 0,25 ppm (partes por milhão) durante o período de observação. Foram observadas pequenas flutuações nos níveis de amônia, principalmente em resposta às atividades de alimentação dos camarões e à decomposição orgânica no tanque. No entanto, medidas de controle eficazes foram implementadas para manter a amônia dentro dos limites seguros, promovendo a saúde dos animais.\n\npH da Água:\nO pH da água foi mantido em um intervalo ideal entre 7,5 e 8,0 ao longo do período de monitoramento. Esta faixa de pH é crucial para garantir um ambiente estável e favorável ao crescimento saudável dos camarões. O uso de tampões naturais e o controle dos valores ótimos foram fundamentais para evitar oscilações abruptas e manter as condições tamponeantes, garantindo a estabilidade do pH do sistema.\n\nConclusão:\nO monitoramento contínuo e a gestão proativa dos parâmetros ambientais são ações fundamentais para manter a saúde e a produtividade do cativeiro de camarão. A equipe de operação é munida continuamente de orientações baseadas em dados e segue as melhores condutas de manejo do ambiente para garantir a eficiência sustentável e o sucesso da operação de criação de camarão.\n\nEste relatório destina-se exclusivamente à equipe de gestão e operação do tanque de camarão e não deve ser reproduzido ou distribuído sem autorização prévia.`;
 
 export default function RelatorioIndividual() {
   const router = useRouter();
-
-  if (!router.isReady) {
-    return null; // ou <Loading /> se preferir
-  }
-
   const { id, periodo: periodoFromQuery } = router.query;
   const [cativeiro, setCativeiro] = useState(null);
+  const [fotoUrl, setFotoUrl] = useState("/images/cativeiro1.jpg");
   const relatorioRef = useRef();
   const [periodo, setPeriodo] = useState(null);
   const [showPeriodoModal, setShowPeriodoModal] = useState(false);
@@ -27,13 +23,102 @@ export default function RelatorioIndividual() {
         const res = await axios.get(`${apiUrl}/cativeiros/${id}`);
         setCativeiro(res.data);
         console.log('Cativeiro carregado:', res.data);
+        
+        // Processar imagem do cativeiro
+        if (res.data?.foto_cativeiro && res.data.foto_cativeiro.data) {
+          try {
+            console.log('Processando imagem do cativeiro:', {
+              hasData: !!res.data.foto_cativeiro.data,
+              dataType: typeof res.data.foto_cativeiro.data,
+              isArray: Array.isArray(res.data.foto_cativeiro.data),
+              dataLength: res.data.foto_cativeiro.data?.length || 'N/A',
+              dataSample: Array.isArray(res.data.foto_cativeiro.data) ? res.data.foto_cativeiro.data.slice(0, 5) : 'N/A'
+            });
+            
+            // Converter buffer para base64 - lidar com diferentes formatos do MongoDB
+            let binary = '';
+            let imageData = res.data.foto_cativeiro.data;
+            
+            // Verificar se os dados são válidos
+            if (!imageData || (Array.isArray(imageData) && imageData.length === 0)) {
+              console.error('Dados da imagem inválidos ou vazios');
+              setFotoUrl("/images/logo_camarize1.png");
+              return;
+            }
+            
+            // MongoDB pode retornar os dados em diferentes formatos
+            if (Array.isArray(imageData)) {
+              // Se for um array (formato mais comum)
+              console.log('Processando como array, length:', imageData.length);
+              for (let i = 0; i < imageData.length; i++) {
+                binary += String.fromCharCode(imageData[i]);
+              }
+            } else if (imageData && typeof imageData === 'object' && imageData.buffer) {
+              // Se for um objeto com buffer (formato Buffer do Node.js)
+              console.log('Processando como objeto com buffer');
+              const bytes = new Uint8Array(imageData.buffer);
+              for (let i = 0; i < bytes.length; i++) {
+                binary += String.fromCharCode(bytes[i]);
+              }
+            } else if (imageData instanceof ArrayBuffer) {
+              // Se for ArrayBuffer
+              console.log('Processando como ArrayBuffer');
+              const bytes = new Uint8Array(imageData);
+              for (let i = 0; i < bytes.length; i++) {
+                binary += String.fromCharCode(bytes[i]);
+              }
+            } else if (imageData && typeof imageData === 'object' && imageData.data) {
+              // Se for um objeto com propriedade data
+              console.log('Processando como objeto com propriedade data');
+              const data = imageData.data;
+              if (Array.isArray(data)) {
+                for (let i = 0; i < data.length; i++) {
+                  binary += String.fromCharCode(data[i]);
+                }
+              } else if (data instanceof ArrayBuffer) {
+                const bytes = new Uint8Array(data);
+                for (let i = 0; i < bytes.length; i++) {
+                  binary += String.fromCharCode(bytes[i]);
+                }
+              }
+            } else {
+              // Tentar converter como Uint8Array
+              console.log('Processando como Uint8Array');
+              const bytes = new Uint8Array(imageData);
+              for (let i = 0; i < bytes.length; i++) {
+                binary += String.fromCharCode(bytes[i]);
+              }
+            }
+            
+            if (binary.length > 0) {
+              const base64String = btoa(binary);
+              const imageUrl = `data:image/jpeg;base64,${base64String}`;
+              setFotoUrl(imageUrl);
+              console.log('Imagem convertida com sucesso, tamanho:', binary.length, 'bytes');
+            } else {
+              console.error('Falha na conversão: binary está vazio');
+              setFotoUrl("/images/logo_camarize1.png");
+            }
+          } catch (error) {
+            console.error('Erro ao processar imagem do cativeiro:', error);
+            console.error('Error details:', error.message);
+            setFotoUrl("/images/logo_camarize1.png");
+          }
+        } else {
+          console.log('Nenhuma imagem encontrada para o cativeiro, usando imagem padrão');
+          console.log('foto_cativeiro:', res.data?.foto_cativeiro);
+          setFotoUrl("/images/logo_camarize1.png");
+        }
       } catch (err) {
         setCativeiro(null);
         console.error('Erro ao buscar cativeiro:', err);
       }
     }
-    fetchCativeiro();
-  }, [id]);
+    
+    if (router.isReady && id) {
+      fetchCativeiro();
+    }
+  }, [id, router.isReady]);
 
   useEffect(() => {
     // Se o período vier da URL, use ele
@@ -46,21 +131,6 @@ export default function RelatorioIndividual() {
       setShowPeriodoModal(false);
     }
   }, [periodo, periodoFromQuery]);
-
-  let fotoUrl = "/images/cativeiro1.jpg";
-  if (cativeiro?.foto_cativeiro && Array.isArray(cativeiro.foto_cativeiro.data)) {
-    const byteArray = new Uint8Array(cativeiro.foto_cativeiro.data);
-    let binary = '';
-    const chunkSize = 0x8000;
-    for (let i = 0; i < byteArray.length; i += chunkSize) {
-      binary += String.fromCharCode.apply(null, byteArray.subarray(i, i + chunkSize));
-    }
-    const base64String = btoa(binary);
-    fotoUrl = `data:image/jpeg;base64,${base64String}`;
-  } else if (cativeiro?.foto_cativeiro && cativeiro.foto_cativeiro.data) {
-    // Se não for array, logar para debug
-    console.warn('foto_cativeiro.data não é array:', cativeiro.foto_cativeiro.data);
-  }
 
   // Se não houver periodo, apenas mostre uma mensagem simples
   if (!periodo) {
