@@ -50,6 +50,25 @@ app.use((req, res, next) => {
   next();
 });
 
+// ✅ Rota raiz para health check
+app.get('/', (req, res) => {
+  res.json({
+    message: '🚀 API Camarize funcionando!',
+    status: 'online',
+    timestamp: new Date().toISOString(),
+    version: '1.0.0'
+  });
+});
+
+// ✅ Rota de health check para Vercel
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'healthy',
+    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+    timestamp: new Date().toISOString()
+  });
+});
+
 // ✅ Registra as rotas
 app.use('/users', userRoutes);
 app.use('/fazendas', fazendaRoutes);
