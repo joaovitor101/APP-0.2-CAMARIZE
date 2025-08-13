@@ -98,14 +98,15 @@ export default function NotificationsSettings() {
           borderRadius: '16px',
           padding: '24px',
           marginBottom: '24px',
-          color: '#fff',
+          color: '#000',
           textAlign: 'center'
         }}>
           <div style={{ fontSize: '48px', marginBottom: '16px' }}>📱</div>
           <h2 style={{
             margin: '0 0 12px 0',
             fontSize: '24px',
-            fontWeight: '600'
+            fontWeight: '600',
+            color: '#000'
           }}>
             Instale o Camarize no seu Celular
           </h2>
@@ -113,7 +114,8 @@ export default function NotificationsSettings() {
             margin: '0 0 20px 0',
             fontSize: '16px',
             opacity: 0.9,
-            lineHeight: '1.5'
+            lineHeight: '1.5',
+            color: '#000'
           }}>
             Transforme o Camarize em um app nativo e receba notificações push 
             mesmo com o navegador fechado!
@@ -130,7 +132,7 @@ export default function NotificationsSettings() {
                 background: 'rgba(255, 255, 255, 0.2)',
                 border: '1px solid rgba(255, 255, 255, 0.3)',
                 borderRadius: '8px',
-                color: '#fff',
+                color: '#000',
                 fontWeight: '600',
                 cursor: 'pointer',
                 fontSize: '14px',
@@ -155,7 +157,7 @@ export default function NotificationsSettings() {
                 background: 'rgba(255, 255, 255, 0.9)',
                 border: 'none',
                 borderRadius: '8px',
-                color: '#f7b0b7',
+                color: '#000',
                 fontWeight: '600',
                 cursor: 'pointer',
                 fontSize: '14px',

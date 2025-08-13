@@ -8,6 +8,7 @@ export default function Document() {
         <link rel="manifest" href="/manifest.json" />
         
         {/* PWA Icons */}
+        <link rel="icon" type="image/png" href="/images/favicon-camarize.png" />
         <link rel="icon" type="image/png" sizes="192x192" href="/images/logo_camarize1.png" />
         <link rel="icon" type="image/png" sizes="512x512" href="/images/logo_camarize2.png" />
         

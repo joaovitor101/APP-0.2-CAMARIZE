@@ -175,7 +175,7 @@ export default function NotificationsPage() {
                 marginTop: '16px',
                 padding: '8px 16px',
                 background: '#007bff',
-                color: 'white',
+                color: '#000',
                 border: 'none',
                 borderRadius: '4px',
                 cursor: 'pointer'
@@ -214,7 +214,7 @@ export default function NotificationsPage() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: '24px',
-                    color: 'white'
+                    color: '#000'
                   }}>
                     {getIcon(notification.tipo)}
                   </div>
