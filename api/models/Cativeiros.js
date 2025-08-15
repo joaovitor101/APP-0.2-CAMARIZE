@@ -43,6 +43,12 @@ const CativeirosSchema = new mongoose.Schema({
     required: false,
     default: null
   },
+  // Campo para associar o cativeiro ao usuário proprietário
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: false
+  }
 });
 
 const Cativeiros = mongoose.model("Cativeiros", CativeirosSchema);

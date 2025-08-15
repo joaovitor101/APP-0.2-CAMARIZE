@@ -2,6 +2,8 @@ import userService from "../services/userService.js";
 import jwt from "jsonwebtoken";
 import fazendaController from "./fazendaController.js";
 import Fazendas from "../models/Fazendas.js";
+import emailService from "../services/emailService.js";
+
 // JWTSecret
 const JWTSecret = process.env.JWT_SECRET || "apigamessecret";
 
@@ -74,6 +76,30 @@ const register = async (req, res) => {
       return res.status(400).json({ 
         error: `Usuário com o email '${email}' já existe. Tente usar um email diferente ou faça login.` 
       });
+    }
+    
+    // 🔍 VALIDAR SE O EMAIL REALMENTE EXISTE
+    console.log("🔍 [REGISTER] Validando email:", email);
+    
+    // Verificar se a validação de email está habilitada
+    if (process.env.VALIDATE_EMAIL_ON_REGISTER !== 'false') {
+      const emailValidation = await emailService.validateEmailForSettings(email);
+      
+      if (!emailValidation.valid) {
+        console.log("❌ [REGISTER] Email inválido:", emailValidation.message);
+        return res.status(400).json({
+          error: `Email inválido: ${emailValidation.message}. Por favor, verifique se o email está correto.`
+        });
+      }
+      
+      if (emailValidation.warning) {
+        console.log("⚠️ [REGISTER] Aviso na validação do email:", emailValidation.message);
+        // Não bloqueia o cadastro, mas registra o aviso
+      }
+      
+      console.log("✅ [REGISTER] Email validado com sucesso");
+    } else {
+      console.log("⏭️ [REGISTER] Validação de email desabilitada");
     }
     
     let fazendaDoc = null;

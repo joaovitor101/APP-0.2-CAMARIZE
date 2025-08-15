@@ -81,7 +81,23 @@ class cativeiroService {
 
   async delete(id) {
     try {
-      return await Cativeiros.findByIdAndDelete(id);
+      // Primeiro, excluir relacionamentos
+      const FazendasxCativeiros = (await import('../models/FazendasxCativeiros.js')).default;
+      const SensoresxCativeiros = (await import('../models/SensoresxCativeiros.js')).default;
+      
+      // Excluir relacionamento fazenda-cativeiro
+      await FazendasxCativeiros.deleteMany({ cativeiro: id });
+      console.log(`🗑️ Relacionamentos fazenda-cativeiro excluídos para cativeiro: ${id}`);
+      
+      // Excluir relacionamentos sensor-cativeiro
+      await SensoresxCativeiros.deleteMany({ id_cativeiro: id });
+      console.log(`🗑️ Relacionamentos sensor-cativeiro excluídos para cativeiro: ${id}`);
+      
+      // Excluir o cativeiro
+      const result = await Cativeiros.findByIdAndDelete(id);
+      console.log(`🗑️ Cativeiro excluído: ${id}`);
+      
+      return result;
     } catch (error) {
       console.log("Erro ao deletar cativeiro:", error);
       return null;

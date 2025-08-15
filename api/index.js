@@ -14,8 +14,12 @@ import sensorRoutes from './routes/sensorRoutes.js';
 import usuariosxFazendasRoutes from './routes/usuariosxFazendasRoutes.js';
 import sensoresxCativeirosRoutes from './routes/sensoresxCativeirosRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
+import emailRoutes from './routes/emailRoutes.js';
 import testRoutes from './routes/testRoutes.js';
 import parametrosRoutes from './routes/parametrosRoutes.js';
+
+// Importar serviço de monitoramento
+import monitoringService from './services/monitoringService.js';
 
 // Carrega todos os modelos para garantir que as coleções sejam criadas
 import './models/SensoresxCativeiros.js';
@@ -78,6 +82,7 @@ app.use('/', sensorRoutes);
 app.use('/usuariosxfazendas', usuariosxFazendasRoutes);
 app.use('/sensoresxcativeiros', sensoresxCativeirosRoutes);
 app.use('/notifications', notificationRoutes);
+app.use('/email', emailRoutes);
 app.use('/test', testRoutes);
 app.use('/parametros', parametrosRoutes);
 // ✅ Conecta ao MongoDB Atlas
@@ -97,6 +102,15 @@ mongoose.connect(mongoUrl, mongooseOptions)
   console.log("✅ MongoDB Atlas conectado com sucesso!");
   console.log(`📊 Database: ${mongoose.connection.name}`);
   console.log(`🌐 Host: ${mongoose.connection.host}`);
+  
+  // Iniciar monitoramento automático após conexão com banco
+  if (process.env.ENABLE_AUTO_MONITORING !== 'false') {
+    const intervalMinutes = parseInt(process.env.MONITORING_INTERVAL_MINUTES) || 5;
+    monitoringService.startMonitoring(intervalMinutes);
+    console.log(`🔍 Monitoramento automático iniciado a cada ${intervalMinutes} minutos`);
+  } else {
+    console.log('⏸️ Monitoramento automático desabilitado (ENABLE_AUTO_MONITORING=false)');
+  }
 })
 .catch(err => {
   console.error("❌ Erro na conexão com MongoDB Atlas:", err.message);

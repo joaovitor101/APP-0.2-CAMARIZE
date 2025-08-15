@@ -39,6 +39,11 @@ const createCativeiro = async (req, res) => {
     data.ph_medio_diario = null;
     data.amonia_media_diaria = null;
     
+    // Associar o usuário logado ao cativeiro
+    if (req.loggedUser?.id) {
+      data.user = req.loggedUser.id;
+    }
+    
     const result = await cativeiroService.Create(data);
     if (!result) {
       return res.status(500).json({ error: "Falha ao salvar no banco." });

@@ -2,6 +2,8 @@ import ParametrosAtuais from "../models/Parametros_atuais.js";
 import CondicoesIdeais from "../models/Condicoes_ideais.js";
 import Cativeiros from "../models/Cativeiros.js";
 import PushSubscription from "../models/PushSubscriptions.js";
+import EmailSettings from "../models/EmailSettings.js";
+import emailService from "../services/emailService.js";
 
 // Configuração VAPID
 const VAPID_PUBLIC_KEY = "BHRkSsllT2m1OmHkc6xsGdN7CpJFm0zHrfDuA4xh14kMt750uWzOsSNc5tI7wUS3Y_qYF6CjBBfyfIrlZgCY9cs";
@@ -68,6 +70,61 @@ const sendNotificationsToAllSubscribers = async (notificationData) => {
   }
 };
 
+// Função para enviar alertas por email
+const sendEmailAlerts = async (notificationData) => {
+  try {
+    console.log('📧 Enviando alertas por email:', notificationData.mensagem);
+    
+    // Buscar todas as configurações de email ativas
+    const emailSettings = await EmailSettings.find({ 
+      emailEnabled: true 
+    }).populate('userId', 'nome email');
+    
+    console.log(`📊 Encontradas ${emailSettings.length} configurações de email ativas`);
+    
+    // Enviar para cada usuário que tem email configurado
+    for (const settings of emailSettings) {
+      try {
+        // Verificar se deve enviar email baseado nas configurações
+        if (!settings.shouldSendEmail(notificationData.tipo, notificationData.severidade)) {
+          console.log(`⏭️ Email pulado para ${settings.emailAddress} - configurações não atendidas`);
+          continue;
+        }
+        
+        // Verificar horário de silêncio
+        if (settings.isInQuietHours()) {
+          console.log(`🌙 Email pulado para ${settings.emailAddress} - horário de silêncio`);
+          continue;
+        }
+        
+        // Verificar limite de frequência
+        if (!settings.canSendEmail()) {
+          console.log(`⏰ Email pulado para ${settings.emailAddress} - limite de frequência atingido`);
+          continue;
+        }
+        
+        // Enviar email
+        const result = await emailService.sendAlertEmail(settings.emailAddress, notificationData);
+        
+        if (result.success) {
+          // Registrar envio bem-sucedido
+          settings.recordEmailSent();
+          await settings.save();
+          
+          console.log(`✅ Email enviado para ${settings.emailAddress}:`, result.messageId);
+        } else {
+          console.error(`❌ Erro ao enviar email para ${settings.emailAddress}:`, result.error);
+        }
+        
+      } catch (error) {
+        console.error(`❌ Erro ao processar email para ${settings.emailAddress}:`, error);
+      }
+    }
+  } catch (error) {
+    console.error('❌ Erro ao enviar alertas por email:', error);
+  }
+};
+
 // Função para gerar notificações baseadas na comparação de dados
 const generateNotifications = async (usuarioId = null) => {
   try {
@@ -125,8 +182,9 @@ const generateNotifications = async (usuarioId = null) => {
           
           notifications.push(notificationData);
           
-          // Enviar notificação push automaticamente
+          // Enviar notificações automaticamente
           await sendNotificationsToAllSubscribers(notificationData);
+          await sendEmailAlerts(notificationData);
         }
       }
       
@@ -152,8 +210,9 @@ const generateNotifications = async (usuarioId = null) => {
           
           notifications.push(notificationData);
           
-          // Enviar notificação push automaticamente
+          // Enviar notificações automaticamente
           await sendNotificationsToAllSubscribers(notificationData);
+          await sendEmailAlerts(notificationData);
         }
       }
       
@@ -179,8 +238,9 @@ const generateNotifications = async (usuarioId = null) => {
           
           notifications.push(notificationData);
           
-          // Enviar notificação push automaticamente
+          // Enviar notificações automaticamente
           await sendNotificationsToAllSubscribers(notificationData);
+          await sendEmailAlerts(notificationData);
         }
       }
     }
@@ -318,10 +378,206 @@ const unsubscribeFromPush = async (req, res) => {
   }
 };
 
+// Controller para obter configurações de email do usuário
+const getEmailSettings = async (req, res) => {
+  try {
+    const userId = req.loggedUser?.id;
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'Usuário não autenticado'
+      });
+    }
+    
+    let emailSettings = await EmailSettings.findOne({ userId });
+    
+    if (!emailSettings) {
+      // Criar configurações padrão se não existirem
+      emailSettings = new EmailSettings({
+        userId,
+        emailAddress: req.loggedUser?.email || ''
+      });
+      await emailSettings.save();
+    }
+    
+    res.status(200).json({
+      success: true,
+      emailSettings
+    });
+  } catch (error) {
+    console.error('Erro ao buscar configurações de email:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erro interno do servidor'
+    });
+  }
+};
+
+// Controller para validar email
+const validateEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        error: 'Email é obrigatório'
+      });
+    }
+    
+    const validation = await emailService.validateEmailForSettings(email);
+    
+    res.status(200).json({
+      success: true,
+      validation
+    });
+  } catch (error) {
+    console.error('Erro ao validar email:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erro interno do servidor'
+    });
+  }
+};
+
+// Controller para atualizar configurações de email
+const updateEmailSettings = async (req, res) => {
+  try {
+    const userId = req.loggedUser?.id;
+    const updateData = req.body;
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'Usuário não autenticado'
+      });
+    }
+    
+    // Se está atualizando o email, validar primeiro
+    if (updateData.emailAddress) {
+      console.log(`🔍 Validando novo email: ${updateData.emailAddress}`);
+      
+      const validation = await emailService.validateEmailForSettings(updateData.emailAddress);
+      
+      if (!validation.valid) {
+        return res.status(400).json({
+          success: false,
+          error: 'Email inválido',
+          details: validation.message
+        });
+      }
+      
+      if (validation.warning) {
+        console.log(`⚠️ Aviso na validação do email: ${validation.message}`);
+      }
+    }
+    
+    let emailSettings = await EmailSettings.findOne({ userId });
+    
+    if (!emailSettings) {
+      emailSettings = new EmailSettings({
+        userId,
+        ...updateData
+      });
+    } else {
+      Object.assign(emailSettings, updateData);
+    }
+    
+    await emailSettings.save();
+    
+    res.status(200).json({
+      success: true,
+      message: 'Configurações de email atualizadas com sucesso',
+      emailSettings
+    });
+  } catch (error) {
+    console.error('Erro ao atualizar configurações de email:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erro interno do servidor'
+    });
+  }
+};
+
+// Controller para enviar email de teste
+const sendTestEmail = async (req, res) => {
+  try {
+    const userId = req.loggedUser?.id;
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'Usuário não autenticado'
+      });
+    }
+    
+    const emailSettings = await EmailSettings.findOne({ userId });
+    
+    if (!emailSettings || !emailSettings.emailEnabled) {
+      return res.status(400).json({
+        success: false,
+        error: 'Configurações de email não encontradas ou desabilitadas'
+      });
+    }
+    
+    const result = await emailService.sendTestEmail(emailSettings.emailAddress);
+    
+    if (result.success) {
+      // Atualizar status do teste
+      emailSettings.testEmailSent = true;
+      emailSettings.lastTestEmail = new Date();
+      await emailSettings.save();
+      
+      res.status(200).json({
+        success: true,
+        message: 'Email de teste enviado com sucesso',
+        messageId: result.messageId
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: 'Erro ao enviar email de teste',
+        details: result.error
+      });
+    }
+  } catch (error) {
+    console.error('Erro ao enviar email de teste:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erro interno do servidor'
+    });
+  }
+};
+
+// Controller para verificar status do serviço de email
+const checkEmailServiceStatus = async (req, res) => {
+  try {
+    const isConnected = await emailService.verifyConnection();
+    
+    res.status(200).json({
+      success: true,
+      emailServiceStatus: isConnected ? 'connected' : 'disconnected',
+      message: isConnected ? 'Serviço de email funcionando' : 'Serviço de email indisponível'
+    });
+  } catch (error) {
+    console.error('Erro ao verificar status do serviço de email:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erro interno do servidor'
+    });
+  }
+};
+
 export default {
   getNotifications,
   getNotificationsByCativeiro,
   generateNotifications,
   subscribeToPush,
-  unsubscribeFromPush
+  unsubscribeFromPush,
+  getEmailSettings,
+  updateEmailSettings,
+  sendTestEmail,
+  checkEmailServiceStatus,
+  validateEmail
 }; 
