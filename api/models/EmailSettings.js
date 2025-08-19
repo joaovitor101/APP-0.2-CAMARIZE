@@ -59,7 +59,9 @@ const emailSettingsSchema = new mongoose.Schema({
   // Configurações de frequência
   frequency: {
     maxEmailsPerHour: { type: Number, default: 5 },
-    maxEmailsPerDay: { type: Number, default: 20 }
+    maxEmailsPerDay: { type: Number, default: 20 },
+    // Intervalo mínimo entre e-mails (em minutos)
+    minIntervalMinutes: { type: Number, default: 10, min: 0 }
   },
   
   // Histórico de envios (para controle de frequência)
@@ -130,19 +132,37 @@ emailSettingsSchema.methods.canSendEmail = function() {
   const now = new Date();
   const lastSent = new Date(this.lastEmailSent.timestamp);
   
+  // Respeitar intervalo mínimo entre e-mails
+  const minInterval = Math.max(0, this.frequency?.minIntervalMinutes ?? 0);
+  if (minInterval > 0) {
+    const minIntervalAgo = new Date(now.getTime() - minInterval * 60 * 1000);
+    if (lastSent > minIntervalAgo) {
+      this._lastBlockReason = 'min_interval';
+      return false;
+    }
+  }
+  
   // Verificar limite por hora
   const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
   if (lastSent > oneHourAgo && this.lastEmailSent.count >= this.frequency.maxEmailsPerHour) {
+    this._lastBlockReason = 'hour_limit';
     return false;
   }
   
   // Verificar limite por dia
   const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
   if (lastSent > oneDayAgo && this.lastEmailSent.count >= this.frequency.maxEmailsPerDay) {
+    this._lastBlockReason = 'day_limit';
     return false;
   }
   
+  this._lastBlockReason = undefined;
   return true;
+};
+
+// Motivo do último bloqueio (volátil, não persistido)
+emailSettingsSchema.methods.getLastBlockReason = function() {
+  return this._lastBlockReason;
 };
 
 // Método para registrar envio de email

@@ -20,7 +20,7 @@ async function addTestParameters() {
 
     if (cativeiros.length === 0) {
       console.log('❌ Nenhum cativeiro encontrado');
-      return;
+      return; 
     }
 
     for (const cativeiro of cativeiros) {

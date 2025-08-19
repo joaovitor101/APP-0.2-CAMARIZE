@@ -14,7 +14,8 @@
     "check-condicoes": "node tests/check-condicoes-ideais.js",
     "view-parametros": "node tests/view-parametros.js",
     "populate-specific-cativeiros": "node tests/populate-specific-cativeiros.js",
-    "clear-mock-parametros": "node tests/clear-mock-parametros.js"
+    "clear-mock-parametros": "node tests/clear-mock-parametros.js",
+    "test-critical-email": "node test-critical-email.js"
   },
   "keywords": [],
   "author": "",

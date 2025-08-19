@@ -227,22 +227,36 @@ class MonitoringService {
       console.log(`📧 Enviando alerta para: ${emailSettings.emailAddress} (${emailSettings.userId.nome})`);
 
       try {
+        const forceSend = process.env.EMAIL_FORCE_SEND === 'true';
+
         // Verificar se deve enviar baseado nas configurações
-        if (!emailSettings.shouldSendEmail(alertData.tipo, alertData.severidade)) {
+        if (!forceSend && !emailSettings.shouldSendEmail(alertData.tipo, alertData.severidade)) {
           console.log(`⏭️ Email pulado para ${emailSettings.emailAddress} - configurações não atendidas`);
           return;
+        } else if (forceSend) {
+          console.log(`⚙️  Forçando envio ignorando preferências do usuário (EMAIL_FORCE_SEND=true)`);
         }
 
         // Verificar horário de silêncio
-        if (emailSettings.isInQuietHours()) {
+        if (!forceSend && emailSettings.isInQuietHours()) {
           console.log(`🌙 Email pulado para ${emailSettings.emailAddress} - horário de silêncio`);
           return;
         }
 
-        // Verificar limite de frequência
-        if (!emailSettings.canSendEmail()) {
-          console.log(`⏰ Email pulado para ${emailSettings.emailAddress} - limite de frequência atingido`);
+        // Verificar limite de frequência (desabilitável por ENV)
+        const disableRateLimit = process.env.EMAIL_DISABLE_RATE_LIMIT === 'true';
+        if (!disableRateLimit && !emailSettings.canSendEmail()) {
+          const reason = emailSettings.getLastBlockReason?.() || 'rate_limit';
+          const reasonText = {
+            min_interval: `intervalo mínimo de ${emailSettings.frequency?.minIntervalMinutes ?? '?'} min não cumprido`,
+            hour_limit: `máximo por hora (${emailSettings.frequency?.maxEmailsPerHour ?? '?'}) atingido`,
+            day_limit: `máximo por dia (${emailSettings.frequency?.maxEmailsPerDay ?? '?'}) atingido`,
+            rate_limit: 'limite de frequência atingido'
+          }[reason];
+          console.log(`⏰ Email pulado para ${emailSettings.emailAddress} - ${reasonText}`);
           return;
+        } else if (disableRateLimit) {
+          console.log(`⚙️  Rate limit de email desabilitado por ENV para ${emailSettings.emailAddress}`);
         }
 
         // Enviar email

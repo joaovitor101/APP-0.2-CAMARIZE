@@ -340,6 +340,69 @@ export default function Settings() {
               <path d="M9 18l6-6-6-6" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
+
+          <button
+            onClick={() => router.push('/email-settings')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '16px 20px',
+              background: '#fff',
+              border: '1px solid #e5e7eb',
+              borderRadius: '12px',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              width: '100%',
+              textAlign: 'left'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.borderColor = '#3B82F6';
+              e.target.style.boxShadow = '0 4px 6px -1px rgba(59, 130, 246, 0.1)';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.borderColor = '#e5e7eb';
+              e.target.style.boxShadow = 'none';
+            }}
+          >
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px'
+            }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                background: '#fef3c7',
+                borderRadius: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '20px'
+              }}>
+                📧
+              </div>
+              <div>
+                <div style={{
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  color: '#1f2937',
+                  marginBottom: '4px'
+                }}>
+                  Configurações de Email
+                </div>
+                <div style={{
+                  fontSize: '14px',
+                  color: '#6b7280'
+                }}>
+                  Quantidade de emails e modo silêncio
+                </div>
+              </div>
+            </div>
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
+              <path d="M9 18l6-6-6-6" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
         </div>
       </div>
       <Notification

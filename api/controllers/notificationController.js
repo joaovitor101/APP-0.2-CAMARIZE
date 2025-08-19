@@ -85,22 +85,36 @@ const sendEmailAlerts = async (notificationData) => {
     // Enviar para cada usuário que tem email configurado
     for (const settings of emailSettings) {
       try {
+        const forceSend = process.env.EMAIL_FORCE_SEND === 'true';
+
         // Verificar se deve enviar email baseado nas configurações
-        if (!settings.shouldSendEmail(notificationData.tipo, notificationData.severidade)) {
+        if (!forceSend && !settings.shouldSendEmail(notificationData.tipo, notificationData.severidade)) {
           console.log(`⏭️ Email pulado para ${settings.emailAddress} - configurações não atendidas`);
           continue;
+        } else if (forceSend) {
+          console.log(`⚙️  Forçando envio ignorando preferências do usuário (EMAIL_FORCE_SEND=true)`);
         }
         
         // Verificar horário de silêncio
-        if (settings.isInQuietHours()) {
+        if (!forceSend && settings.isInQuietHours()) {
           console.log(`🌙 Email pulado para ${settings.emailAddress} - horário de silêncio`);
           continue;
         }
         
-        // Verificar limite de frequência
-        if (!settings.canSendEmail()) {
-          console.log(`⏰ Email pulado para ${settings.emailAddress} - limite de frequência atingido`);
+        // Verificar limite de frequência (pode ser desabilitado por env)
+        const disableRateLimit = process.env.EMAIL_DISABLE_RATE_LIMIT === 'true';
+        if (!disableRateLimit && !settings.canSendEmail()) {
+          const reason = settings.getLastBlockReason?.() || 'rate_limit';
+          const reasonText = {
+            min_interval: `intervalo mínimo de ${settings.frequency?.minIntervalMinutes ?? '?'} min não cumprido`,
+            hour_limit: `máximo por hora (${settings.frequency?.maxEmailsPerHour ?? '?'}) atingido`,
+            day_limit: `máximo por dia (${settings.frequency?.maxEmailsPerDay ?? '?'}) atingido`,
+            rate_limit: 'limite de frequência atingido'
+          }[reason];
+          console.log(`⏰ Email pulado para ${settings.emailAddress} - ${reasonText}`);
           continue;
+        } else if (disableRateLimit) {
+          console.log(`⚙️  Rate limit de email desabilitado por ENV para ${settings.emailAddress}`);
         }
         
         // Enviar email
@@ -471,6 +485,22 @@ const updateEmailSettings = async (req, res) => {
       if (validation.warning) {
         console.log(`⚠️ Aviso na validação do email: ${validation.message}`);
       }
+    }
+    
+    // Sanitizar/validar frequência se enviada
+    if (updateData.frequency) {
+      const freq = updateData.frequency;
+      const sanitized = {};
+      if (typeof freq.maxEmailsPerHour === 'number') {
+        sanitized.maxEmailsPerHour = Math.max(0, Math.floor(freq.maxEmailsPerHour));
+      }
+      if (typeof freq.maxEmailsPerDay === 'number') {
+        sanitized.maxEmailsPerDay = Math.max(0, Math.floor(freq.maxEmailsPerDay));
+      }
+      if (typeof freq.minIntervalMinutes === 'number') {
+        sanitized.minIntervalMinutes = Math.max(0, Math.floor(freq.minIntervalMinutes));
+      }
+      updateData.frequency = { ...sanitized };
     }
     
     let emailSettings = await EmailSettings.findOne({ userId });

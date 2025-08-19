@@ -1,4 +1,5 @@
 import User from "../models/Users.js";
+import EmailSettings from "../models/EmailSettings.js";
 
 class userService {
   
@@ -18,6 +19,45 @@ class userService {
       console.log("💾 [SERVICE] Salvando usuário no banco...");
       const savedUser = await newUser.save();
       console.log("✅ [SERVICE] Usuário salvo com sucesso:", savedUser._id);
+      
+      // Criar configurações de email automaticamente
+      console.log("📧 [SERVICE] Criando configurações de email...");
+      try {
+        const emailSettings = new EmailSettings({
+          userId: savedUser._id,
+          emailAddress: email,
+          emailEnabled: true,
+          alertTypes: {
+            temperatura: {
+              enabled: true,
+              severity: { baixa: false, media: true, alta: true }
+            },
+            ph: {
+              enabled: true,
+              severity: { baixa: false, media: true, alta: true }
+            },
+            amonia: {
+              enabled: true,
+              severity: { baixa: false, media: true, alta: true }
+            }
+          },
+          quietHours: {
+            enabled: false,
+            startTime: '22:00',
+            endTime: '07:00'
+          },
+          frequency: {
+            maxEmailsPerHour: 5,
+            maxEmailsPerDay: 20
+          }
+        });
+        
+        await emailSettings.save();
+        console.log("✅ [SERVICE] Configurações de email criadas automaticamente");
+      } catch (error) {
+        console.log("⚠️ [SERVICE] Erro ao criar configurações de email:", error.message);
+        // Não falha o cadastro se der erro nas configurações de email
+      }
       
       return savedUser;
     } catch (error) {

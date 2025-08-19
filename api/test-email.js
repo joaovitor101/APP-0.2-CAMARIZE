@@ -10,9 +10,13 @@ import monitoringService from './services/monitoringService.js';
 
 async function testEmail() {
   try {
-    console.log('🔌 Conectando ao MongoDB...');
-    await mongoose.connect(process.env.MONGO_URL);
-    console.log('✅ Conectado ao MongoDB');
+    if (process.env.MONGO_URL) {
+      console.log('🔌 Conectando ao MongoDB...');
+      await mongoose.connect(process.env.MONGO_URL);
+      console.log('✅ Conectado ao MongoDB');
+    } else {
+      console.log('ℹ️  MONGO_URL não definido. Pulando conexão com o MongoDB para o teste de email.');
+    }
 
     console.log('\n🔧 Verificando configurações:');
     console.log('   - EMAIL_USER:', process.env.EMAIL_USER);
@@ -28,25 +32,13 @@ async function testEmail() {
     }
 
     console.log('\n📧 Testando envio de email...');
-    
-    const testEmailData = {
-      to: 'joaooficialkusaka@gmail.com',
-      subject: 'Teste de Alerta - Camarize',
-      html: `
-        <h2>🚨 Alerta de Teste - Camarize</h2>
-        <p>Este é um email de teste para verificar se as configurações de email estão funcionando.</p>
-        <p><strong>Cativeiro:</strong> Teste</p>
-        <p><strong>Parâmetro:</strong> Temperatura</p>
-        <p><strong>Valor:</strong> 35°C (CRÍTICO)</p>
-        <p><strong>Timestamp:</strong> ${new Date().toLocaleString('pt-BR')}</p>
-        <hr>
-        <p><em>Este é um teste automático do sistema Camarize.</em></p>
-      `
-    };
-
-    const result = await emailService.sendEmail(testEmailData);
-    console.log('✅ Email enviado com sucesso!');
-    console.log('   - Message ID:', result.messageId);
+    const result = await emailService.sendTestEmail('joaooficialkusaka@gmail.com');
+    if (result.success) {
+      console.log('✅ Email enviado com sucesso!');
+      console.log('   - Message ID:', result.messageId);
+    } else {
+      console.log('❌ Falha ao enviar email:', result.error);
+    }
 
     console.log('\n🔍 Testando monitoramento...');
     const status = monitoringService.getStatus();
@@ -61,8 +53,10 @@ async function testEmail() {
       console.log('   - Gere uma senha de app para o email camarize.alertas@gmail.com');
     }
   } finally {
-    await mongoose.disconnect();
-    console.log('\n🔌 Desconectado do MongoDB');
+    if (mongoose.connection?.readyState === 1) {
+      await mongoose.disconnect();
+      console.log('\n🔌 Desconectado do MongoDB');
+    }
   }
 }
 
